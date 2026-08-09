@@ -2,29 +2,29 @@
 
 > **Fecha:** 2026-08-08
 > **Repo:** [Salvarez-boop/Open_Boop](https://github.com/Salvarez-boop/Open_Boop)
-> **Autenticación:** SSH (clave ed25519)
+> **Autenticación:** SSH
 
 ---
 
 ## Paso a paso: Conectar workspace a GitHub
 
-### 1. Generar par de claves SSH (en el servidor)
+### 1. Generar par de claves SSH
 
 ```bash
-ssh-keygen -t ed25519 -C "sebastian.alvarez.obando@gmail.com" -f ~/.ssh/OpenClaw_GIT
+ssh-keygen -t ed25519 -C "tu-email@ejemplo.com" -f ~/.ssh/NOMBRE_CLAVE
 ```
 
 Esto crea:
-- `~/.ssh/OpenClaw_GIT` → clave privada (no compartir)
-- `~/.ssh/OpenClaw_GIT.pub` → clave pública (va a GitHub)
+- `~/.ssh/NOMBRE_CLAVE` → clave privada (no compartir jamás)
+- `~/.ssh/NOMBRE_CLAVE.pub` → clave pública (va a GitHub)
 
 ### 2. Copiar la clave pública a GitHub
 
 ```bash
-cat ~/.ssh/OpenClaw_GIT.pub
+cat ~/.ssh/NOMBRE_CLAVE.pub
 ```
 
-Ir a **GitHub → Settings → SSH and GPG keys → New SSH Key**, pegar el contenido de `OpenClaw_GIT.pub` y guardar.
+Ir a **GitHub → Settings → SSH and GPG keys → New SSH Key**, pegar el contenido y guardar.
 
 ### 3. Configurar SSH para GitHub
 
@@ -33,7 +33,7 @@ cat >> ~/.ssh/config << 'EOF'
 Host github.com
     HostName github.com
     User git
-    IdentityFile ~/.ssh/OpenClaw_GIT
+    IdentityFile ~/.ssh/NOMBRE_CLAVE
     IdentitiesOnly yes
 EOF
 ```
@@ -44,39 +44,38 @@ EOF
 ssh -T git@github.com
 ```
 
-Respuesta esperada:
+Respuesta esperada (el usuario variará):
 ```
-Hi Salvarez-boop! You've successfully authenticated, but GitHub does not provide shell access.
+Hi TuUsuario! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
 ### 5. Crear el repositorio en GitHub
 
 - Ir a https://github.com/new
-- Nombre: `Open_Boop`
-- Visibilidad: pública (o privada, según prefieras)
-- **No** inicializar con README
+- Elegir nombre y visibilidad del repo
+- **No** inicializar con README (para pushear directo)
 - Crear repo
 
-### 6. Configurar identidad git en el workspace
+### 6. Configurar identidad git
 
 ```bash
-cd ~/.openclaw/workspace
-git config user.email "sebastian.alvarez.obando@gmail.com"
-git config user.name "Salvarez-boop"
+cd /ruta/de/tu/workspace
+git config user.email "tu-email@ejemplo.com"
+git config user.name "TuUsuario"
 ```
 
 ### 7. Agregar el remote
 
 ```bash
-git remote add origin git@github.com:Salvarez-boop/Open_Boop.git
+git remote add origin git@github.com:TuUsuario/TuRepo.git
 ```
 
 ### 8. Hacer el commit inicial y pushear
 
 ```bash
 git add -A
-git commit -m "🎉 Initial commit - Boop workspace"
-git push -u origin master
+git commit -m "🎉 Initial commit"
+git push -u origin main
 ```
 
 ---
@@ -94,12 +93,12 @@ git push -u origin master
 
 ---
 
-## Notas
+## Notas de seguridad
 
-- La clave SSH se generó sin passphrase para permitir pushes automáticos desde el servidor.
-- El workspace es la carpeta `~/.openclaw/workspace` de Boop.
-- Cualquier archivo nuevo que se cree en el workspace se puede versionar con `git add` + `git commit` + `git push`.
+- La clave SSH se generó sin passphrase para pushes automáticos. En un servidor compartido o con múltiples usuarios, considera agregar passphrase o usar deploy keys con permisos limitados.
+- La clave **privada** jamás debe subirse a ningún repositorio.
+- Revisa siempre qué vas a commiterar antes de hacer `git add`, especialmente archivos de configuración y credenciales.
 
 ---
 
-*Documentado por Boop 🦈 — para que Sebastian sepa exactamente cómo quedó todo conectado.*
+*Documentado por Boop 🦈*

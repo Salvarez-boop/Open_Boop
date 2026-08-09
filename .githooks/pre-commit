@@ -1,0 +1,77 @@
+#!/bin/bash
+# 🛡️ Pre-commit hook - Previene fugas de credenciales y archivos sensibles
+
+echo "🔍 Escaneando antes del commit..."
+
+# Variables
+PROBLEMS=0
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Archivos y patrones prohibidos en commits
+FORBIDDEN_PATTERNS=(
+    "-----BEGIN.*PRIVATE KEY-----"
+    "ghp_[[:alnum:]_]{36}"              # GitHub PAT clásico
+    "gho_[[:alnum:]_]{36}"              # GitHub OAuth
+    "github_pat_[[:alnum:]_]{82}"       # GitHub fine-grained PAT
+    "ghr_[[:alnum:]_]{76}"              # GitHub refresh token
+    "ghs_[[:alnum:]_]{36}"              # GitHub SSH
+    "xox[bpors]-[[:alnum:]-]{24,}"      # Slack tokens
+    "sk-[[:alnum:]]{20,}"               # OpenAI keys
+    "AIza[[:alnum:]_\-]{35}"            # Google API keys
+    "AKIA[0-9A-Z]{16}"                  # AWS access keys
+    "-----BEGIN OPENSSH PRIVATE KEY-----"
+    "-----BEGIN RSA PRIVATE KEY-----"
+    "-----BEGIN EC PRIVATE KEY-----"
+)
+
+FORBIDDEN_FILES=(
+    "**/credentials/**"
+    "**/openclaw.json"
+    "**/exec-approvals.json"
+    "**/*.pem"
+)
+
+# Revisar archivos staged
+for FILE in $(git diff --cached --name-only); do
+    # Saltar archivos eliminados
+    [ ! -f "$FILE" ] && continue
+
+    # 1. Revisar si el archivo está en lista prohibida
+    for PATTERN in "${FORBIDDEN_FILES[@]}"; do
+        if [[ "$FILE" == $PATTERN ]]; then
+            echo -e "${RED}❌ ARCHIVO PROHIBIDO: $FILE${NC}"
+            PROBLEMS=$((PROBLEMS+1))
+        fi
+    done
+
+    # 2. Revisar contenido por patrones sensibles
+    if [ -f "$FILE" ]; then
+        LINE_NUM=1
+        while IFS= read -r LINE; do
+            for PATTERN in "${FORBIDDEN_PATTERNS[@]}"; do
+                if echo "$LINE" | grep -qE "$PATTERN"; then
+                    echo -e "${RED}⚠️  POSIBLE CREDENCIAL en $FILE línea $LINE_NUM${NC}"
+                    echo -e "${YELLOW}   → $LINE${NC}"
+                    PROBLEMS=$((PROBLEMS+1))
+                fi
+            done
+            LINE_NUM=$((LINE_NUM+1))
+        done < "$FILE"
+    fi
+done
+
+# Resultado
+if [ $PROBLEMS -gt 0 ]; then
+    echo ""
+    echo -e "${RED}⛔  Se encontraron $PROBLEMAS problema(s) de seguridad.${NC}"
+    echo -e "${YELLOW}   Commit CANCELADO. Revisa y corrige antes de commitear.${NC}"
+    echo ""
+    echo "   Para forzar igual (NO RECOMENDADO): git commit --no-verify"
+    exit 1
+else
+    echo -e "${GREEN}✅  Escaneo limpio. Procediendo con el commit...${NC}"
+    exit 0
+fi

@@ -1,0 +1,68 @@
+# 🔴 SECRETS - Nunca subir
+**/credentials/
+**/credentials
+**/*.pem
+**/*.key
+**/*-key.pub
+**/*_rsa
+**/*_dsa
+**/*_ecdsa
+**/*_ed25519
+
+# 🔴 Config & tokens
+openclaw.json
+openclaw.json.*
+state/
+exec-approvals.json
+workspace-attestations/
+
+# 🔴 Logs, databases, caches
+*.log
+*.sqlite
+*.sqlite3
+.cache/
+completions/
+logs/
+
+# 🔴 Media (pueden ser grandes/personales)
+media/
+canvas/
+
+# 🟡 Sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.nfs*
+
+# 🟡 Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# 🟡 Node
+node_modules/
+.turbo/
+.eslintcache
+
+# 🟡 IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# 🟡 Archivos temporales del workspace
+**/temp/
+**/tmp/
+*.bak
+*.backup
+
+# ⚠️ Archivos sensibles comunes - verificar antes de subir
+# Los siguientes requieren revisión manual
+# Conexion_Boop.md  ← Sanitizado manualmente, sin IP ni SSH pub
