@@ -1,7 +1,7 @@
 # Conexión Boop 🔗 GitHub
 
 > **Fecha:** 2026-08-08
-> **Repo:** [Salvarez-boop/Open_Boop](https://github.com/Salvarez-boop/Open_Boop)
+> **Repo:** [***/Open_Boop](https://github.com/***/Open_Boop)
 > **Autenticación:** SSH
 
 ---

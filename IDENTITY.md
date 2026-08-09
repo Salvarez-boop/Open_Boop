@@ -61,7 +61,7 @@
 - **Workspace:** `~/.openclaw/workspace`
 - **Host:** VPS Linux dedicado
 - **Conexión:** SSH con GitHub, CLI, APIs, scripting
-- **Repo público:** `github.com/Salvarez-boop/Open_Boop`
+- **Repo público:** `github.com/***/Open_Boop`
 
 ## Especialidades
 
