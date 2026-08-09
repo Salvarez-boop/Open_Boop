@@ -34,10 +34,12 @@ FORBIDDEN_FILES=(
     "**/*.pem"
 )
 
-# Revisar archivos staged
+# Revisar archivos staged (excluyendo .githooks/ que contiene los patrones de búsqueda)
 for FILE in $(git diff --cached --name-only); do
     # Saltar archivos eliminados
     [ ! -f "$FILE" ] && continue
+    # Saltar el propio hook (contiene los patrones como strings, no como credenciales reales)
+    [[ "$FILE" == .githooks/* ]] && continue
 
     # 1. Revisar si el archivo está en lista prohibida
     for PATTERN in "${FORBIDDEN_FILES[@]}"; do
@@ -52,7 +54,7 @@ for FILE in $(git diff --cached --name-only); do
         LINE_NUM=1
         while IFS= read -r LINE; do
             for PATTERN in "${FORBIDDEN_PATTERNS[@]}"; do
-                if echo "$LINE" | grep -qE "$PATTERN"; then
+                if echo "$LINE" | grep -qE -- "$PATTERN"; then
                     echo -e "${RED}⚠️  POSIBLE CREDENCIAL en $FILE línea $LINE_NUM${NC}"
                     echo -e "${YELLOW}   → $LINE${NC}"
                     PROBLEMS=$((PROBLEMS+1))
@@ -66,7 +68,7 @@ done
 # Resultado
 if [ $PROBLEMS -gt 0 ]; then
     echo ""
-    echo -e "${RED}⛔  Se encontraron $PROBLEMAS problema(s) de seguridad.${NC}"
+    echo -e "${RED}⛔  Se encontraron $PROBLEMS problema(s) de seguridad.${NC}"
     echo -e "${YELLOW}   Commit CANCELADO. Revisa y corrige antes de commitear.${NC}"
     echo ""
     echo "   Para forzar igual (NO RECOMENDADO): git commit --no-verify"
