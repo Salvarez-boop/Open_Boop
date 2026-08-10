@@ -137,19 +137,19 @@
     </div>
   </section>
 
-  <!-- ========== BANCOS ========== -->
+  <!-- ========== BANCOS / CUENTAS ========== -->
   <section class="page" id="page-bancos">
     <div class="flex items-center gap-2 mb-4">
-      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏦 Bancos</h2>
-      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalBanco()">➕ Agregar</button>
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏦 Cuentas Bancarias</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalBanco()">➕ Agregar Cuenta</button>
     </div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay bancos.</p>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
       </div>
     </div>
   </section>
@@ -276,8 +276,12 @@
 <dialog id="modalBanco" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalBancoTitle">➕ Agregar Banco</h2>
   <form onsubmit="return guardarBanco(event)">
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa</label><select id="frmBancoEmpresa" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="0">Todas / Compartido</option></select></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmBancoEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option></select></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Banco *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo Cuenta *</label><select id="frmBancoTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="Cta. Cte">Cta. Cte</option><option value="Cta. Vista">Cta. Vista</option><option value="Cta. USD">Cta. USD</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Cuenta *</label><input type="text" id="frmBancoNumero" required placeholder="Ej: 12345678" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalBanco').close()">Cancelar</button>
       <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
@@ -566,32 +570,36 @@ function getNextBancoId() {
 
 function mostrarModalBanco(data) {
   editBancoId = data ? data.id : null;
-  document.getElementById('modalBancoTitle').textContent = data ? '✏️ Editar Banco' : '➕ Agregar Banco';
+  document.getElementById('modalBancoTitle').textContent = data ? '✏️ Editar Cuenta Bancaria' : '➕ Agregar Cuenta Bancaria';
   document.getElementById('frmBancoNombre').value = data ? data.nombre : '';
+  document.getElementById('frmBancoTipo').value = data ? data.tipoCuenta : '';
+  document.getElementById('frmBancoNumero').value = data ? data.nroCuenta : '';
   // Llenar select empresas
   var selEmp = document.getElementById('frmBancoEmpresa');
-  var empHtml = '<option value="0">Todas / Compartido</option>';
+  var empHtml = '<option value="">Seleccionar</option>';
   for (var i = 0; i < EMPRESAS.length; i++) {
     empHtml += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
   }
   selEmp.innerHTML = empHtml;
-  if (data) selEmp.value = data.empresaId || 0;
+  if (data) selEmp.value = data.empresaId;
   document.getElementById('modalBanco').showModal();
 }
 
 function guardarBanco(e) {
   e.preventDefault();
+  var empresaId = parseInt(document.getElementById('frmBancoEmpresa').value);
   var nombre = document.getElementById('frmBancoNombre').value.trim();
-  var empresaId = parseInt(document.getElementById('frmBancoEmpresa').value) || 0;
-  if (!nombre) { mostrarToast('Ingresa el nombre', 'error'); return false; }
+  var tipoCuenta = document.getElementById('frmBancoTipo').value;
+  var nroCuenta = document.getElementById('frmBancoNumero').value.trim();
+  if (!empresaId || !nombre || !tipoCuenta || !nroCuenta) { mostrarToast('Completa todos los campos', 'error'); return false; }
   if (editBancoId) {
     for (var i = 0; i < bancos.length; i++) {
-      if (bancos[i].id === editBancoId) { bancos[i].nombre = nombre; bancos[i].empresaId = empresaId; break; }
+      if (bancos[i].id === editBancoId) { bancos[i].empresaId = empresaId; bancos[i].nombre = nombre; bancos[i].tipoCuenta = tipoCuenta; bancos[i].nroCuenta = nroCuenta; break; }
     }
-    mostrarToast('✅ Banco actualizado', 'success');
+    mostrarToast('✅ Cuenta actualizada', 'success');
   } else {
-    bancos.push({ id: getNextBancoId(), nombre: nombre, empresaId: empresaId });
-    mostrarToast('✅ Banco agregado', 'success');
+    bancos.push({ id: getNextBancoId(), empresaId: empresaId, nombre: nombre, tipoCuenta: tipoCuenta, nroCuenta: nroCuenta });
+    mostrarToast('✅ Cuenta agregada', 'success');
   }
   guardarTodo();
   document.getElementById('modalBanco').close();
@@ -625,10 +633,8 @@ function renderBancos() {
   var html = '';
   for (var i = 0; i < bancos.length; i++) {
     var b = bancos[i];
-    var emp = b.empresaId ? empresaObj(b.empresaId) : null;
-    var movsCount = 0;
-    var totalIng = 0;
-    var totalGas = 0;
+    var emp = empresaObj(b.empresaId);
+    var movsCount = 0, totalIng = 0, totalGas = 0;
     for (var j = 0; j < movimientos.length; j++) {
       if (movimientos[j].bancoId === b.id) {
         movsCount++;
@@ -638,8 +644,10 @@ function renderBancos() {
     }
     html += '<tr class="hover:bg-gray-50">';
     html += '<td class="p-2.5">' + b.id + '</td>';
-    html += '<td class="p-2.5 font-semibold">' + b.nombre + '</td>';
-    html += '<td class="p-2.5">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : 'Compartido') + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : '—') + '</td>';
+    html += '<td class="p-2.5">' + b.nombre + '</td>';
+    html += '<td class="p-2.5">' + (b.tipoCuenta || '—') + '</td>';
+    html += '<td class="p-2.5 font-mono text-sm">' + (b.nroCuenta || '—') + '</td>';
     html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#70AD47]">' + fmtCLP(totalIng) + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#E74C3C]">' + fmtCLP(totalGas) + '</td>';
@@ -1483,8 +1491,8 @@ function cargarDatosEjemplo() {
   ];
 
   bancos = [
-    { id: 1, nombre: 'Banco Estado', empresaId: 1 }, { id: 2, nombre: 'Banco de Chile', empresaId: 2 }, { id: 3, nombre: 'Banco Santander', empresaId: 0 },
-    { id: 4, nombre: 'Banco BCI', empresaId: 0 }, { id: 5, nombre: 'Banco Internacional', empresaId: 0 }
+    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: '10012345' }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: '20067890' }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: '30011223' },
+    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: '40044556' }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: '50077889' }
   ];
 
   mediosPago = [
@@ -1621,8 +1629,8 @@ if (categorias.length === 0) {
 
 if (bancos.length === 0) {
   bancos = [
-    { id: 1, nombre: 'Banco Estado', empresaId: 1 }, { id: 2, nombre: 'Banco de Chile', empresaId: 2 }, { id: 3, nombre: 'Banco Santander', empresaId: 0 },
-    { id: 4, nombre: 'Banco BCI', empresaId: 0 }, { id: 5, nombre: 'Banco Internacional', empresaId: 0 }
+    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: '10012345' }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: '20067890' }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: '30011223' },
+    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: '40044556' }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: '50077889' }
   ];
   guardarTodo();
 }
