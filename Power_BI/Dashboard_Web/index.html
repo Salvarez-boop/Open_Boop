@@ -3,569 +3,341 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💰 Gestión Financiera Empresarial</title>
+<title>Finan-TECH · Gestión Financiera</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-:root, [data-theme="light"] {
-  --primary: #7122FA;
-  --primary-dark: #5A1BC8;
-  --success: #09FBD3;
-  --success-text: #0B9B7A;
-  --danger: #FE53BB;
-  --danger-text: #D6308A;
-  --warning: #F5D300;
-  --warning-text: #B89B00;
-  --cyan: #08F7FE;
-  --cyan-text: #078F93;
-  --bg: #F5F0FF;
-  --card: #FFFFFF;
-  --card-alt: #F0E8FF;
-  --text: #1A1A2E;
-  --text-muted: #6B6B8D;
-  --shadow: 0 2px 12px rgba(113,34,250,0.08);
-  --sidebar: #FFFFFF;
-  --sidebar-text: #6B6B8D;
-  --sidebar-hover: #F0E8FF;
-  --sidebar-active: #7122FA;
-  --border: rgba(113,34,250,0.1);
-  --thead-bg: #7122FA;
-  --thead-text: #FFFFFF;
-  --btn-success-text: #0B9B7A;
-  --btn-danger-text: #D6308A;
-  --toggle-bg: #7122FA;
+:root {
+  --primary: #2E75B6; --primary-dark: #1F4E7A;
+  --success: #70AD47; --danger: #E74C3C; --warning: #F39C12;
 }
-
-[data-theme="dark"] {
-  --primary: #7122FA;
-  --primary-dark: #5A1BC8;
-  --success: #09FBD3;
-  --success-text: #09FBD3;
-  --danger: #FE53BB;
-  --danger-text: #FE53BB;
-  --warning: #F5D300;
-  --warning-text: #F5D300;
-  --cyan: #08F7FE;
-  --cyan-text: #08F7FE;
-  --bg: #0D0D1A;
-  --card: #1A1A2E;
-  --card-alt: #232344;
-  --text: #E0E0F0;
-  --text-muted: #8888AA;
-  --shadow: 0 2px 16px rgba(0,0,0,0.3);
-  --sidebar: #070714;
-  --sidebar-text: #8888BB;
-  --sidebar-hover: #1A1A3E;
-  --sidebar-active: #08F7FE;
-  --border: rgba(255,255,255,0.06);
-  --thead-bg: #7122FA;
-  --thead-text: #FFFFFF;
-  --btn-success-text: #FFFFFF;
-  --btn-danger-text: #FFFFFF;
-  --toggle-bg: #08F7FE;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg); color: var(--text); display: flex; min-height: 100vh;
-}
-
-/* SIDEBAR */
-.sidebar {
-  width: 220px; background: var(--sidebar); color: #fff; padding: 20px 0;
-  position: fixed; left:0; top:0; bottom:0; overflow-y:auto; z-index:100;
-}
-.sidebar .brand { padding: 0 18px 18px; font-size: 17px; font-weight: 700; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:8px; }
-.sidebar .brand small { font-size:11px; font-weight:400; opacity:0.6; display:block; }
-.sidebar nav { padding: 10px 0; }
-.sidebar nav a {
-  display:flex; align-items:center; gap:10px; padding: 11px 18px; color: var(--sidebar-text);
-  text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent;
-  transition: all .15s; cursor: pointer;
-}
-.sidebar nav a:hover, .sidebar nav a.active { background: var(--sidebar-hover); color: #fff; }
-.sidebar nav a.active { border-left-color: var(--cyan); }
-.sidebar .version { padding: 16px 18px; font-size: 11px; color: rgba(255,255,255,0.3); border-top:1px solid rgba(255,255,255,0.05); margin-top:auto; }
-
-/* MAIN */
-.main { margin-left: 220px; flex:1; padding: 24px 28px; max-width: calc(100vw - 220px); }
-.main h1 { font-size: 22px; color: var(--text); margin-bottom: 4px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.main .subtitle { color: var(--text-muted); font-size:13px; margin-bottom:20px; }
-
-/* PAGE SECTIONS */
-.page { display:none; }
-.page.active { display:block; }
-
-/* KPI ROW */
-.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 22px; }
-.kpi-card { background:var(--card); border-radius:12px; padding:18px 16px; box-shadow:var(--shadow); text-align:center; border:1px solid rgba(255,255,255,0.05); }
-.kpi-card .label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color: var(--text-muted); margin-bottom:4px; }
-.kpi-card .value { font-size:24px; font-weight:700; }
-.kpi-card .value.green { color:var(--success); }
-.kpi-card .value.red { color:var(--danger); }
-.kpi-card .value.blue { color:var(--cyan); }
-
-/* COMPANY SELECTOR */
-.company-selector { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
-.company-selector label { font-size:13px; font-weight:600; color: var(--text-muted); }
-.company-selector select { padding:8px 12px; border:1px solid rgba(255,255,255,0.1); border-radius:8px; font-size:13px; min-width:260px; background: var(--card); color: var(--text); }
-
-/* CHARTS LAYOUT */
-.charts-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px; }
-@media (max-width:1000px) { .charts-row { grid-template-columns:1fr; } }
-
-.card { background:var(--card); border-radius:12px; padding:18px; box-shadow:var(--shadow); margin-bottom:18px; border:1px solid rgba(255,255,255,0.04); }
-.card h3 { font-size:14px; color: var(--text); margin-bottom:12px; }
-.card canvas { max-height:300px; }
-
-/* TOOLBAR + BUTTONS */
-.toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-.btn {
-  padding:7px 14px; border:none; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;
-  display:inline-flex; align-items:center; gap:5px; transition:opacity .15s;
-}
-.btn:hover { opacity:0.85; }
-.btn-primary { background:var(--primary); color:#fff; }
-.btn-success { background:var(--success); color:#fff; }
-.btn-danger { background:var(--danger); color:#fff; }
-.btn-warning { background:var(--warning); color:#fff; }
-.btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.15); color: var(--text-muted); }
-.btn-sm { padding:4px 8px; font-size:11px; }
-
-/* TABLE */
-.table-wrap { overflow-x:auto; max-height:500px; overflow-y:auto; }
-table { width:100%; border-collapse:collapse; font-size:12.5px; }
-thead th {
-  background:var(--primary); color:#fff; padding:9px 7px; text-align:left; font-weight:600;
-  position:sticky; top:0; z-index:2; white-space:nowrap;
-}
-tbody td { padding:7px; border-bottom:1px solid rgba(255,255,255,0.06); vertical-align:middle; }
-tbody tr:hover { background: var(--card-alt); }
-td.monto { text-align:right; font-family:'SF Mono','Courier New',monospace; font-weight:600; }
-td.tipo-ingreso { color:var(--success); font-weight:600; }
-td.tipo-gasto { color:var(--danger); font-weight:600; }
-td.actions { white-space:nowrap; text-align:center; }
-
-/* BADGE */
-.badge { display:inline-block; background:var(--primary); color:#fff; border-radius:20px; padding:1px 9px; font-size:11px; font-weight:600; }
-.badge.green { background:var(--success); }
-.badge.red { background:var(--danger); }
-
-/* MODAL */
-.modal-overlay {
-  display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.45); backdrop-filter:blur(2px);
-  justify-content:center; align-items:center;
-}
-.modal-overlay.active { display:flex; }
-.modal {
-  .modal { background: var(--card); border-radius:16px; width:540px; max-width:94vw; max-height:90vh; overflow-y:auto;
-  padding:24px; box-shadow:0 8px 40px rgba(0,0,0,0.4);
-}
-.modal h2 { font-size:17px; color: var(--cyan); margin-bottom:16px; }
-.modal .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; }
-.modal .form-row.full { grid-template-columns:1fr; }
-.modal label { display:block; font-size:11px; font-weight:600; color: var(--text-muted); margin-bottom:3px; }
-.modal input, .modal select, .modal textarea {
-  width:100%; padding:8px 11px; border:1px solid rgba(255,255,255,0.12); border-radius:7px; font-size:13px; background: var(--card-alt); color: var(--text);
-}
-.modal input:focus, .modal select:focus, .modal textarea:focus { outline:none; border-color: var(--cyan); box-shadow:0 0 0 2px rgba(8,247,254,0.15); }
-.modal .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
-.modal .modal-actions .btn { min-width:75px; justify-content:center; }
-
-/* TOAST */
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.sidebar-link { transition: all .15s; border-left: 3px solid transparent; }
+.sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.08); }
+.sidebar-link.active { border-left-color: #70AD47; }
+.page { display: none; }
+.page.active { display: block; }
+canvas { max-height: 300px; }
 .toast {
-  position:fixed; bottom:24px; right:24px; color:#fff; padding:12px 18px;
-  border-radius:10px; font-size:13px; box-shadow:0 4px 20px rgba(0,0,0,0.25);
-  transform:translateY(80px); opacity:0; transition:all .3s; z-index:2000;
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  transform: translateY(80px); opacity: 0; transition: all .3s;
 }
-.toast.show { transform:translateY(0); opacity:1; }
-.toast.success { background:var(--success); }
-.toast.error { background:var(--danger); }
-
-/* EMPTY STATE */
-.empty-state { padding:24px; text-align:center; color: var(--text-muted); font-size:13px; }
-
-/* MANTENEDOR GRID */
-.mant-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-@media (max-width:800px) { .mant-grid { grid-template-columns:1fr; } }
-
-/* COMPANY IN KPI FORMAT */
-.emp-kpi { background:var(--card); border-radius:12px; padding:16px; box-shadow:var(--shadow); text-align:center; border-left:4px solid var(--cyan); }
-.emp-kpi .nombre { font-size:15px; font-weight:700; color: var(--text); }
-.emp-kpi .rut { font-size:11px; color: var(--text-muted); margin-bottom:4px; }
-.emp-kpi .tipo-emp { font-size:11px; color: var(--cyan); font-weight:600; }
-.emp-kpi .valores { display:flex; gap:16px; justify-content:center; margin-top:8px; font-size:14px; }
-.emp-kpi .valores span { font-weight:600; }
-.emp-kpi .valores .ing { color:var(--success); }
-.emp-kpi .valores .gas { color:var(--danger); }
-.emp-kpi .valores .saldo { color:var(--primary); }
-
-/* responsive for sidebar on mobile */
-@media (max-width:768px) {
-  .sidebar { width:100%; position:relative; height:auto; }
-  .main { margin-left:0; max-width:100%; padding:16px; }
-  .sidebar nav { display:flex; flex-wrap:wrap; gap:4px; padding:8px 12px; }
-  .sidebar nav a { border-left:none; border-bottom:2px solid transparent; padding:8px 12px; font-size:12px; }
-  .sidebar nav a.active { border-bottom-color:var(--success); border-left:none; }
-  .sidebar .version { display:none; }
-}
+.toast.show { transform: translateY(0); opacity: 1; }
+td.monto { font-family: 'SF Mono', 'Courier New', monospace; }
+td.tipo-ingreso { color: var(--success); font-weight: 600; }
+td.tipo-gasto { color: var(--danger); font-weight: 600; }
+dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
 </style>
 </head>
 <body>
 
 <!-- ═══ SIDEBAR ═══ -->
-<div class="sidebar">
-  <div class="brand">
-    💰 Gestión Financiera
-    <small>Ingresos & Gastos</small>
-  </div>
-  <nav>
-    <a class="active" onclick="irAPagina('dashboard')" data-page="dashboard">📊 Dashboard</a>
-    <a onclick="irAPagina('movimientos')" data-page="movimientos">📋 Movimientos</a>
-    <a onclick="irAPagina('categorias')" data-page="categorias">🏷️ Categorías</a>
-    <a onclick="irAPagina('bancos')" data-page="bancos">🏦 Bancos</a>
-    <a onclick="irAPagina('medios-pago')" data-page="medios-pago">💳 Medios de Pago</a>
-    <a onclick="irAPagina('transferencias')" data-page="transferencias">🔄 Transferencias</a>
-    <a onclick="irAPagina('datos')" data-page="datos">⚙️ Datos</a>
+<aside class="fixed left-0 top-0 h-full w-56 bg-[#1F3864] z-50 flex flex-col">
+  <header class="px-5 py-4 border-b border-white/10">
+    <h1 class="text-white text-lg font-bold">🚀 Finan-TECH</h1>
+    <p class="text-blue-200/60 text-xs">Ingresos & Gastos</p>
+  </header>
+  <nav class="flex-1 py-2">
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link active" data-page="dashboard" onclick="irAPagina('dashboard')">📊 Dashboard</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="movimientos" onclick="irAPagina('movimientos')">📋 Movimientos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="categorias" onclick="irAPagina('categorias')">🏷️ Categorías</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="bancos" onclick="irAPagina('bancos')">🏦 Bancos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="medios-pago" onclick="irAPagina('medios-pago')">💳 Medios de Pago</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="irAPagina('transferencias')">🔄 Transferencias</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="datos" onclick="irAPagina('datos')">⚙️ Datos</a>
   </nav>
-  <div style="padding:12px 18px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:10px;">
-    <span style="font-size:11px;color:var(--sidebar-text);">🌙 Modo Oscuro</span>
-    <label class="switch">
-      <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
-      <span class="slider"></span>
-    </label>
-  </div>
-  <div class="version">Boop 🦈 · v2.0</div>
-</div>
+  <footer class="px-5 py-3 border-t border-white/10 text-blue-300/30 text-[10px]">Boop 🦈 · v3.0</footer>
+</aside>
 
 <!-- ═══ MAIN ═══ -->
-<div class="main">
+<main class="ml-56 p-6 bg-gray-50 min-h-screen">
 
-  <!-- ═══════════════════ DASHBOARD PAGE ═══════════════════ -->
-  <div class="page active" id="page-dashboard">
-    <h1>📊 Dashboard <span class="badge" id="badgeCount">0</span></h1>
-    <div class="subtitle">Panel general · selecciona una empresa para ver sus KPIs individuales</div>
+  <!-- ===== DASHBOARD ===== -->
+  <section class="page active" id="page-dashboard">
+    <header class="flex items-center gap-3 mb-1">
+      <h2 class="text-xl font-bold text-[#1F3864]">📊 Dashboard</h2>
+      <span class="bg-[#2E75B6] text-white text-xs font-semibold px-3 py-0.5 rounded-full" id="badgeCount">0</span>
+    </header>
+    <p class="text-gray-500 text-sm mb-4">Panel general · selecciona una empresa para ver KPIs individuales</p>
 
-    <!-- Company selector -->
-    <div class="company-selector">
-      <label>Empresa:</label>
-      <select id="dashEmpresa" onchange="renderDashboard()">
-        <option value="Todas">🌐 Todas las empresas</option>
-      </select>
+    <div class="flex items-center gap-3 mb-5">
+      <label class="text-sm font-semibold text-gray-600">Empresa:</label>
+      <select id="dashEmpresa" onchange="renderDashboard()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white min-w-[260px]"></select>
     </div>
 
-    <!-- KPI cards -->
-    <div class="kpi-row" id="kpiRow">
-      <div class="kpi-card"><div class="label">💰 Total Ingresos</div><div class="value green" id="kpiIngresos">$0</div></div>
-      <div class="kpi-card"><div class="label">💸 Total Gastos</div><div class="value red" id="kpiGastos">$0</div></div>
-      <div class="kpi-card"><div class="label">📈 Saldo Neto</div><div class="value blue" id="kpiSaldo">$0</div></div>
-      <div class="kpi-card"><div class="label">📊 Total Mov.</div><div class="value" id="kpiMovs" style="color:var(--dark)">0</div></div>
-      <div class="kpi-card"><div class="label">✅ Pagados</div><div class="value" id="kpiPagados" style="color:var(--success)">0</div></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5" id="kpiRow">
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Ingresos</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiIngresos">$0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💸 Total Gastos</p><p class="text-2xl font-bold text-[#E74C3C]" id="kpiGastos">$0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📈 Saldo Neto</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiSaldo">$0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Total Mov.</p><p class="text-2xl font-bold text-gray-700" id="kpiMovs">0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">✅ Pagados</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiPagados">0</p></article>
     </div>
 
-    <!-- Company detail card (when one selected) -->
-    <div id="empresaDetail" style="display:none;margin-bottom:18px;"></div>
+    <div id="empresaDetail" class="hidden mb-5"></div>
 
-    <!-- Charts -->
-    <div class="charts-row">
-      <div class="card"><h3>🥧 Ingresos vs Gastos</h3><canvas id="chartPie"></canvas></div>
-      <div class="card"><h3>📈 Evolución Mensual</h3><canvas id="chartMonthly"></canvas></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🥧 Ingresos vs Gastos</h3><canvas id="chartPie"></canvas></article>
+      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📈 Evolución Mensual</h3><canvas id="chartMonthly"></canvas></article>
     </div>
-    <div class="charts-row">
-      <div class="card"><h3>🏢 Por Empresa</h3><canvas id="chartEmpresa"></canvas></div>
-      <div class="card"><h3>📂 Por Categoría (Top 12)</h3><canvas id="chartCategoria"></canvas></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🏢 Por Empresa</h3><canvas id="chartEmpresa"></canvas></article>
+      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📂 Por Categoría (Top 12)</h3><canvas id="chartCategoria"></canvas></article>
     </div>
 
-    <!-- Mini tabla últimos 10 -->
-    <div class="card">
-      <h3>📋 Últimos 10 movimientos</h3>
-      <div class="table-wrap">
-        <table><thead><tr><th>Fecha</th><th>Empresa</th><th>Tipo</th><th>Categoría</th><th>Monto</th></tr></thead>
-        <tbody id="miniTablaBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════ MOVIMIENTOS PAGE ═══════════════════ -->
-  <div class="page" id="page-movimientos">
-    <div class="toolbar">
-      <h3 style="flex:1;margin:0;">📋 Todos los Movimientos</h3>
-      <button class="btn btn-success" onclick="mostrarModalMovimiento()">➕ Agregar</button>
-      <button class="btn btn-outline" onclick="recargarDatos()">🔄</button>
-    </div>
-    <div class="card" style="margin-bottom:14px;">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <label style="font-size:12px;font-weight:600;">Filtrar:</label>
-        <select id="movFilterEmpresa" onchange="renderMovimientos()"><option value="Todas">Todas empresas</option></select>
-        <select id="movFilterTipo" onchange="renderMovimientos()"><option value="">Todos tipos</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select>
-        <input type="date" id="movFilterDesde" onchange="renderMovimientos()">
-        <span>a</span>
-        <input type="date" id="movFilterHasta" onchange="renderMovimientos()">
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('movFilterEmpresa').value='Todas';document.getElementById('movFilterTipo').value='';document.getElementById('movFilterDesde').value='';document.getElementById('movFilterHasta').value='';renderMovimientos()">Limpiar</button>
-        <span style="flex:1"></span>
-        <span style="font-size:12px;color:var(--text-muted);" id="movCountLabel"></span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Fecha</th><th>Empresa (RUT)</th><th>Tipo</th><th>Categoría</th><th>Banco</th><th>Medio Pago</th><th>Monto</th><th>Moneda</th><th>Glosa</th><th>Pagado</th><th>Acción</th>
-          </tr></thead>
-          <tbody id="movBody"></tbody>
+    <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <h3 class="text-sm font-bold text-gray-700 mb-3">📋 Últimos 10 movimientos</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">Fecha</th><th class="p-2.5 text-left font-semibold">Empresa</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-left font-semibold">Categoría</th><th class="p-2.5 text-right font-semibold">Monto</th></tr></thead>
+          <tbody id="miniTablaBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <div class="empty-state" id="movEmpty">No hay movimientos registrados.</div>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══════════════════ CATEGORIAS PAGE ═══════════════════ -->
-  <div class="page" id="page-categorias">
-    <div class="toolbar">
-      <h3 style="flex:1;margin:0;">🏷️ Categorías</h3>
-      <button class="btn btn-success" onclick="mostrarModalCategoria()">➕ Agregar</button>
+  <!-- ===== MOVIMIENTOS ===== -->
+  <section class="page" id="page-movimientos">
+    <div class="flex items-center gap-2 flex-wrap mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">📋 Movimientos</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalMovimiento()">➕ Agregar</button>
+      <button class="border border-gray-300 text-gray-500 text-xs px-3 py-2 rounded-lg cursor-pointer transition hover:bg-gray-50" onclick="recargarDatos()">🔄</button>
     </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Total Mov.</th><th>Monto Total</th><th>Acción</th></tr></thead>
-          <tbody id="catBody"></tbody>
+    <article class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="text-xs font-semibold text-gray-500">Filtrar:</label>
+        <select id="movFilterEmpresa" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
+        <select id="movFilterTipo" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"><option value="">Todos</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select>
+        <input type="date" id="movFilterDesde" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
+        <span class="text-gray-400 text-xs">a</span>
+        <input type="date" id="movFilterHasta" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('movFilterEmpresa').value='Todas';document.getElementById('movFilterTipo').value='';document.getElementById('movFilterDesde').value='';document.getElementById('movFilterHasta').value='';renderMovimientos()">Limpiar</button>
+        <span class="flex-1"></span>
+        <span class="text-xs text-gray-400" id="movCountLabel"></span>
+      </div>
+    </article>
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white sticky top-0 z-10"><th class="p-2.5 text-left font-semibold whitespace-nowrap">Fecha</th><th class="p-2.5 text-left font-semibold whitespace-nowrap">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-left font-semibold">Categoría</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Medio Pago</th><th class="p-2.5 text-right font-semibold">Monto</th><th class="p-2.5 text-left font-semibold">Moneda</th><th class="p-2.5 text-left font-semibold">Glosa</th><th class="p-2.5 text-left font-semibold">Pagado</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="movBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <div class="empty-state" id="catEmpty">No hay categorías. Carga datos de ejemplo o agrega una.</div>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="movEmpty">No hay movimientos registrados.</p>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══════════════════ BANCOS PAGE ═══════════════════ -->
-  <div class="page" id="page-bancos">
-    <div class="toolbar">
-      <h3 style="flex:1;margin:0;">🏦 Bancos</h3>
-      <button class="btn btn-success" onclick="mostrarModalBanco()">➕ Agregar</button>
+  <!-- ===== CATEGORÍAS ===== -->
+  <section class="page" id="page-categorias">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏷️ Categorías</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalCategoria()">➕ Agregar</button>
     </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Nombre</th><th>Total Mov.</th><th>Monto Total</th><th>Acción</th></tr></thead>
-          <tbody id="bancoBody"></tbody>
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="catBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <div class="empty-state" id="bancoEmpty">No hay bancos registrados.</div>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="catEmpty">No hay categorías.</p>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══════════════════ MEDIOS DE PAGO PAGE ═══════════════════ -->
-  <div class="page" id="page-medios-pago">
-    <div class="toolbar">
-      <h3 style="flex:1;margin:0;">💳 Medios de Pago</h3>
-      <button class="btn btn-success" onclick="mostrarModalMedioPago()">➕ Agregar</button>
+  <!-- ===== BANCOS ===== -->
+  <section class="page" id="page-bancos">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏦 Bancos</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalBanco()">➕ Agregar</button>
     </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Nombre</th><th>Total Mov.</th><th>Monto Total</th><th>Acción</th></tr></thead>
-          <tbody id="mpBody"></tbody>
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <div class="empty-state" id="mpEmpty">No hay medios de pago registrados.</div>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay bancos.</p>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══════════════════ TRANSFERENCIAS PAGE ═══════════════════ -->
-  <div class="page" id="page-transferencias">
-    <div class="toolbar">
-      <h3 style="flex:1;margin:0;">🔄 Transferencias Bancarias</h3>
-      <button class="btn btn-success" onclick="mostrarModalTransferencia()">➕ Agregar</button>
+  <!-- ===== MEDIOS DE PAGO ===== -->
+  <section class="page" id="page-medios-pago">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">💳 Medios de Pago</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalMedioPago()">➕ Agregar</button>
     </div>
-
-    <!-- KPIs Transferencias -->
-    <div class="kpi-row" style="margin-bottom:14px;">
-      <div class="kpi-card"><div class="label">💰 Total Transferido</div><div class="value blue" id="kpiTransTotal">$0</div></div>
-      <div class="kpi-card"><div class="label">📊 Cantidad</div><div class="value" id="kpiTransCant" style="color:var(--dark)">0</div></div>
-      <div class="kpi-card"><div class="label">🏦 Bancos Involucrados</div><div class="value" id="kpiTransBancos" style="color:var(--dark)">0</div></div>
-    </div>
-
-    <div class="card" style="margin-bottom:14px;">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <label style="font-size:12px;font-weight:600;">Filtrar:</label>
-        <select id="transFilterEmpresa" onchange="renderTransferencias()">
-          <option value="Todas">Todas empresas</option>
-        </select>
-        <select id="transFilterBanco" onchange="renderTransferencias()">
-          <option value="Todos">Todos los bancos</option>
-        </select>
-        <input type="date" id="transFilterDesde" onchange="renderTransferencias()">
-        <span>a</span>
-        <input type="date" id="transFilterHasta" onchange="renderTransferencias()">
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('transFilterEmpresa').value='Todas';document.getElementById('transFilterBanco').value='Todos';document.getElementById('transFilterDesde').value='';document.getElementById('transFilterHasta').value='';renderTransferencias()">Limpiar</button>
-        <span style="flex:1"></span>
-        <span style="font-size:12px;color:var(--text-muted);" id="transCountLabel"></span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Fecha</th><th>Empresa</th><th>Banco Origen</th><th>Banco Destino</th><th>Monto</th><th>Moneda</th><th>Glosa</th><th>Acción</th>
-          </tr></thead>
-          <tbody id="transBody"></tbody>
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="mpBody" class="divide-y divide-gray-100"></tbody>
         </table>
-        <div class="empty-state" id="transEmpty">No hay transferencias registradas.</div>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="mpEmpty">No hay medios de pago.</p>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══════════════════ DATOS PAGE ═══════════════════ -->
-  <div class="page" id="page-datos">
-    <h3 style="margin-bottom:12px;">⚙️ Gestión de Datos</h3>
-    <div class="toolbar" style="margin-bottom:16px;">
-      <button class="btn btn-primary" onclick="exportarJSON()">⬇️ Exportar Todo (JSON)</button>
-      <button class="btn btn-success" onclick="exportarCSV()">📥 Exportar CSV (Excel)</button>
-      <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
-      <button class="btn btn-warning" onclick="cargarDatosEjemplo()">📦 Cargar Ejemplo</button>
-      <button class="btn btn-danger" onclick="if(confirm('¿Eliminar TODOS los datos?')){localStorage.clear();location.reload();}">🗑️ Limpiar Todo</button>
+  <!-- ===== TRANSFERENCIAS ===== -->
+  <section class="page" id="page-transferencias">
+    <div class="flex items-center gap-2 flex-wrap mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🔄 Transferencias Bancarias</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalTransferencia()">➕ Agregar</button>
     </div>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarJSON(event)">
-    <div class="card" style="font-size:13px;color:var(--text-muted);">
-      <p><strong>¿Cómo funciona?</strong></p>
-      <p>Todo se guarda automáticamente en tu navegador (localStorage). No necesita internet. Puedes exportar un backup JSON en cualquier momento.</p>
-      <p style="margin-top:8px;">Para pasar datos al Excel: Exportar CSV → abrir en Excel → Guardar como .xlsx</p>
-      <p style="margin-top:4px;">Para restaurar datos: Exportaste un JSON antes → Importar JSON → seleccionas el archivo.</p>
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Transferido</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiTransTotal">$0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Cantidad</p><p class="text-2xl font-bold text-gray-700" id="kpiTransCant">0</p></article>
+      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">🏦 Bancos Involucrados</p><p class="text-2xl font-bold text-gray-700" id="kpiTransBancos">0</p></article>
     </div>
-  </div>
-</div>
+    <article class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="text-xs font-semibold text-gray-500">Filtrar:</label>
+        <select id="transFilterEmpresa" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
+        <select id="transFilterBanco" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
+        <input type="date" id="transFilterDesde" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
+        <span class="text-gray-400 text-xs">a</span>
+        <input type="date" id="transFilterHasta" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('transFilterEmpresa').value='Todas';document.getElementById('transFilterBanco').value='Todos';document.getElementById('transFilterDesde').value='';document.getElementById('transFilterHasta').value='';renderTransferencias()">Limpiar</button>
+        <span class="flex-1"></span>
+        <span class="text-xs text-gray-400" id="transCountLabel"></span>
+      </div>
+    </article>
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white sticky top-0 z-10"><th class="p-2.5 text-left font-semibold">Fecha</th><th class="p-2.5 text-left font-semibold">Empresa</th><th class="p-2.5 text-left font-semibold">Banco Origen</th><th class="p-2.5 text-left font-semibold">Banco Destino</th><th class="p-2.5 text-right font-semibold">Monto</th><th class="p-2.5 text-left font-semibold">Moneda</th><th class="p-2.5 text-left font-semibold">Glosa</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="transBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="transEmpty">No hay transferencias.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ===== DATOS ===== -->
+  <section class="page" id="page-datos">
+    <h2 class="text-lg font-bold text-[#1F3864] mb-4">⚙️ Gestión de Datos</h2>
+    <div class="flex items-center gap-2 flex-wrap mb-4">
+      <button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarJSON()">⬇️ Exportar Todo (JSON)</button>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarCSV()">📥 Exportar CSV (Excel)</button>
+      <button class="border border-gray-300 text-gray-600 text-xs px-4 py-2 rounded-lg cursor-pointer transition hover:bg-gray-50" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
+      <button class="bg-[#F39C12] hover:bg-[#D68910] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="cargarDatosEjemplo()">📦 Cargar Ejemplo</button>
+      <button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="if(confirm('¿Eliminar TODOS los datos?')){localStorage.clear();location.reload();}">🗑️ Limpiar Todo</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importarJSON(event)">
+    <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-sm text-gray-600">
+      <p class="font-semibold">¿Cómo funciona?</p>
+      <p>Todo se guarda automáticamente en tu navegador. No necesita internet. Exporta un backup JSON frecuentemente.</p>
+      <p class="mt-2">Para pasar datos al Excel: Exportar CSV → abrir en Excel → Guardar como .xlsx</p>
+      <p class="mt-1">Para restaurar: Exportaste un JSON antes → Importar JSON → selecciona el archivo.</p>
+    </article>
+  </section>
+
+</main>
 
 <!-- ═══ MODAL MOVIMIENTO ═══ -->
-<div class="modal-overlay" id="modalMov">
-  <div class="modal">
-    <h2 id="modalMovTitle">➕ Agregar Movimiento</h2>
-    <form id="formMov" onsubmit="return guardarMovimiento(event)">
-      <div class="form-row">
-        <div><label>Fecha *</label><input type="date" id="frmFecha" required></div>
-        <div><label>Empresa *</label><select id="frmEmpresa" required></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Tipo *</label>
-          <select id="frmTipo" required onchange="actualizarSelectCategorias()">
-            <option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option>
-          </select>
-        </div>
-        <div><label>Categoría *</label><select id="frmCategoria" required></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Banco</label><select id="frmBanco"><option value="">Ninguno</option></select></div>
-        <div><label>Medio de Pago</label><select id="frmMedioPago"><option value="">Ninguno</option></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Monto *</label><input type="number" id="frmMonto" min="0" step="1" required placeholder="0"></div>
-        <div><label>Moneda</label><select id="frmMoneda"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Pagado</label><select id="frmPagado"><option value="Sí">Sí</option><option value="No">No</option></select></div>
-        <div></div>
-      </div>
-      <div class="form-row full">
-        <label>Glosa</label>
-        <textarea id="frmGlosa" rows="2" placeholder="Ej: Venta 100 tickets"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalMov')">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="btnGuardarMov">💾 Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<dialog id="modalMov" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalMovTitle">➕ Agregar Movimiento</h2>
+  <form id="formMov" onsubmit="return guardarMovimiento(event)">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmTipo" required onchange="actualizarSelectCategorias()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Categoría *</label><select id="frmCategoria" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco</label><select id="frmBanco" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Ninguno</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Medio de Pago</label><select id="frmMedioPago" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Ninguno</option></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Pagado</label><select id="frmPagado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="Sí">Sí</option><option value="No">No</option></select></div>
+      <div></div>
+    </div>
+    <div class="mb-3">
+      <label class="block text-xs font-semibold text-gray-500 mb-1">Glosa</label>
+      <textarea id="frmGlosa" rows="2" placeholder="Ej: Venta 100 tickets" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white resize-none"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalMov').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition" id="btnGuardarMov">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- ═══ MODAL CATEGORIA ═══ -->
-<div class="modal-overlay" id="modalCat">
-  <div class="modal" style="width:420px;">
-    <h2 id="modalCatTitle">➕ Agregar Categoría</h2>
-    <form onsubmit="return guardarCategoria(event)">
-      <div class="form-row full">
-        <div><label>Nombre *</label><input type="text" id="frmCatNombre" required placeholder="Ej: Marketing Digital"></div>
-      </div>
-      <div class="form-row full">
-        <div><label>Tipo *</label>
-          <select id="frmCatTipo" required>
-            <option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalCat')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">💾 Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<dialog id="modalCat" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalCatTitle">➕ Agregar Categoría</h2>
+  <form onsubmit="return guardarCategoria(event)">
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmCatNombre" required placeholder="Ej: Marketing Digital" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmCatTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalCat').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- ═══ MODAL BANCO ═══ -->
-<div class="modal-overlay" id="modalBanco">
-  <div class="modal" style="width:420px;">
-    <h2 id="modalBancoTitle">➕ Agregar Banco</h2>
-    <form onsubmit="return guardarBanco(event)">
-      <div class="form-row full">
-        <div><label>Nombre *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado"></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalBanco')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">💾 Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ═══ MODAL TRANSFERENCIA ═══ -->
-<div class="modal-overlay" id="modalTrans">
-  <div class="modal" style="width:520px;">
-    <h2 id="modalTransTitle">➕ Agregar Transferencia</h2>
-    <form onsubmit="return guardarTransferencia(event)">
-      <div class="form-row">
-        <div><label>Fecha *</label><input type="date" id="frmTransFecha" required></div>
-        <div><label>Empresa *</label><select id="frmTransEmpresa" required></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Banco Origen *</label><select id="frmTransBancoOrigen" required><option value="">Seleccionar</option></select></div>
-        <div><label>Banco Destino *</label><select id="frmTransBancoDestino" required><option value="">Seleccionar</option></select></div>
-      </div>
-      <div class="form-row">
-        <div><label>Monto *</label><input type="number" id="frmTransMonto" min="0" step="1" required placeholder="0"></div>
-        <div><label>Moneda</label><select id="frmTransMoneda"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
-      </div>
-      <div class="form-row full">
-        <label>Glosa</label>
-        <textarea id="frmTransGlosa" rows="2" placeholder="Ej: Traspaso fondo operacional"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalTrans')">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="btnGuardarTrans">💾 Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<dialog id="modalBanco" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalBancoTitle">➕ Agregar Banco</h2>
+  <form onsubmit="return guardarBanco(event)">
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalBanco').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- ═══ MODAL MEDIO PAGO ═══ -->
-<div class="modal-overlay" id="modalMP">
-  <div class="modal" style="width:420px;">
-    <h2 id="modalMPTitle">➕ Agregar Medio de Pago</h2>
-    <form onsubmit="return guardarMedioPago(event)">
-      <div class="form-row full">
-        <div><label>Nombre *</label><input type="text" id="frmMPNombre" required placeholder="Ej: Transferencia"></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalMP')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">💾 Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<dialog id="modalMP" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalMPTitle">➕ Agregar Medio de Pago</h2>
+  <form onsubmit="return guardarMedioPago(event)">
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmMPNombre" required placeholder="Ej: Transferencia" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalMP').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- ═══ MODAL TRANSFERENCIA ═══ -->
+<dialog id="modalTrans" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalTransTitle">➕ Agregar Transferencia</h2>
+  <form onsubmit="return guardarTransferencia(event)">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmTransFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmTransEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Origen *</label><select id="frmTransBancoOrigen" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Destino *</label><select id="frmTransBancoDestino" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option></select></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmTransMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmTransMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+    </div>
+    <div class="mb-3">
+      <label class="block text-xs font-semibold text-gray-500 mb-1">Glosa</label>
+      <textarea id="frmTransGlosa" rows="2" placeholder="Ej: Traspaso fondo operacional" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white resize-none"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalTrans').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition" id="btnGuardarTrans">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast bg-gray-800 text-white px-5 py-3 rounded-xl text-sm shadow-lg" id="toast"></div>
 
 <script>
 // ════════════════════════════════════════════════════════
-// DATA STORE
+// DATA
 // ════════════════════════════════════════════════════════
 const EMPRESAS = [
   { id:1, nombre:'RenoxPell SpA (YoSorteo.cl)',     rut:'76.837.558-5', tipo:'Plataforma de sorteos' },
@@ -579,13 +351,7 @@ const EMPRESAS = [
   { id:9, nombre:'Best Free Wifi Chile SpA',         rut:'76.718.863-3', tipo:'Enlaces & CCTV' },
 ];
 
-// ENTITIES WITH CRUD
-let categorias = [];
-let bancos = [];
-let mediosPago = [];
-let transferencias = [];
-let movimientos = [];
-
+let categorias = [], bancos = [], mediosPago = [], transferencias = [], movimientos = [];
 let editMovId = null, editCatId = null, editBancoId = null, editMPId = null, editTransId = null;
 
 // ════════════════════════════════════════════════════════
@@ -598,17 +364,14 @@ function guardarTodo() {
   localStorage.setItem('mediosPago', JSON.stringify(mediosPago));
   localStorage.setItem('transferencias', JSON.stringify(transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))));
 }
-
 function cargarTodo() {
   try {
-    const m = localStorage.getItem('movimientos');
-    movimientos = m ? JSON.parse(m).map(x=>({...x,fecha:new Date(x.fecha)})) : [];
-    categorias = JSON.parse(localStorage.getItem('categorias') || '[]');
-    bancos = JSON.parse(localStorage.getItem('bancos') || '[]');
-    mediosPago = JSON.parse(localStorage.getItem('mediosPago') || '[]');
-    const t = localStorage.getItem('transferencias');
-    transferencias = t ? JSON.parse(t).map(x=>({...x,fecha:new Date(x.fecha)})) : [];
-  } catch(e) { movimientos=[]; categorias=[]; bancos=[]; mediosPago=[]; transferencias=[]; }
+    movimientos = JSON.parse(localStorage.getItem('movimientos')||'[]').map(x=>({...x,fecha:new Date(x.fecha)}));
+    categorias = JSON.parse(localStorage.getItem('categorias')||'[]');
+    bancos = JSON.parse(localStorage.getItem('bancos')||'[]');
+    mediosPago = JSON.parse(localStorage.getItem('mediosPago')||'[]');
+    transferencias = JSON.parse(localStorage.getItem('transferencias')||'[]').map(x=>({...x,fecha:new Date(x.fecha)}));
+  } catch(e) { [movimientos,categorias,bancos,mediosPago,transferencias]=[[],[],[],[],[]]; }
 }
 
 // ════════════════════════════════════════════════════════
@@ -617,903 +380,264 @@ function cargarTodo() {
 const fmtCLP = n => '$' + Math.abs(n).toLocaleString('es-CL');
 const fmtFecha = d => { if(typeof d==='string') d=new Date(d); return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}); };
 const toDateInput = d => { if(typeof d==='string') d=new Date(d); return d.toISOString().split('T')[0]; };
-const empresaNombreRut = id => { const e=EMPRESAS.find(x=>x.id===id); return e ? e.nombre+' ('+e.rut+')' : '—'; };
 const empresaObj = id => EMPRESAS.find(x=>x.id===id);
 
 let toastTimeout;
 function mostrarToast(msg,tipo='') {
   const el=document.getElementById('toast');
-  el.textContent=msg; el.className='toast '+tipo;
+  el.textContent=msg; el.className='toast show px-5 py-3 rounded-xl text-sm shadow-lg '+
+    (tipo==='success'?'bg-[#70AD47] text-white':tipo==='error'?'bg-[#E74C3C] text-white':'bg-gray-800 text-white');
   clearTimeout(toastTimeout);
-  requestAnimationFrame(()=>el.classList.add('show'));
   toastTimeout=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ════════════════════════════════════════════════════════
-// THEME TOGGLE
-// ════════════════════════════════════════════════════════
-function toggleTheme(dark) {
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  localStorage.setItem('theme', dark ? 'dark' : 'light');
-  document.getElementById('themeToggle').checked = dark;
-  // Re-render charts to adapt to new bg (Chart.js auto-detects)
-  const active = document.querySelector('.page.active');
-  if(active && active.id==='page-dashboard') renderDashboard();
-}
-
-function initTheme() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const dark = saved === 'dark' || (!saved && prefersDark);
-  toggleTheme(dark);
-}
-
-// SIDEBAR NAV
 function irAPagina(page) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));
-  document.querySelector(`.sidebar nav a[data-page="${page}"]`)?.classList.add('active');
-  if(page==='dashboard') renderDashboard();
-  if(page==='movimientos') renderMovimientos();
-  if(page==='categorias') renderCategorias();
-  if(page==='bancos') renderBancos();
-  if(page==='medios-pago') renderMediosPago();
-  if(page==='transferencias') renderTransferencias();
+  document.querySelectorAll('.sidebar-link').forEach(a=>a.classList.remove('active'));
+  document.querySelector(`.sidebar-link[data-page="${page}"]`)?.classList.add('active');
+  const fn = { dashboard:renderDashboard, movimientos:renderMovimientos, categorias:renderCategorias,
+    bancos:renderBancos, 'medios-pago':renderMediosPago, transferencias:renderTransferencias };
+  if(fn[page]) fn[page]();
 }
-
-function cerrarModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; editTransId=null; }
 
 // ════════════════════════════════════════════════════════
 // CATEGORIAS CRUD
 // ════════════════════════════════════════════════════════
-function getNextCatId() {
-  if(categorias.length===0) return 1;
-  return Math.max(...categorias.map(c=>c.id)) + 1;
-}
+function getNextCatId() { return categorias.length ? Math.max(...categorias.map(c=>c.id))+1 : 1; }
 function mostrarModalCategoria(data) {
   editCatId = data ? data.id : null;
   document.getElementById('modalCatTitle').textContent = data ? '✏️ Editar Categoría' : '➕ Agregar Categoría';
   document.getElementById('frmCatNombre').value = data ? data.nombre : '';
   document.getElementById('frmCatTipo').value = data ? data.tipoMov : '';
-  document.getElementById('modalCat').classList.add('active');
-  document.body.style.overflow='hidden';
+  document.getElementById('modalCat').showModal();
 }
 function guardarCategoria(e) {
   e.preventDefault();
   const nombre = document.getElementById('frmCatNombre').value.trim();
   const tipoMov = document.getElementById('frmCatTipo').value;
-  if(!nombre || !tipoMov) { mostrarToast('Completa todos los campos','error'); return false; }
-  if(editCatId) {
-    const idx = categorias.findIndex(c=>c.id===editCatId);
-    if(idx>=0) { categorias[idx].nombre=nombre; categorias[idx].tipoMov=tipoMov; }
-    mostrarToast('✅ Categoría actualizada','success');
-  } else {
-    categorias.push({id:getNextCatId(), nombre, tipoMov});
-    mostrarToast('✅ Categoría agregada','success');
-  }
-  guardarTodo(); cerrarModal('modalCat');
-  if(document.getElementById('page-categorias').classList.contains('active')) renderCategorias();
-  return false;
+  if(!nombre||!tipoMov) { mostrarToast('Completa todos los campos','error'); return false; }
+  if(editCatId) { const i=categorias.findIndex(c=>c.id===editCatId); if(i>=0){categorias[i].nombre=nombre;categorias[i].tipoMov=tipoMov;} mostrarToast('✅ Actualizada','success'); }
+  else { categorias.push({id:getNextCatId(),nombre,tipoMov}); mostrarToast('✅ Agregada','success'); }
+  guardarTodo(); document.getElementById('modalCat').close(); renderCategorias(); return false;
 }
-function editarCategoria(id) {
-  const c = categorias.find(x=>x.id===id);
-  if(c) mostrarModalCategoria(c);
-}
-function eliminarCategoria(id) {
-  if(!confirm('¿Eliminar esta categoría?')) return;
-  categorias = categorias.filter(c=>c.id!==id);
-  guardarTodo(); renderCategorias();
-  mostrarToast('🗑️ Categoría eliminada','success');
-}
+function editarCategoria(id) { const c=categorias.find(x=>x.id===id); if(c) mostrarModalCategoria(c); }
+function eliminarCategoria(id) { if(!confirm('¿Eliminar?')) return; categorias=categorias.filter(c=>c.id!==id); guardarTodo(); renderCategorias(); mostrarToast('🗑️ Eliminada','success'); }
 function renderCategorias() {
-  const tbody = document.getElementById('catBody');
-  const empty = document.getElementById('catEmpty');
-  if(categorias.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
+  const tbody=document.getElementById('catBody'), empty=document.getElementById('catEmpty');
+  if(!categorias.length) { tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
   tbody.innerHTML = categorias.map(c => {
-    const movs = movimientos.filter(m=>m.categoriaId===c.id);
-    const total = movs.reduce((s,m)=>s+m.monto,0);
-    return `<tr>
-      <td>${c.id}</td>
-      <td><strong>${c.nombre}</strong></td>
-      <td class="${c.tipoMov==='Ingreso'?'tipo-ingreso':'tipo-gasto'}">${c.tipoMov}</td>
-      <td>${movs.length}</td>
-      <td class="monto">${total>0?fmtCLP(total):'$0'}</td>
-      <td class="actions"><button class="btn btn-primary btn-sm" onclick="editarCategoria(${c.id})">✏️</button> <button class="btn btn-danger btn-sm" onclick="eliminarCategoria(${c.id})">🗑️</button></td>
-    </tr>`;
+    const movs=movimientos.filter(m=>m.categoriaId===c.id), total=movs.reduce((s,m)=>s+m.monto,0);
+    return `<tr class="hover:bg-gray-50"><td class="p-2.5">${c.id}</td><td class="p-2.5 font-semibold">${c.nombre}</td><td class="p-2.5 ${c.tipoMov==='Ingreso'?'text-[#70AD47]':'text-[#E74C3C]'} font-semibold">${c.tipoMov}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarCategoria(${c.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarCategoria(${c.id})">🗑️</button></td></tr>`;
   }).join('');
 }
 
 // ════════════════════════════════════════════════════════
 // BANCOS CRUD
 // ════════════════════════════════════════════════════════
-function getNextBancoId() {
-  if(bancos.length===0) return 1;
-  return Math.max(...bancos.map(b=>b.id)) + 1;
-}
+function getNextBancoId() { return bancos.length ? Math.max(...bancos.map(b=>b.id))+1 : 1; }
 function mostrarModalBanco(data) {
-  editBancoId = data ? data.id : null;
-  document.getElementById('modalBancoTitle').textContent = data ? '✏️ Editar Banco' : '➕ Agregar Banco';
-  document.getElementById('frmBancoNombre').value = data ? data.nombre : '';
-  document.getElementById('modalBanco').classList.add('active');
-  document.body.style.overflow='hidden';
+  editBancoId=data?data.id:null; document.getElementById('modalBancoTitle').textContent=data?'✏️ Editar Banco':'➕ Agregar Banco';
+  document.getElementById('frmBancoNombre').value=data?data.nombre:''; document.getElementById('modalBanco').showModal();
 }
 function guardarBanco(e) {
   e.preventDefault();
-  const nombre = document.getElementById('frmBancoNombre').value.trim();
-  if(!nombre) { mostrarToast('Ingresa el nombre del banco','error'); return false; }
-  if(editBancoId) {
-    const idx = bancos.findIndex(b=>b.id===editBancoId);
-    if(idx>=0) bancos[idx].nombre=nombre;
-    mostrarToast('✅ Banco actualizado','success');
-  } else {
-    bancos.push({id:getNextBancoId(), nombre});
-    mostrarToast('✅ Banco agregado','success');
-  }
-  guardarTodo(); cerrarModal('modalBanco');
-  if(document.getElementById('page-bancos').classList.contains('active')) renderBancos();
-  return false;
+  const nombre=document.getElementById('frmBancoNombre').value.trim();
+  if(!nombre){mostrarToast('Ingresa el nombre','error');return false;}
+  if(editBancoId){const i=bancos.findIndex(b=>b.id===editBancoId);if(i>=0)bancos[i].nombre=nombre;mostrarToast('✅ Actualizado','success');}
+  else{bancos.push({id:getNextBancoId(),nombre});mostrarToast('✅ Agregado','success');}
+  guardarTodo();document.getElementById('modalBanco').close();renderBancos();return false;
 }
-function editarBanco(id) { const b=bancos.find(x=>x.id===id); if(b) mostrarModalBanco(b); }
-function eliminarBanco(id) {
-  if(!confirm('¿Eliminar este banco?')) return;
-  bancos = bancos.filter(b=>b.id!==id);
-  guardarTodo(); renderBancos();
-  mostrarToast('🗑️ Banco eliminado','success');
-}
+function editarBanco(id){const b=bancos.find(x=>x.id===id);if(b)mostrarModalBanco(b);}
+function eliminarBanco(id){if(!confirm('¿Eliminar?'))return;bancos=bancos.filter(b=>b.id!==id);guardarTodo();renderBancos();mostrarToast('🗑️ Eliminado','success');}
 function renderBancos() {
-  const tbody = document.getElementById('bancoBody');
-  const empty = document.getElementById('bancoEmpty');
-  if(bancos.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tbody.innerHTML = bancos.map(b => {
-    const movs = movimientos.filter(m=>m.bancoId===b.id);
-    const total = movs.reduce((s,m)=>s+m.monto,0);
-    return `<tr>
-      <td>${b.id}</td>
-      <td><strong>${b.nombre}</strong></td>
-      <td>${movs.length}</td>
-      <td class="monto">${total>0?fmtCLP(total):'$0'}</td>
-      <td class="actions"><button class="btn btn-primary btn-sm" onclick="editarBanco(${b.id})">✏️</button> <button class="btn btn-danger btn-sm" onclick="eliminarBanco(${b.id})">🗑️</button></td>
-    </tr>`;
-  }).join('');
+  const tbody=document.getElementById('bancoBody'),empty=document.getElementById('bancoEmpty');
+  if(!bancos.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=bancos.map(b=>{const movs=movimientos.filter(m=>m.bancoId===b.id),total=movs.reduce((s,m)=>s+m.monto,0);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${b.id}</td><td class="p-2.5 font-semibold">${b.nombre}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarBanco(${b.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarBanco(${b.id})">🗑️</button></td></tr>`;}).join('');
 }
 
 // ════════════════════════════════════════════════════════
 // MEDIOS DE PAGO CRUD
 // ════════════════════════════════════════════════════════
-function getNextMPId() {
-  if(mediosPago.length===0) return 1;
-  return Math.max(...mediosPago.map(m=>m.id)) + 1;
-}
-function mostrarModalMedioPago(data) {
-  editMPId = data ? data.id : null;
-  document.getElementById('modalMPTitle').textContent = data ? '✏️ Editar Medio de Pago' : '➕ Agregar Medio de Pago';
-  document.getElementById('frmMPNombre').value = data ? data.nombre : '';
-  document.getElementById('modalMP').classList.add('active');
-  document.body.style.overflow='hidden';
-}
-function guardarMedioPago(e) {
-  e.preventDefault();
-  const nombre = document.getElementById('frmMPNombre').value.trim();
-  if(!nombre) { mostrarToast('Ingresa el nombre','error'); return false; }
-  if(editMPId) {
-    const idx = mediosPago.findIndex(m=>m.id===editMPId);
-    if(idx>=0) mediosPago[idx].nombre=nombre;
-    mostrarToast('✅ Medio de pago actualizado','success');
-  } else {
-    mediosPago.push({id:getNextMPId(), nombre});
-    mostrarToast('✅ Medio de pago agregado','success');
-  }
-  guardarTodo(); cerrarModal('modalMP');
-  if(document.getElementById('page-medios-pago').classList.contains('active')) renderMediosPago();
-  return false;
-}
-function editarMedioPago(id) { const m=mediosPago.find(x=>x.id===id); if(m) mostrarModalMedioPago(m); }
-function eliminarMedioPago(id) {
-  if(!confirm('¿Eliminar este medio de pago?')) return;
-  mediosPago = mediosPago.filter(m=>m.id!==id);
-  guardarTodo(); renderMediosPago();
-  mostrarToast('🗑️ Medio de pago eliminado','success');
-}
-function renderMediosPago() {
-  const tbody = document.getElementById('mpBody');
-  const empty = document.getElementById('mpEmpty');
-  if(mediosPago.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tbody.innerHTML = mediosPago.map(mp => {
-    const movs = movimientos.filter(m=>m.medioPagoId===mp.id);
-    const total = movs.reduce((s,m)=>s+m.monto,0);
-    return `<tr>
-      <td>${mp.id}</td>
-      <td><strong>${mp.nombre}</strong></td>
-      <td>${movs.length}</td>
-      <td class="monto">${total>0?fmtCLP(total):'$0'}</td>
-      <td class="actions"><button class="btn btn-primary btn-sm" onclick="editarMedioPago(${mp.id})">✏️</button> <button class="btn btn-danger btn-sm" onclick="eliminarMedioPago(${mp.id})">🗑️</button></td>
-    </tr>`;
-  }).join('');
-}
+function getNextMPId(){return mediosPago.length?Math.max(...mediosPago.map(m=>m.id))+1:1;}
+function mostrarModalMedioPago(data){editMPId=data?data.id:null;document.getElementById('modalMPTitle').textContent=data?'✏️ Editar':'➕ Agregar';document.getElementById('frmMPNombre').value=data?data.nombre:'';document.getElementById('modalMP').showModal();}
+function guardarMedioPago(e){e.preventDefault();const nombre=document.getElementById('frmMPNombre').value.trim();if(!nombre){mostrarToast('Ingresa el nombre','error');return false;}if(editMPId){const i=mediosPago.findIndex(m=>m.id===editMPId);if(i>=0)mediosPago[i].nombre=nombre;mostrarToast('✅ Actualizado','success');}else{mediosPago.push({id:getNextMPId(),nombre});mostrarToast('✅ Agregado','success');}guardarTodo();document.getElementById('modalMP').close();renderMediosPago();return false;}
+function editarMedioPago(id){const m=mediosPago.find(x=>x.id===id);if(m)mostrarModalMedioPago(m);}
+function eliminarMedioPago(id){if(!confirm('¿Eliminar?'))return;mediosPago=mediosPago.filter(m=>m.id!==id);guardarTodo();renderMediosPago();mostrarToast('🗑️ Eliminado','success');}
+function renderMediosPago(){const tbody=document.getElementById('mpBody'),empty=document.getElementById('mpEmpty');if(!mediosPago.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');tbody.innerHTML=mediosPago.map(mp=>{const movs=movimientos.filter(m=>m.medioPagoId===mp.id),total=movs.reduce((s,m)=>s+m.monto,0);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${mp.id}</td><td class="p-2.5 font-semibold">${mp.nombre}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMedioPago(${mp.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMedioPago(${mp.id})">🗑️</button></td></tr>`;}).join('');}
 
 // ════════════════════════════════════════════════════════
 // MOVIMIENTOS CRUD
 // ════════════════════════════════════════════════════════
 function llenarSelectoresMov() {
-  const selEmp = document.getElementById('frmEmpresa');
-  selEmp.innerHTML = '<option value="">Seleccionar</option>'+
-    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-
-  const selBanco = document.getElementById('frmBanco');
-  selBanco.innerHTML = '<option value="">Ninguno</option>'+
-    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
-
-  const selMP = document.getElementById('frmMedioPago');
-  selMP.innerHTML = '<option value="">Ninguno</option>'+
-    mediosPago.map(mp => `<option value="${mp.id}">${mp.nombre}</option>`).join('');
+  document.getElementById('frmEmpresa').innerHTML='<option value="">Seleccionar</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  document.getElementById('frmBanco').innerHTML='<option value="">Ninguno</option>'+bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
+  document.getElementById('frmMedioPago').innerHTML='<option value="">Ninguno</option>'+mediosPago.map(mp=>`<option value="${mp.id}">${mp.nombre}</option>`).join('');
 }
-
 function actualizarSelectCategorias() {
-  const tipo = document.getElementById('frmTipo').value;
-  const sel = document.getElementById('frmCategoria');
-  if(!tipo) { sel.innerHTML = '<option value="">Primero selecciona Tipo</option>'; return; }
-  sel.innerHTML = '<option value="">Seleccionar</option>'+
-    categorias.filter(c => c.tipoMov === tipo)
-      .map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+  const tipo=document.getElementById('frmTipo').value;
+  const sel=document.getElementById('frmCategoria');
+  if(!tipo){sel.innerHTML='<option value="">Primero selecciona Tipo</option>';return;}
+  sel.innerHTML='<option value="">Seleccionar</option>'+categorias.filter(c=>c.tipoMov===tipo).map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
 }
-
 function mostrarModalMovimiento(data) {
-  editMovId = data ? data.id : null;
-  document.getElementById('modalMovTitle').textContent = data ? '✏️ Editar Movimiento' : '➕ Agregar Movimiento';
-  
-  const f = document.getElementById('formMov');
-  f.reset();
-  document.getElementById('frmFecha').value = data ? toDateInput(data.fecha) : new Date().toISOString().split('T')[0];
-  
+  editMovId=data?data.id:null; document.getElementById('modalMovTitle').textContent=data?'✏️ Editar Movimiento':'➕ Agregar Movimiento';
+  document.getElementById('frmFecha').value=data?toDateInput(data.fecha):new Date().toISOString().split('T')[0];
   llenarSelectoresMov();
-  if(data) {
-    document.getElementById('frmEmpresa').value = data.empresaId;
-    document.getElementById('frmTipo').value = data.tipo;
-    actualizarSelectCategorias();
-    document.getElementById('frmCategoria').value = data.categoriaId;
-    document.getElementById('frmBanco').value = data.bancoId || '';
-    document.getElementById('frmMedioPago').value = data.medioPagoId || '';
-    document.getElementById('frmMonto').value = data.monto;
-    document.getElementById('frmMoneda').value = data.moneda;
-    document.getElementById('frmPagado').value = data.pagado;
-    document.getElementById('frmGlosa').value = data.glosa || '';
-  } else {
-    document.getElementById('frmTipo').value = '';
-    actualizarSelectCategorias();
-  }
-  
-  document.getElementById('btnGuardarMov').textContent = data ? '🔄 Actualizar' : '💾 Guardar';
-  document.getElementById('modalMov').classList.add('active');
-  document.body.style.overflow = 'hidden';
+  if(data){
+    document.getElementById('frmEmpresa').value=data.empresaId;document.getElementById('frmTipo').value=data.tipo;
+    actualizarSelectCategorias();document.getElementById('frmCategoria').value=data.categoriaId;
+    document.getElementById('frmBanco').value=data.bancoId||'';document.getElementById('frmMedioPago').value=data.medioPagoId||'';
+    document.getElementById('frmMonto').value=data.monto;document.getElementById('frmMoneda').value=data.moneda;
+    document.getElementById('frmPagado').value=data.pagado;document.getElementById('frmGlosa').value=data.glosa||'';
+  } else { document.getElementById('frmTipo').value=''; actualizarSelectCategorias(); }
+  document.getElementById('btnGuardarMov').textContent=data?'🔄 Actualizar':'💾 Guardar';
+  document.getElementById('modalMov').showModal();
 }
-
 function guardarMovimiento(e) {
   e.preventDefault();
-  const empresaId = parseInt(document.getElementById('frmEmpresa').value);
-  const tipo = document.getElementById('frmTipo').value;
-  const categoriaId = parseInt(document.getElementById('frmCategoria').value);
-  const bancoId = parseInt(document.getElementById('frmBanco').value) || 0;
-  const medioPagoId = parseInt(document.getElementById('frmMedioPago').value) || 0;
-  const monto = parseFloat(document.getElementById('frmMonto').value);
-  const moneda = document.getElementById('frmMoneda').value;
-  const glosa = document.getElementById('frmGlosa').value.trim();
-  const pagado = document.getElementById('frmPagado').value;
-  const fecha = document.getElementById('frmFecha').value;
-
-  if(!fecha || !empresaId || !tipo || !categoriaId || !monto) {
-    mostrarToast('Completa todos los campos obligatorios (*)','error'); return false;
-  }
-
-  const emp = EMPRESAS.find(e=>e.id===empresaId);
-  const cat = categorias.find(c=>c.id===categoriaId);
-
-  const obj = {
-    id: editMovId || Date.now(),
-    fecha: new Date(fecha+'T12:00:00'),
-    empresaId, empresaNombre: emp?emp.nombre:'',
-    empresaRut: emp?emp.rut:'',
-    tipo, categoriaId, categoriaNombre: cat?cat.nombre:'',
-    bancoId, medioPagoId, monto, moneda, glosa, pagado,
-  };
-
-  if(editMovId) {
-    const idx = movimientos.findIndex(m=>m.id===editMovId);
-    if(idx>=0) movimientos[idx]=obj;
-    mostrarToast('✅ Movimiento actualizado','success');
-  } else {
-    movimientos.push(obj);
-    mostrarToast('✅ Movimiento agregado','success');
-  }
-  guardarTodo(); cerrarModal('modalMov');
-  const active = document.querySelector('.page.active');
-  if(active) {
-    if(active.id==='page-movimientos') renderMovimientos();
-    else if(active.id==='page-dashboard') renderDashboard();
-  }
+  const empresaId=parseInt(document.getElementById('frmEmpresa').value),tipo=document.getElementById('frmTipo').value;
+  const categoriaId=parseInt(document.getElementById('frmCategoria').value),bancoId=parseInt(document.getElementById('frmBanco').value)||0;
+  const medioPagoId=parseInt(document.getElementById('frmMedioPago').value)||0,monto=parseFloat(document.getElementById('frmMonto').value);
+  const moneda=document.getElementById('frmMoneda').value,glosa=document.getElementById('frmGlosa').value.trim();
+  const pagado=document.getElementById('frmPagado').value,fecha=document.getElementById('frmFecha').value;
+  if(!fecha||!empresaId||!tipo||!categoriaId||!monto){mostrarToast('Completa campos obligatorios','error');return false;}
+  const emp=EMPRESAS.find(e=>e.id===empresaId),cat=categorias.find(c=>c.id===categoriaId);
+  const obj={id:editMovId||Date.now(),fecha:new Date(fecha+'T12:00:00'),empresaId,empresaNombre:emp?emp.nombre:'',empresaRut:emp?emp.rut:'',tipo,categoriaId,categoriaNombre:cat?cat.nombre:'',bancoId,medioPagoId,monto,moneda,glosa,pagado};
+  if(editMovId){const i=movimientos.findIndex(m=>m.id===editMovId);if(i>=0)movimientos[i]=obj;mostrarToast('✅ Actualizado','success');}
+  else{movimientos.push(obj);mostrarToast('✅ Agregado','success');}
+  guardarTodo();document.getElementById('modalMov').close();
+  const active=document.querySelector('.page.active');if(active&&active.id==='page-movimientos')renderMovimientos();else if(active&&active.id==='page-dashboard')renderDashboard();
   return false;
 }
-
-function editarMovimiento(id) {
-  const m = movimientos.find(x=>x.id===id);
-  if(m) mostrarModalMovimiento(m);
-}
-function eliminarMovimiento(id) {
-  const m = movimientos.find(x=>x.id===id);
-  if(!m) return;
-  const emp = empresaObj(m.empresaId);
-  if(!confirm(`¿Eliminar este movimiento?\n${fmtFecha(m.fecha)} - ${emp?emp.nombre:'?'} - ${fmtCLP(m.monto)}`)) return;
-  movimientos = movimientos.filter(x=>x.id!==id);
-  guardarTodo();
-  const active = document.querySelector('.page.active');
-  if(active) {
-    if(active.id==='page-movimientos') renderMovimientos();
-    else if(active.id==='page-dashboard') renderDashboard();
-  }
-  mostrarToast('🗑️ Eliminado','success');
-}
-
+function editarMovimiento(id){const m=movimientos.find(x=>x.id===id);if(m)mostrarModalMovimiento(m);}
+function eliminarMovimiento(id){const m=movimientos.find(x=>x.id===id);if(!m)return;const emp=empresaObj(m.empresaId);if(!confirm(`¿Eliminar?\n${fmtFecha(m.fecha)} - ${emp?emp.nombre:'?'} - ${fmtCLP(m.monto)}`))return;movimientos=movimientos.filter(x=>x.id!==id);guardarTodo();const active=document.querySelector('.page.active');if(active&&active.id==='page-movimientos')renderMovimientos();else if(active&&active.id==='page-dashboard')renderDashboard();mostrarToast('🗑️ Eliminado','success');}
 function renderMovimientos() {
-  let data = [...movimientos];
-  const filtroEmp = document.getElementById('movFilterEmpresa').value;
-  const filtroTipo = document.getElementById('movFilterTipo').value;
-  const desde = document.getElementById('movFilterDesde').value;
-  const hasta = document.getElementById('movFilterHasta').value;
-  if(filtroEmp!=='Todas') data = data.filter(m=>m.empresaId===parseInt(filtroEmp));
-  if(filtroTipo) data = data.filter(m=>m.tipo===filtroTipo);
-  if(desde) data = data.filter(m=>m.fecha>=new Date(desde+'T00:00:00'));
-  if(hasta) data = data.filter(m=>m.fecha<=new Date(hasta+'T23:59:59'));
+  let data=[...movimientos]; const fEmp=document.getElementById('movFilterEmpresa').value,fTipo=document.getElementById('movFilterTipo').value,desde=document.getElementById('movFilterDesde').value,hasta=document.getElementById('movFilterHasta').value;
+  if(fEmp!=='Todas')data=data.filter(m=>m.empresaId===parseInt(fEmp));if(fTipo)data=data.filter(m=>m.tipo===fTipo);if(desde)data=data.filter(m=>m.fecha>=new Date(desde+'T00:00:00'));if(hasta)data=data.filter(m=>m.fecha<=new Date(hasta+'T23:59:59'));
   data.sort((a,b)=>b.fecha-a.fecha);
-
-  const tbody = document.getElementById('movBody');
-  const empty = document.getElementById('movEmpty');
-  const countLabel = document.getElementById('movCountLabel');
-  countLabel.textContent = data.length+' registros';
-
-  if(data.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tbody.innerHTML = data.map(m => {
-    const emp = empresaObj(m.empresaId);
-    const cat = categorias.find(c=>c.id===m.categoriaId);
-    const ban = bancos.find(b=>b.id===m.bancoId);
-    const mp = mediosPago.find(mp=>mp.id===m.medioPagoId);
-    return `<tr>
-      <td>${fmtFecha(m.fecha)}</td>
-      <td>${emp ? emp.nombre+' ('+emp.rut+')' : '—'}</td>
-      <td class="tipo-${m.tipo.toLowerCase()}">${m.tipo}</td>
-      <td>${cat?cat.nombre:'—'}</td>
-      <td>${ban?ban.nombre:'—'}</td>
-      <td>${mp?mp.nombre:'—'}</td>
-      <td class="monto">${fmtCLP(m.monto)}</td>
-      <td>${m.moneda}</td>
-      <td>${m.glosa||''}</td>
-      <td>${m.pagado==='Sí'?'✅':'❌'}</td>
-      <td class="actions">
-        <button class="btn btn-primary btn-sm" onclick="editarMovimiento(${m.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="eliminarMovimiento(${m.id})">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════════════
-// DASHBOARD
-// ════════════════════════════════════════════════════════
-let charts = {};
-function destroyCharts() { Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}}); charts={}; }
-
-function renderDashboard() {
-  destroyCharts();
-  const empId = document.getElementById('dashEmpresa').value;
-  const data = empId==='Todas' ? [...movimientos] : movimientos.filter(m=>m.empresaId===parseInt(empId));
-
-  // KPIs
-  const ing = data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0);
-  const gas = data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0);
-  const saldo = ing - gas;
-  const pagados = data.filter(m=>m.pagado==='Sí').length;
-  document.getElementById('kpiIngresos').textContent = fmtCLP(ing);
-  document.getElementById('kpiGastos').textContent = fmtCLP(gas);
-  const sel = document.getElementById('kpiSaldo');
-  sel.textContent = fmtCLP(saldo);
-  sel.style.color = saldo>=0 ? 'var(--success)' : 'var(--danger)';
-  document.getElementById('kpiMovs').textContent = data.length;
-  document.getElementById('kpiPagados').textContent = pagados;
-  document.getElementById('badgeCount').textContent = movimientos.length+' reg.';
-
-  // Empresa detail card
-  const det = document.getElementById('empresaDetail');
-  if(empId!=='Todas') {
-    const emp = EMPRESAS.find(e=>e.id===parseInt(empId));
-    if(emp) {
-      const catIng = data.filter(m=>m.tipo==='Ingreso');
-      const catGas = data.filter(m=>m.tipo==='Gasto');
-      det.style.display='block';
-      det.innerHTML = `<div class="emp-kpi">
-        <div class="nombre">${emp.nombre}</div>
-        <div class="rut">RUT ${emp.rut}</div>
-        <div class="tipo-emp">${emp.tipo}</div>
-        <div class="valores">
-          <span class="ing">💰 Ingresos: ${fmtCLP(catIng.reduce((s,m)=>s+m.monto,0))}</span>
-          <span class="gas">💸 Gastos: ${fmtCLP(catGas.reduce((s,m)=>s+m.monto,0))}</span>
-          <span class="saldo">📈 Saldo: ${fmtCLP(saldo)}</span>
-        </div>
-      </div>`;
-    }
-  } else {
-    det.style.display='none';
-  }
-
-  // Charts
-  renderDashCharts(data);
-  renderMiniTabla(data);
-}
-
-function renderDashCharts(data) {
-  const ing = data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0);
-  const gas = data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0);
-
-  if(ing+gas===0) { mostrarSinDatos('chartPie'); } else {
-    charts.pie = new Chart(document.getElementById('chartPie'), {
-      type:'doughnut',
-      data:{ labels:['Ingresos','Gastos'], datasets:[{ data:[ing,gas], backgroundColor:['#70AD47','#E74C3C'], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{ label:ctx=>ctx.label+': '+fmtCLP(ctx.parsed) } } } }
-    });
-  }
-
-  // Monthly
-  const map = {};
-  data.forEach(m => {
-    const key = m.fecha.getFullYear()+'-'+String(m.fecha.getMonth()+1).padStart(2,'0');
-    if(!map[key]) map[key]={i:0,g:0};
-    if(m.tipo==='Ingreso') map[key].i+=m.monto; else map[key].g+=m.monto;
-  });
-  const labels = Object.keys(map).sort();
-  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  if(labels.length===0) { mostrarSinDatos('chartMonthly'); } else {
-    charts.monthly = new Chart(document.getElementById('chartMonthly'), {
-      type:'bar',
-      data:{ labels:labels.map(k=>{const[y,m]=k.split('-');return meses[parseInt(m)-1]+' '+y;}), datasets:[
-        {label:'Ingresos', data:labels.map(k=>map[k].i), backgroundColor:'#70AD47', borderRadius:4},
-        {label:'Gastos', data:labels.map(k=>map[k].g), backgroundColor:'#E74C3C', borderRadius:4}
-      ]},
-      options:{ responsive:true, maintainAspectRatio:true, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>fmtCLP(v) } } }, plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{ label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.y) } } } }
-    });
-  }
-
-  // By company
-  const empMap = {};
-  data.forEach(m => {
-    if(!empMap[m.empresaId]) empMap[m.empresaId]={i:0,g:0, nom:''};
-    const emp = EMPRESAS.find(e=>e.id===m.empresaId);
-    empMap[m.empresaId].nom = emp ? emp.nombre : '?';
-    if(m.tipo==='Ingreso') empMap[m.empresaId].i+=m.monto; else empMap[m.empresaId].g+=m.monto;
-  });
-  const empLabels = Object.keys(empMap).sort((a,b)=> (empMap[b].i+empMap[b].g) - (empMap[a].i+empMap[a].g));
-  if(empLabels.length===0) { mostrarSinDatos('chartEmpresa'); } else {
-    charts.empresa = new Chart(document.getElementById('chartEmpresa'), {
-      type:'bar',
-      data:{ labels:empLabels.map(k=>{const n=empMap[k].nom; return n.length>22?n.substring(0,20)+'…':n;}), datasets:[
-        {label:'Ingresos', data:empLabels.map(k=>empMap[k].i), backgroundColor:'#70AD47', borderRadius:4},
-        {label:'Gastos', data:empLabels.map(k=>empMap[k].g), backgroundColor:'#E74C3C', borderRadius:4}
-      ]},
-      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true, scales:{ x:{ beginAtZero:true, ticks:{ callback:v=>fmtCLP(v) } } }, plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{ label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.x) } } } }
-    });
-  }
-
-  // By category
-  const catMap = {};
-  data.forEach(m => {
-    const cat = categorias.find(c=>c.id===m.categoriaId);
-    const nombre = cat?cat.nombre:'Sin categoría';
-    if(!catMap[nombre]) catMap[nombre]=0;
-    catMap[nombre]+=m.monto;
-  });
-  const catEntries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  if(catEntries.length===0) { mostrarSinDatos('chartCategoria'); } else {
-    const colors = catEntries.map(e=>{const c=categorias.find(x=>x.nombre===e[0]); return c&&c.tipoMov==='Gasto'?'#E74C3C':'#70AD47';});
-    charts.categoria = new Chart(document.getElementById('chartCategoria'), {
-      type:'bar',
-      data:{ labels:catEntries.map(e=>e[0].length>24?e[0].substring(0,22)+'…':e[0]), datasets:[{label:'Monto', data:catEntries.map(e=>e[1]), backgroundColor:colors, borderRadius:4}]},
-      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true, scales:{ x:{ beginAtZero:true, ticks:{ callback:v=>fmtCLP(v) } } }, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:ctx=>fmtCLP(ctx.parsed.x) } } } }
-    });
-  }
+  document.getElementById('movCountLabel').textContent=data.length+' registros';
+  const tbody=document.getElementById('movBody'),empty=document.getElementById('movEmpty');
+  if(!data.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
+  tbody.innerHTML=data.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId),ban=bancos.find(b=>b.id===m.bancoId),mp=mediosPago.find(x=>x.id===m.medioPagoId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(m.fecha)}</td><td class="p-2.5">${emp?emp.nombre+' ('+emp.rut+')':'—'}</td><td class="p-2.5 tipo-${m.tipo.toLowerCase()}">${m.tipo}</td><td class="p-2.5">${cat?cat.nombre:'—'}</td><td class="p-2.5">${ban?ban.nombre:'—'}</td><td class="p-2.5">${mp?mp.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(m.monto)}</td><td class="p-2.5">${m.moneda}</td><td class="p-2.5">${m.glosa||''}</td><td class="p-2.5">${m.pagado==='Sí'?'✅':'❌'}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMovimiento(${m.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMovimiento(${m.id})">🗑️</button></td></tr>`;}).join('');
 }
 
 // ════════════════════════════════════════════════════════
 // TRANSFERENCIAS CRUD
 // ════════════════════════════════════════════════════════
 function llenarSelectoresTrans() {
-  const selEmp = document.getElementById('frmTransEmpresa');
-  selEmp.innerHTML = '<option value="">Seleccionar</option>'+
-    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-
-  const selOri = document.getElementById('frmTransBancoOrigen');
-  selOri.innerHTML = '<option value="">Seleccionar</option>'+
-    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
-
-  const selDes = document.getElementById('frmTransBancoDestino');
-  selDes.innerHTML = '<option value="">Seleccionar</option>'+
-    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
+  document.getElementById('frmTransEmpresa').innerHTML='<option value="">Seleccionar</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  const opts=bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
+  document.getElementById('frmTransBancoOrigen').innerHTML='<option value="">Seleccionar</option>'+opts;
+  document.getElementById('frmTransBancoDestino').innerHTML='<option value="">Seleccionar</option>'+opts;
 }
-
 function mostrarModalTransferencia(data) {
-  editTransId = data ? data.id : null;
-  document.getElementById('modalTransTitle').textContent = data ? '✏️ Editar Transferencia' : '➕ Agregar Transferencia';
-  const f = document.getElementById('formTrans'); if(!f) {}
-  // Reset
-  document.getElementById('frmTransFecha').value = data ? toDateInput(data.fecha) : new Date().toISOString().split('T')[0];
+  editTransId=data?data.id:null; document.getElementById('modalTransTitle').textContent=data?'✏️ Editar Transferencia':'➕ Agregar Transferencia';
+  document.getElementById('frmTransFecha').value=data?toDateInput(data.fecha):new Date().toISOString().split('T')[0];
   llenarSelectoresTrans();
-  if(data) {
-    document.getElementById('frmTransEmpresa').value = data.empresaId;
-    document.getElementById('frmTransBancoOrigen').value = data.bancoOrigenId;
-    document.getElementById('frmTransBancoDestino').value = data.bancoDestinoId;
-    document.getElementById('frmTransMonto').value = data.monto;
-    document.getElementById('frmTransMoneda').value = data.moneda;
-    document.getElementById('frmTransGlosa').value = data.glosa || '';
-  } else {
-    document.getElementById('frmTransMonto').value = '';
-    document.getElementById('frmTransMoneda').value = 'CLP';
-    document.getElementById('frmTransGlosa').value = '';
-  }
-  document.getElementById('btnGuardarTrans').textContent = data ? '🔄 Actualizar' : '💾 Guardar';
-  document.getElementById('modalTrans').classList.add('active');
-  document.body.style.overflow = 'hidden';
+  if(data){document.getElementById('frmTransEmpresa').value=data.empresaId;document.getElementById('frmTransBancoOrigen').value=data.bancoOrigenId;document.getElementById('frmTransBancoDestino').value=data.bancoDestinoId;document.getElementById('frmTransMonto').value=data.monto;document.getElementById('frmTransMoneda').value=data.moneda;document.getElementById('frmTransGlosa').value=data.glosa||'';}
+  document.getElementById('btnGuardarTrans').textContent=data?'🔄 Actualizar':'💾 Guardar';
+  document.getElementById('modalTrans').showModal();
 }
-
 function guardarTransferencia(e) {
-  e.preventDefault();
-  const empresaId = parseInt(document.getElementById('frmTransEmpresa').value);
-  const bancoOrigenId = parseInt(document.getElementById('frmTransBancoOrigen').value);
-  const bancoDestinoId = parseInt(document.getElementById('frmTransBancoDestino').value);
-  const monto = parseFloat(document.getElementById('frmTransMonto').value);
-  const moneda = document.getElementById('frmTransMoneda').value;
-  const glosa = document.getElementById('frmTransGlosa').value.trim();
-  const fecha = document.getElementById('frmTransFecha').value;
-
-  if(!fecha || !empresaId || !bancoOrigenId || !bancoDestinoId || !monto) {
-    mostrarToast('Completa todos los campos obligatorios (*)','error'); return false;
-  }
-  if(bancoOrigenId === bancoDestinoId) {
-    mostrarToast('El banco origen y destino deben ser distintos','error'); return false;
-  }
-
-  const emp = empresaObj(empresaId);
-  const banOri = bancos.find(b=>b.id===bancoOrigenId);
-  const banDes = bancos.find(b=>b.id===bancoDestinoId);
-
-  const obj = {
-    id: editTransId || Date.now(),
-    fecha: new Date(fecha+'T12:00:00'),
-    empresaId, empresaNombre: emp?emp.nombre:'', empresaRut: emp?emp.rut:'',
-    bancoOrigenId, bancoOrigenNombre: banOri?banOri.nombre:'',
-    bancoDestinoId, bancoDestinoNombre: banDes?banDes.nombre:'',
-    monto, moneda, glosa,
-  };
-
-  if(editTransId) {
-    const idx = transferencias.findIndex(t=>t.id===editTransId);
-    if(idx>=0) transferencias[idx]=obj;
-    mostrarToast('✅ Transferencia actualizada','success');
-  } else {
-    transferencias.push(obj);
-    mostrarToast('✅ Transferencia agregada','success');
-  }
-  guardarTodo();
-  document.getElementById('modalTrans').classList.remove('active');
-  document.body.style.overflow='';
-  editTransId=null;
-  if(document.getElementById('page-transferencias').classList.contains('active')) renderTransferencias();
-  return false;
+  e.preventDefault();const empresaId=parseInt(document.getElementById('frmTransEmpresa').value),bancoOrigenId=parseInt(document.getElementById('frmTransBancoOrigen').value),bancoDestinoId=parseInt(document.getElementById('frmTransBancoDestino').value),monto=parseFloat(document.getElementById('frmTransMonto').value),moneda=document.getElementById('frmTransMoneda').value,glosa=document.getElementById('frmTransGlosa').value.trim(),fecha=document.getElementById('frmTransFecha').value;
+  if(!fecha||!empresaId||!bancoOrigenId||!bancoDestinoId||!monto){mostrarToast('Completa campos obligatorios','error');return false;}
+  if(bancoOrigenId===bancoDestinoId){mostrarToast('Origen y destino deben ser distintos','error');return false;}
+  const emp=empresaObj(empresaId),banOri=bancos.find(b=>b.id===bancoOrigenId),banDes=bancos.find(b=>b.id===bancoDestinoId);
+  const obj={id:editTransId||Date.now(),fecha:new Date(fecha+'T12:00:00'),empresaId,empresaNombre:emp?emp.nombre:'',empresaRut:emp?emp.rut:'',bancoOrigenId,bancoOrigenNombre:banOri?banOri.nombre:'',bancoDestinoId,bancoDestinoNombre:banDes?banDes.nombre:'',monto,moneda,glosa};
+  if(editTransId){const i=transferencias.findIndex(t=>t.id===editTransId);if(i>=0)transferencias[i]=obj;mostrarToast('✅ Actualizada','success');}
+  else{transferencias.push(obj);mostrarToast('✅ Agregada','success');}
+  guardarTodo();document.getElementById('modalTrans').close();editTransId=null;renderTransferencias();return false;
 }
-
-function editarTransferencia(id) {
-  const t = transferencias.find(x=>x.id===id);
-  if(t) mostrarModalTransferencia(t);
-}
-
-function eliminarTransferencia(id) {
-  const t = transferencias.find(x=>x.id===id);
-  if(!t) return;
-  const banOri = bancos.find(b=>b.id===t.bancoOrigenId);
-  const banDes = bancos.find(b=>b.id===t.bancoDestinoId);
-  if(!confirm(`¿Eliminar transferencia?\n${fmtFecha(t.fecha)} - ${banOri?banOri.nombre:'?'} → ${banDes?banDes.nombre:'?'} - ${fmtCLP(t.monto)}`)) return;
-  transferencias = transferencias.filter(x=>x.id!==id);
-  guardarTodo();
-  renderTransferencias();
-  mostrarToast('🗑️ Transferencia eliminada','success');
-}
-
+function editarTransferencia(id){const t=transferencias.find(x=>x.id===id);if(t)mostrarModalTransferencia(t);}
+function eliminarTransferencia(id){const t=transferencias.find(x=>x.id===id);if(!t)return;if(!confirm('¿Eliminar transferencia?'))return;transferencias=transferencias.filter(x=>x.id!==id);guardarTodo();renderTransferencias();mostrarToast('🗑️ Eliminada','success');}
 function renderTransferencias() {
-  // Filtros
-  let data = [...transferencias];
-  const filtroEmp = document.getElementById('transFilterEmpresa').value;
-  const filtroBanco = document.getElementById('transFilterBanco').value;
-  const desde = document.getElementById('transFilterDesde').value;
-  const hasta = document.getElementById('transFilterHasta').value;
-  if(filtroEmp!=='Todas') data = data.filter(t=>t.empresaId===parseInt(filtroEmp));
-  if(filtroBanco!=='Todos') data = data.filter(t=>t.bancoOrigenId===parseInt(filtroBanco)||t.bancoDestinoId===parseInt(filtroBanco));
-  if(desde) data = data.filter(t=>t.fecha>=new Date(desde+'T00:00:00'));
-  if(hasta) data = data.filter(t=>t.fecha<=new Date(hasta+'T23:59:59'));
-  data.sort((a,b)=>b.fecha-a.fecha);
-
-  const tbody = document.getElementById('transBody');
-  const empty = document.getElementById('transEmpty');
-  document.getElementById('transCountLabel').textContent = data.length+' transferencias';
-
-  // KPIs
-  const totalTrans = data.reduce((s,t)=>s+t.monto,0);
-  document.getElementById('kpiTransTotal').textContent = fmtCLP(totalTrans);
-  document.getElementById('kpiTransCant').textContent = data.length;
-  const bancosSet = new Set();
-  data.forEach(t=>{bancosSet.add(t.bancoOrigenId);bancosSet.add(t.bancoDestinoId);});
-  document.getElementById('kpiTransBancos').textContent = bancosSet.size;
-
-  if(data.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tbody.innerHTML = data.map(t => {
-    const emp = empresaObj(t.empresaId);
-    const banOri = bancos.find(b=>b.id===t.bancoOrigenId);
-    const banDes = bancos.find(b=>b.id===t.bancoDestinoId);
-    return `<tr>
-      <td>${fmtFecha(t.fecha)}</td>
-      <td>${emp?emp.nombre+' ('+emp.rut+')':'—'}</td>
-      <td><strong>${banOri?banOri.nombre:'—'}</strong></td>
-      <td><strong>${banDes?banDes.nombre:'—'}</strong></td>
-      <td class="monto">${fmtCLP(t.monto)}</td>
-      <td>${t.moneda}</td>
-      <td>${t.glosa||''}</td>
-      <td class="actions">
-        <button class="btn btn-primary btn-sm" onclick="editarTransferencia(${t.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="eliminarTransferencia(${t.id})">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
+  let data=[...transferencias];const fEmp=document.getElementById('transFilterEmpresa').value,fBanco=document.getElementById('transFilterBanco').value,desde=document.getElementById('transFilterDesde').value,hasta=document.getElementById('transFilterHasta').value;
+  if(fEmp!=='Todas')data=data.filter(t=>t.empresaId===parseInt(fEmp));if(fBanco!=='Todos')data=data.filter(t=>t.bancoOrigenId===parseInt(fBanco)||t.bancoDestinoId===parseInt(fBanco));if(desde)data=data.filter(t=>t.fecha>=new Date(desde+'T00:00:00'));if(hasta)data=data.filter(t=>t.fecha<=new Date(hasta+'T23:59:59'));data.sort((a,b)=>b.fecha-a.fecha);
+  document.getElementById('transCountLabel').textContent=data.length+' transferencias';
+  const totalTrans=data.reduce((s,t)=>s+t.monto,0);document.getElementById('kpiTransTotal').textContent=fmtCLP(totalTrans);document.getElementById('kpiTransCant').textContent=data.length;const bs=new Set();data.forEach(t=>{bs.add(t.bancoOrigenId);bs.add(t.bancoDestinoId);});document.getElementById('kpiTransBancos').textContent=bs.size;
+  const tbody=document.getElementById('transBody'),empty=document.getElementById('transEmpty');if(!data.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
+  tbody.innerHTML=data.map(t=>{const emp=empresaObj(t.empresaId),banOri=bancos.find(b=>b.id===t.bancoOrigenId),banDes=bancos.find(b=>b.id===t.bancoDestinoId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(t.fecha)}</td><td class="p-2.5">${emp?emp.nombre+' ('+emp.rut+')':'—'}</td><td class="p-2.5 font-semibold">${banOri?banOri.nombre:'—'}</td><td class="p-2.5 font-semibold">${banDes?banDes.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(t.monto)}</td><td class="p-2.5">${t.moneda}</td><td class="p-2.5">${t.glosa||''}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarTransferencia(${t.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarTransferencia(${t.id})">🗑️</button></td></tr>`;}).join('');
 }
 
-function mostrarSinDatos(id) {
-  const canvas = document.getElementById(id);
-  Chart.getChart(canvas)?.destroy();
-  const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.font='14px sans-serif'; ctx.fillStyle='#bbb'; ctx.textAlign='center';
-  ctx.fillText('Sin datos', canvas.width/2, canvas.height/2);
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+let charts={};
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+function renderDashboard(){
+  destroyCharts();const empId=document.getElementById('dashEmpresa').value;const data=empId==='Todas'?[...movimientos]:movimientos.filter(m=>m.empresaId===parseInt(empId));
+  const ing=data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0),gas=data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0),saldo=ing-gas,pagados=data.filter(m=>m.pagado==='Sí').length;
+  document.getElementById('kpiIngresos').textContent=fmtCLP(ing);document.getElementById('kpiGastos').textContent=fmtCLP(gas);
+  const sel=document.getElementById('kpiSaldo');sel.textContent=fmtCLP(saldo);sel.style.color=saldo>=0?'#70AD47':'#E74C3C';
+  document.getElementById('kpiMovs').textContent=data.length;document.getElementById('kpiPagados').textContent=pagados;document.getElementById('badgeCount').textContent=movimientos.length+' reg.';
+  const det=document.getElementById('empresaDetail');if(empId!=='Todas'){const emp=EMPRESAS.find(e=>e.id===parseInt(empId));if(emp){det.classList.remove('hidden');det.innerHTML=`<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center border-l-4 border-l-[#2E75B6]"><p class="text-lg font-bold text-gray-800">${emp.nombre}</p><p class="text-sm text-gray-500">RUT ${emp.rut}</p><p class="text-xs text-[#2E75B6] font-semibold mb-2">${emp.tipo}</p><div class="flex justify-center gap-6 text-sm"><span class="font-semibold text-[#70AD47]">💰 Ingresos: ${fmtCLP(data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0))}</span><span class="font-semibold text-[#E74C3C]">💸 Gastos: ${fmtCLP(data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0))}</span><span class="font-semibold text-[#2E75B6]">📈 Saldo: ${fmtCLP(saldo)}</span></div></div>`;}}else{det.classList.add('hidden');}
+  renderDashCharts(data);renderMiniTabla(data);
 }
-
-function renderMiniTabla(data) {
-  const sorted = [...data].sort((a,b)=>b.fecha-a.fecha).slice(0,10);
-  const tbody = document.getElementById('miniTablaBody');
-  tbody.innerHTML = sorted.map(m => {
-    const emp = empresaObj(m.empresaId);
-    const cat = categorias.find(c=>c.id===m.categoriaId);
-    return `<tr>
-      <td>${fmtFecha(m.fecha)}</td>
-      <td>${emp?emp.nombre:'—'}</td>
-      <td class="tipo-${m.tipo.toLowerCase()}">${m.tipo}</td>
-      <td>${cat?cat.nombre:'—'}</td>
-      <td class="monto">${fmtCLP(m.monto)}</td>
-    </tr>`;
-  }).join('');
+function renderDashCharts(data){
+  const ing=data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0),gas=data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0);
+  if(ing+gas===0){mostrarSinDatos('chartPie');}else{charts.pie=new Chart(document.getElementById('chartPie'),{type:'doughnut',data:{labels:['Ingresos','Gastos'],datasets:[{data:[ing,gas],backgroundColor:['#70AD47','#E74C3C'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtCLP(ctx.parsed)}}}}});}
+  const map={};data.forEach(m=>{const key=m.fecha.getFullYear()+'-'+String(m.fecha.getMonth()+1).padStart(2,'0');if(!map[key])map[key]={i:0,g:0};if(m.tipo==='Ingreso')map[key].i+=m.monto;else map[key].g+=m.monto;});
+  const labels=Object.keys(map).sort(),meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  if(!labels.length){mostrarSinDatos('chartMonthly');}else{charts.monthly=new Chart(document.getElementById('chartMonthly'),{type:'bar',data:{labels:labels.map(k=>{const[y,m]=k.split('-');return meses[parseInt(m)-1]+' '+y;}),datasets:[{label:'Ingresos',data:labels.map(k=>map[k].i),backgroundColor:'#70AD47',borderRadius:4},{label:'Gastos',data:labels.map(k=>map[k].g),backgroundColor:'#E74C3C',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.y)}}}}}});}
+  const empMap={};data.forEach(m=>{if(!empMap[m.empresaId])empMap[m.empresaId]={i:0,g:0,nom:''};const emp=EMPRESAS.find(e=>e.id===m.empresaId);empMap[m.empresaId].nom=emp?emp.nombre:'?';if(m.tipo==='Ingreso')empMap[m.empresaId].i+=m.monto;else empMap[m.empresaId].g+=m.monto;});
+  const empLabels=Object.keys(empMap).sort((a,b)=>(empMap[b].i+empMap[b].g)-(empMap[a].i+empMap[a].g));
+  if(!empLabels.length){mostrarSinDatos('chartEmpresa');}else{charts.empresa=new Chart(document.getElementById('chartEmpresa'),{type:'bar',data:{labels:empLabels.map(k=>{const n=empMap[k].nom;return n.length>22?n.substring(0,20)+'…':n;}),datasets:[{label:'Ingresos',data:empLabels.map(k=>empMap[k].i),backgroundColor:'#70AD47',borderRadius:4},{label:'Gastos',data:empLabels.map(k=>empMap[k].g),backgroundColor:'#E74C3C',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.x)}}}}}});}
+  const catMap={};data.forEach(m=>{const cat=categorias.find(c=>c.id===m.categoriaId),nombre=cat?cat.nombre:'Sin categoría';if(!catMap[nombre])catMap[nombre]=0;catMap[nombre]+=m.monto;});
+  const catEntries=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  if(!catEntries.length){mostrarSinDatos('chartCategoria');}else{const colors=catEntries.map(e=>{const c=categorias.find(x=>x.nombre===e[0]);return c&&c.tipoMov==='Gasto'?'#E74C3C':'#70AD47';});charts.categoria=new Chart(document.getElementById('chartCategoria'),{type:'bar',data:{labels:catEntries.map(e=>e[0].length>24?e[0].substring(0,22)+'…':e[0]),datasets:[{label:'Monto',data:catEntries.map(e=>e[1]),backgroundColor:colors,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtCLP(ctx.parsed.x)}}}}}});}
 }
+function mostrarSinDatos(id){const canvas=document.getElementById(id);Chart.getChart(canvas)?.destroy();const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.font='14px sans-serif';ctx.fillStyle='#bbb';ctx.textAlign='center';ctx.fillText('Sin datos',canvas.width/2,canvas.height/2);}
+function renderMiniTabla(data){const sorted=[...data].sort((a,b)=>b.fecha-a.fecha).slice(0,10);document.getElementById('miniTablaBody').innerHTML=sorted.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(m.fecha)}</td><td class="p-2.5">${emp?emp.nombre:'—'}</td><td class="p-2.5 tipo-${m.tipo.toLowerCase()}">${m.tipo}</td><td class="p-2.5">${cat?cat.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(m.monto)}</td></tr>`;}).join('');}
 
 // ════════════════════════════════════════════════════════
 // EXPORT / IMPORT
 // ════════════════════════════════════════════════════════
-function descargar(content, filename, mime) {
-  const blob = new Blob([content], {type:mime});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
-  document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-
-function exportarJSON() {
-  const data = {movimientos: movimientos.map(m=>({...m,fecha:m.fecha.toISOString()})), categorias, bancos, mediosPago, transferencias: transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))};
-  descargar(JSON.stringify(data,null,2), 'backup_financiero.json', 'application/json');
-  mostrarToast('⬇️ Backup completo descargado','success');
-}
-
-function exportarCSV() {
-  const headers = ['Fecha','Empresa','RUT','Tipo','Categoría','Banco','Medio Pago','Monto','Moneda','Glosa','Pagado'];
-  const rows = movimientos.map(m => {
-    const emp=empresaObj(m.empresaId);
-    const cat=categorias.find(c=>c.id===m.categoriaId);
-    const ban=bancos.find(b=>b.id===m.bancoId);
-    const mp=mediosPago.find(x=>x.id===m.medioPagoId);
-    return [toDateInput(m.fecha), emp?emp.nombre:'', emp?emp.rut:'', m.tipo, cat?cat.nombre:'', ban?ban.nombre:'', mp?mp.nombre:'', m.monto, m.moneda, m.glosa||'', m.pagado];
-  });
-  const csv = [headers.join(','), ...rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))].join('\n');
-  descargar('\uFEFF'+csv, 'movimientos_financieros.csv', 'text/csv;charset=utf-8;');
-  mostrarToast('⬇️ CSV descargado — ábrelo en Excel','success');
-}
-
-function importarJSON(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if(data.movimientos) {
-        movimientos = data.movimientos.map(m=>({...m,fecha:new Date(m.fecha)}));
-        categorias = data.categorias || [];
-        bancos = data.bancos || [];
-        mediosPago = data.mediosPago || [];
-        transferencias = (data.transferencias||[]).map(t=>({...t,fecha:new Date(t.fecha)}));
-      } else if(Array.isArray(data)) {
-        movimientos = data.map(m=>({...m,fecha:new Date(m.fecha)}));
-      } else throw new Error('Formato inválido');
-      guardarTodo(); initAll();
-      mostrarToast('✅ '+movimientos.length+' registros importados','success');
-    } catch(err) { mostrarToast('❌ Error: '+err.message,'error'); }
-  };
-  reader.readAsText(file);
-  event.target.value='';
-}
+function descargar(content,filename,mime){const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportarJSON(){const data={movimientos:movimientos.map(m=>({...m,fecha:m.fecha.toISOString()})),categorias,bancos,mediosPago,transferencias:transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))};descargar(JSON.stringify(data,null,2),'backup_financiero.json','application/json');mostrarToast('⬇️ Backup descargado','success');}
+function exportarCSV(){const headers=['Fecha','Empresa','RUT','Tipo','Categoría','Banco','Medio Pago','Monto','Moneda','Glosa','Pagado'];const rows=movimientos.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId),ban=bancos.find(b=>b.id===m.bancoId),mp=mediosPago.find(x=>x.id===m.medioPagoId);return[toDateInput(m.fecha),emp?emp.nombre:'',emp?emp.rut:'',m.tipo,cat?cat.nombre:'',ban?ban.nombre:'',mp?mp.nombre:'',m.monto,m.moneda,m.glosa||'',m.pagado];});const csv=[headers.join(','),...rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))].join('\n');descargar('\uFEFF'+csv,'movimientos_financieros.csv','text/csv;charset=utf-8;');mostrarToast('⬇️ CSV descargado — ábrelo en Excel','success');}
+function importarJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e=>{try{const data=JSON.parse(e.target.result);if(data.movimientos){movimientos=data.movimientos.map(m=>({...m,fecha:new Date(m.fecha)}));categorias=data.categorias||[];bancos=data.bancos||[];mediosPago=data.mediosPago||[];transferencias=(data.transferencias||[]).map(t=>({...t,fecha:new Date(t.fecha)}));}else if(Array.isArray(data)){movimientos=data.map(m=>({...m,fecha:new Date(m.fecha)}));}else throw new Error('Formato inválido');guardarTodo();initAll();mostrarToast('✅ '+movimientos.length+' registros importados','success');}catch(err){mostrarToast('❌ Error: '+err.message,'error');}});reader.readAsText(file);event.target.value='';}
 
 // ════════════════════════════════════════════════════════
 // SAMPLE DATA
 // ════════════════════════════════════════════════════════
 function cargarDatosEjemplo() {
-  if(movimientos.length>0 && !confirm('¿Reemplazar los datos actuales con los de ejemplo?')) return;
-  const rng = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
-  const hoy = new Date();
-
-  categorias = [
-    {id:1,nombre:'Ventas / Servicios', tipoMov:'Ingreso'},
-    {id:2,nombre:'Publicidad / Sponsors', tipoMov:'Ingreso'},
-    {id:3,nombre:'Arriendos', tipoMov:'Ingreso'},
-    {id:4,nombre:'Inversiones / Rentas', tipoMov:'Ingreso'},
-    {id:5,nombre:'Otros Ingresos', tipoMov:'Ingreso'},
-    {id:10,nombre:'Hosting & Dominios', tipoMov:'Gasto'},
-    {id:11,nombre:'Servicios Cloud / APIs', tipoMov:'Gasto'},
-    {id:12,nombre:'Sueldos / Honorarios', tipoMov:'Gasto'},
-    {id:13,nombre:'Marketing & Publicidad', tipoMov:'Gasto'},
-    {id:14,nombre:'Transporte & Logística', tipoMov:'Gasto'},
-    {id:15,nombre:'Insumos Ferretería', tipoMov:'Gasto'},
-    {id:16,nombre:'Mantenimiento Equipos', tipoMov:'Gasto'},
-    {id:17,nombre:'Servicios Básicos', tipoMov:'Gasto'},
-    {id:18,nombre:'Arriendos (gasto)', tipoMov:'Gasto'},
-    {id:19,nombre:'Seguros', tipoMov:'Gasto'},
-    {id:20,nombre:'Impuestos / Contribuciones', tipoMov:'Gasto'},
-    {id:21,nombre:'Comisiones Bancarias', tipoMov:'Gasto'},
-    {id:22,nombre:'Alimentación', tipoMov:'Gasto'},
-    {id:23,nombre:'Salud', tipoMov:'Gasto'},
-    {id:24,nombre:'Educación', tipoMov:'Gasto'},
-    {id:25,nombre:'Entretención', tipoMov:'Gasto'},
-    {id:26,nombre:'Varios / Otros Gastos', tipoMov:'Gasto'},
-  ];
-  bancos = [
-    {id:1,nombre:'Banco Estado'},
-    {id:2,nombre:'Banco de Chile'},
-    {id:3,nombre:'Banco Santander'},
-    {id:4,nombre:'Banco BCI'},
-    {id:5,nombre:'Banco Internacional'},
-  ];
-  mediosPago = [
-    {id:1,nombre:'Transferencia'},
-    {id:2,nombre:'Débito'},
-    {id:3,nombre:'Crédito'},
-    {id:4,nombre:'Efectivo'},
-    {id:5,nombre:'Cheque'},
-    {id:6,nombre:'WebPay / Khipu'},
-  ];
-
-  movimientos = [];
-  transferencias = [];
-  const empIds = EMPRESAS.map(e=>e.id);
-
-  // Movimientos
-  for(let i=0;i<45;i++) {
-    const d = new Date(hoy); d.setDate(d.getDate()-rng(0,240));
-    const empId = empIds[rng(0,empIds.length-1)];
-    const emp = EMPRESAS.find(e=>e.id===empId);
-    const tipo = i<20 ? 'Ingreso' : 'Gasto';
-    const cats = categorias.filter(c=>c.tipoMov===tipo);
-    const cat = cats[rng(0,cats.length-1)];
-    const ban = bancos[rng(0,bancos.length-1)];
-    const mp = mediosPago[rng(0,mediosPago.length-1)];
-    movimientos.push({
-      id: Date.now()+i, fecha:d, empresaId:empId, empresaNombre:emp.nombre, empresaRut:emp.rut,
-      tipo, categoriaId:cat.id, categoriaNombre:cat.nombre,
-      bancoId:ban.id, medioPagoId:mp.id,
-      monto: tipo==='Ingreso' ? rng(150000,5500000) : rng(5000,850000),
-      moneda: Math.random()>0.9 ? 'USD' : 'CLP',
-      glosa: (tipo==='Ingreso'?'Venta/ingreso #':'Gasto #')+(i+1),
-      pagado: Math.random()>0.15 ? 'Sí' : 'No',
-    });
-  }
-
-  // Transferencias de ejemplo
-  for(let i=0;i<20;i++) {
-    const d = new Date(hoy); d.setDate(d.getDate()-rng(0,210));
-    const empId = empIds[rng(0,empIds.length-1)];
-    const emp = EMPRESAS.find(e=>e.id===empId);
-    let banOri, banDes;
-    do { banOri = bancos[rng(0,bancos.length-1)]; banDes = bancos[rng(0,bancos.length-1)]; } while(banOri.id===banDes.id);
-    transferencias.push({
-      id: Date.now()+500+i, fecha:d, empresaId:empId, empresaNombre:emp.nombre, empresaRut:emp.rut,
-      bancoOrigenId:banOri.id, bancoOrigenNombre:banOri.nombre,
-      bancoDestinoId:banDes.id, bancoDestinoNombre:banDes.nombre,
-      monto: rng(50000, 2000000), moneda: Math.random()>0.9?'USD':'CLP',
-      glosa: 'Traspaso #'+(i+1),
-    });
-  }
-
-  guardarTodo(); initAll();
-  mostrarToast('📦 Datos de ejemplo cargados (45 movs, '+transferencias.length+' trans, '+categorias.length+' cat, '+bancos.length+' bancos, '+mediosPago.length+' MP)','success');
+  if(movimientos.length&&!confirm('¿Reemplazar los datos actuales?'))return;
+  const rng=(min,max)=>Math.floor(Math.random()*(max-min+1))+min,hoy=new Date();
+  categorias=[{id:1,nombre:'Ventas / Servicios',tipoMov:'Ingreso'},{id:2,nombre:'Publicidad / Sponsors',tipoMov:'Ingreso'},{id:3,nombre:'Arriendos',tipoMov:'Ingreso'},{id:4,nombre:'Inversiones / Rentas',tipoMov:'Ingreso'},{id:5,nombre:'Otros Ingresos',tipoMov:'Ingreso'},{id:10,nombre:'Hosting & Dominios',tipoMov:'Gasto'},{id:11,nombre:'Servicios Cloud / APIs',tipoMov:'Gasto'},{id:12,nombre:'Sueldos / Honorarios',tipoMov:'Gasto'},{id:13,nombre:'Marketing & Publicidad',tipoMov:'Gasto'},{id:14,nombre:'Transporte & Logística',tipoMov:'Gasto'},{id:15,nombre:'Insumos Ferretería',tipoMov:'Gasto'},{id:16,nombre:'Mantenimiento Equipos',tipoMov:'Gasto'},{id:17,nombre:'Servicios Básicos',tipoMov:'Gasto'},{id:18,nombre:'Arriendos (gasto)',tipoMov:'Gasto'},{id:19,nombre:'Seguros',tipoMov:'Gasto'},{id:20,nombre:'Impuestos / Contribuciones',tipoMov:'Gasto'},{id:21,nombre:'Comisiones Bancarias',tipoMov:'Gasto'},{id:22,nombre:'Alimentación',tipoMov:'Gasto'},{id:23,nombre:'Salud',tipoMov:'Gasto'},{id:24,nombre:'Educación',tipoMov:'Gasto'},{id:25,nombre:'Entretención',tipoMov:'Gasto'},{id:26,nombre:'Varios / Otros Gastos',tipoMov:'Gasto'}];
+  bancos=[{id:1,nombre:'Banco Estado'},{id:2,nombre:'Banco de Chile'},{id:3,nombre:'Banco Santander'},{id:4,nombre:'Banco BCI'},{id:5,nombre:'Banco Internacional'}];
+  mediosPago=[{id:1,nombre:'Transferencia'},{id:2,nombre:'Débito'},{id:3,nombre:'Crédito'},{id:4,nombre:'Efectivo'},{id:5,nombre:'Cheque'},{id:6,nombre:'WebPay / Khipu'}];
+  movimientos=[];transferencias=[];const empIds=EMPRESAS.map(e=>e.id);
+  for(let i=0;i<45;i++){const d=new Date(hoy);d.setDate(d.getDate()-rng(0,240));const empId=empIds[rng(0,empIds.length-1)],emp=EMPRESAS.find(e=>e.id===empId),tipo=i<20?'Ingreso':'Gasto',cats=categorias.filter(c=>c.tipoMov===tipo),cat=cats[rng(0,cats.length-1)],ban=bancos[rng(0,bancos.length-1)],mp=mediosPago[rng(0,mediosPago.length-1)];movimientos.push({id:Date.now()+i,fecha:d,empresaId:empId,empresaNombre:emp.nombre,empresaRut:emp.rut,tipo,categoriaId:cat.id,categoriaNombre:cat.nombre,bancoId:ban.id,medioPagoId:mp.id,monto:tipo==='Ingreso'?rng(150000,5500000):rng(5000,850000),moneda:Math.random()>0.9?'USD':'CLP',glosa:(tipo==='Ingreso'?'Venta #':'Gasto #')+(i+1),pagado:Math.random()>0.15?'Sí':'No'});}
+  for(let i=0;i<20;i++){const d=new Date(hoy);d.setDate(d.getDate()-rng(0,210));const empId=empIds[rng(0,empIds.length-1)],emp=EMPRESAS.find(e=>e.id===empId);let banOri,banDes;do{banOri=bancos[rng(0,bancos.length-1)];banDes=bancos[rng(0,bancos.length-1)];}while(banOri.id===banDes.id);transferencias.push({id:Date.now()+500+i,fecha:d,empresaId:empId,empresaNombre:emp.nombre,empresaRut:emp.rut,bancoOrigenId:banOri.id,bancoOrigenNombre:banOri.nombre,bancoDestinoId:banDes.id,bancoDestinoNombre:banDes.nombre,monto:rng(50000,2000000),moneda:Math.random()>0.9?'USD':'CLP',glosa:'Traspaso #'+(i+1)});}
+  guardarTodo();initAll();mostrarToast('📦 Datos cargados (45 movs, 20 trans)','success');
 }
 
 // ════════════════════════════════════════════════════════
-// INIT FILTERS
+// RECARGAR
 // ════════════════════════════════════════════════════════
-function initAll() {
-  // Dashboard empresa selector
-  const dashSel = document.getElementById('dashEmpresa');
-  dashSel.innerHTML = '<option value="Todas">🌐 Todas las empresas</option>'+
-    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+function recargarDatos(){cargarTodo();initAll();mostrarToast('🔄 Recargado','');}
 
-  // Movimientos filter
-  const movSel = document.getElementById('movFilterEmpresa');
-  movSel.innerHTML = '<option value="Todas">Todas empresas</option>'+
-    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-
-  // Transferencias filters
-  const transEmp = document.getElementById('transFilterEmpresa');
-  transEmp.innerHTML = '<option value="Todas">Todas empresas</option>'+
-    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  const transBanco = document.getElementById('transFilterBanco');
-  transBanco.innerHTML = '<option value="Todos">Todos los bancos</option>'+
-    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
-
-  renderDashboard();
-  renderMovimientos();
-  renderCategorias();
-  renderBancos();
-  renderMediosPago();
-  renderTransferencias();
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+function initFilters() {
+  const selEmp=document.getElementById('dashEmpresa');selEmp.innerHTML='<option value="Todas">🌐 Todas las empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  const movSel=document.getElementById('movFilterEmpresa');movSel.innerHTML='<option value="Todas">Todas empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  const tEmp=document.getElementById('transFilterEmpresa');tEmp.innerHTML='<option value="Todas">Todas empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  const tBan=document.getElementById('transFilterBanco');tBan.innerHTML='<option value="Todos">Todos los bancos</option>'+bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
 }
+function initAll() { initFilters(); renderDashboard(); renderMovimientos(); renderCategorias(); renderBancos(); renderMediosPago(); renderTransferencias(); }
 
 // ════════════════════════════════════════════════════════
 // BOOT
 // ════════════════════════════════════════════════════════
 cargarTodo();
-// If no categories or banks, seed with defaults
-if(categorias.length===0) {
-  categorias = [
-    {id:1,nombre:'Ventas / Servicios', tipoMov:'Ingreso'},{id:2,nombre:'Publicidad / Sponsors', tipoMov:'Ingreso'},
-    {id:3,nombre:'Arriendos', tipoMov:'Ingreso'},{id:4,nombre:'Inversiones / Rentas', tipoMov:'Ingreso'},
-    {id:5,nombre:'Otros Ingresos', tipoMov:'Ingreso'},
-    {id:10,nombre:'Hosting & Dominios', tipoMov:'Gasto'},{id:11,nombre:'Servicios Cloud / APIs', tipoMov:'Gasto'},
-    {id:12,nombre:'Sueldos / Honorarios', tipoMov:'Gasto'},{id:13,nombre:'Marketing & Publicidad', tipoMov:'Gasto'},
-    {id:14,nombre:'Transporte & Logística', tipoMov:'Gasto'},{id:15,nombre:'Insumos Ferretería', tipoMov:'Gasto'},
-    {id:16,nombre:'Mantenimiento Equipos', tipoMov:'Gasto'},{id:17,nombre:'Servicios Básicos', tipoMov:'Gasto'},
-    {id:18,nombre:'Arriendos (gasto)', tipoMov:'Gasto'},{id:19,nombre:'Seguros', tipoMov:'Gasto'},
-    {id:20,nombre:'Impuestos / Contribuciones', tipoMov:'Gasto'},{id:21,nombre:'Comisiones Bancarias', tipoMov:'Gasto'},
-    {id:22,nombre:'Alimentación', tipoMov:'Gasto'},{id:23,nombre:'Salud', tipoMov:'Gasto'},
-    {id:24,nombre:'Educación', tipoMov:'Gasto'},{id:25,nombre:'Entretención', tipoMov:'Gasto'},
-    {id:26,nombre:'Varios / Otros Gastos', tipoMov:'Gasto'},
-  ];
-  guardarTodo();
-}
-if(bancos.length===0) {
-  bancos = [
-    {id:1,nombre:'Banco Estado'},{id:2,nombre:'Banco de Chile'},{id:3,nombre:'Banco Santander'},
-    {id:4,nombre:'Banco BCI'},{id:5,nombre:'Banco Internacional'},
-  ];
-  guardarTodo();
-}
-if(mediosPago.length===0) {
-  mediosPago = [
-    {id:1,nombre:'Transferencia'},{id:2,nombre:'Débito'},{id:3,nombre:'Crédito'},
-    {id:4,nombre:'Efectivo'},{id:5,nombre:'Cheque'},{id:6,nombre:'WebPay / Khipu'},
-  ];
-  guardarTodo();
-}
-
-initTheme();
+if(!categorias.length){categorias=[{id:1,nombre:'Ventas / Servicios',tipoMov:'Ingreso'},{id:2,nombre:'Publicidad / Sponsors',tipoMov:'Ingreso'},{id:3,nombre:'Arriendos',tipoMov:'Ingreso'},{id:4,nombre:'Inversiones / Rentas',tipoMov:'Ingreso'},{id:5,nombre:'Otros Ingresos',tipoMov:'Ingreso'},{id:10,nombre:'Hosting & Dominios',tipoMov:'Gasto'},{id:11,nombre:'Servicios Cloud / APIs',tipoMov:'Gasto'},{id:12,nombre:'Sueldos / Honorarios',tipoMov:'Gasto'},{id:13,nombre:'Marketing & Publicidad',tipoMov:'Gasto'},{id:14,nombre:'Transporte & Logística',tipoMov:'Gasto'},{id:15,nombre:'Insumos Ferretería',tipoMov:'Gasto'},{id:16,nombre:'Mantenimiento Equipos',tipoMov:'Gasto'},{id:17,nombre:'Servicios Básicos',tipoMov:'Gasto'},{id:18,nombre:'Arriendos (gasto)',tipoMov:'Gasto'},{id:19,nombre:'Seguros',tipoMov:'Gasto'},{id:20,nombre:'Impuestos / Contribuciones',tipoMov:'Gasto'},{id:21,nombre:'Comisiones Bancarias',tipoMov:'Gasto'},{id:22,nombre:'Alimentación',tipoMov:'Gasto'},{id:23,nombre:'Salud',tipoMov:'Gasto'},{id:24,nombre:'Educación',tipoMov:'Gasto'},{id:25,nombre:'Entretención',tipoMov:'Gasto'},{id:26,nombre:'Varios / Otros Gastos',tipoMov:'Gasto'}];guardarTodo();}
+if(!bancos.length){bancos=[{id:1,nombre:'Banco Estado'},{id:2,nombre:'Banco de Chile'},{id:3,nombre:'Banco Santander'},{id:4,nombre:'Banco BCI'},{id:5,nombre:'Banco Internacional'}];guardarTodo();}
+if(!mediosPago.length){mediosPago=[{id:1,nombre:'Transferencia'},{id:2,nombre:'Débito'},{id:3,nombre:'Crédito'},{id:4,nombre:'Efectivo'},{id:5,nombre:'Cheque'},{id:6,nombre:'WebPay / Khipu'}];guardarTodo();}
 initAll();
 </script>
 </body>
