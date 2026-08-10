@@ -56,12 +56,12 @@
       <select id="dashEmpresa" onchange="renderDashboard()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white min-w-[260px]"></select>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Ingresos</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiIngresos">$0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💸 Gastos</p><p class="text-2xl font-bold text-[#E74C3C]" id="kpiGastos">$0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📈 Saldo</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiSaldo">$0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Mov.</p><p class="text-2xl font-bold text-gray-700" id="kpiMovs">0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">✅ Pagados</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiPagados">0</p></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5 text-center">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Ingresos</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiIngresos">$0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💸 Gastos</p><p class="text-2xl font-bold text-[#E74C3C]" id="kpiGastos">$0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📈 Saldo</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiSaldo">$0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Mov.</p><p class="text-2xl font-bold text-gray-700" id="kpiMovs">0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">✅ Pagados</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiPagados">0</p></div>
     </div>
 
     <div id="empresaDetail" class="hidden mb-5"></div>
@@ -176,10 +176,10 @@
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">🔄 Transferencias</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalTransferencia()">➕ Agregar</button>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Transferido</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiTransTotal">$0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Cantidad</p><p class="text-2xl font-bold text-gray-700" id="kpiTransCant">0</p></div>
-      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">🏦 Bancos</p><p class="text-2xl font-bold text-gray-700" id="kpiTransBancos">0</p></div>
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-center">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Transferido</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiTransTotal">$0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Cantidad</p><p class="text-2xl font-bold text-gray-700" id="kpiTransCant">0</p></div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center justify-center"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">🏦 Bancos</p><p class="text-2xl font-bold text-gray-700" id="kpiTransBancos">0</p></div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
       <div class="flex items-center gap-3 flex-wrap">
