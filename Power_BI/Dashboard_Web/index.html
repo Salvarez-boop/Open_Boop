@@ -175,6 +175,7 @@ td.actions { white-space:nowrap; text-align:center; }
     <a onclick="irAPagina('categorias')" data-page="categorias">🏷️ Categorías</a>
     <a onclick="irAPagina('bancos')" data-page="bancos">🏦 Bancos</a>
     <a onclick="irAPagina('medios-pago')" data-page="medios-pago">💳 Medios de Pago</a>
+    <a onclick="irAPagina('transferencias')" data-page="transferencias">🔄 Transferencias</a>
     <a onclick="irAPagina('datos')" data-page="datos">⚙️ Datos</a>
   </nav>
   <div class="version">Boop 🦈 · v2.0</div>
@@ -312,6 +313,51 @@ td.actions { white-space:nowrap; text-align:center; }
     </div>
   </div>
 
+  <!-- ═══════════════════ TRANSFERENCIAS PAGE ═══════════════════ -->
+  <div class="page" id="page-transferencias">
+    <div class="toolbar">
+      <h3 style="flex:1;margin:0;">🔄 Transferencias Bancarias</h3>
+      <button class="btn btn-success" onclick="mostrarModalTransferencia()">➕ Agregar</button>
+    </div>
+
+    <!-- KPIs Transferencias -->
+    <div class="kpi-row" style="margin-bottom:14px;">
+      <div class="kpi-card"><div class="label">💰 Total Transferido</div><div class="value blue" id="kpiTransTotal">$0</div></div>
+      <div class="kpi-card"><div class="label">📊 Cantidad</div><div class="value" id="kpiTransCant" style="color:var(--dark)">0</div></div>
+      <div class="kpi-card"><div class="label">🏦 Bancos Involucrados</div><div class="value" id="kpiTransBancos" style="color:var(--dark)">0</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <label style="font-size:12px;font-weight:600;">Filtrar:</label>
+        <select id="transFilterEmpresa" onchange="renderTransferencias()">
+          <option value="Todas">Todas empresas</option>
+        </select>
+        <select id="transFilterBanco" onchange="renderTransferencias()">
+          <option value="Todos">Todos los bancos</option>
+        </select>
+        <input type="date" id="transFilterDesde" onchange="renderTransferencias()">
+        <span style="color:#aaa;">a</span>
+        <input type="date" id="transFilterHasta" onchange="renderTransferencias()">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('transFilterEmpresa').value='Todas';document.getElementById('transFilterBanco').value='Todos';document.getElementById('transFilterDesde').value='';document.getElementById('transFilterHasta').value='';renderTransferencias()">Limpiar</button>
+        <span style="flex:1"></span>
+        <span style="font-size:12px;color:#888;" id="transCountLabel"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Fecha</th><th>Empresa</th><th>Banco Origen</th><th>Banco Destino</th><th>Monto</th><th>Moneda</th><th>Glosa</th><th>Acción</th>
+          </tr></thead>
+          <tbody id="transBody"></tbody>
+        </table>
+        <div class="empty-state" id="transEmpty">No hay transferencias registradas.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════ DATOS PAGE ═══════════════════ -->
   <div class="page" id="page-datos">
     <h3 style="margin-bottom:12px;">⚙️ Gestión de Datos</h3>
@@ -412,6 +458,35 @@ td.actions { white-space:nowrap; text-align:center; }
   </div>
 </div>
 
+<!-- ═══ MODAL TRANSFERENCIA ═══ -->
+<div class="modal-overlay" id="modalTrans">
+  <div class="modal" style="width:520px;">
+    <h2 id="modalTransTitle">➕ Agregar Transferencia</h2>
+    <form onsubmit="return guardarTransferencia(event)">
+      <div class="form-row">
+        <div><label>Fecha *</label><input type="date" id="frmTransFecha" required></div>
+        <div><label>Empresa *</label><select id="frmTransEmpresa" required></select></div>
+      </div>
+      <div class="form-row">
+        <div><label>Banco Origen *</label><select id="frmTransBancoOrigen" required><option value="">Seleccionar</option></select></div>
+        <div><label>Banco Destino *</label><select id="frmTransBancoDestino" required><option value="">Seleccionar</option></select></div>
+      </div>
+      <div class="form-row">
+        <div><label>Monto *</label><input type="number" id="frmTransMonto" min="0" step="1" required placeholder="0"></div>
+        <div><label>Moneda</label><select id="frmTransMoneda"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+      </div>
+      <div class="form-row full">
+        <label>Glosa</label>
+        <textarea id="frmTransGlosa" rows="2" placeholder="Ej: Traspaso fondo operacional"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="cerrarModal('modalTrans')">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btnGuardarTrans">💾 Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ═══ MODAL MEDIO PAGO ═══ -->
 <div class="modal-overlay" id="modalMP">
   <div class="modal" style="width:420px;">
@@ -451,9 +526,10 @@ const EMPRESAS = [
 let categorias = [];
 let bancos = [];
 let mediosPago = [];
+let transferencias = [];
 let movimientos = [];
 
-let editMovId = null, editCatId = null, editBancoId = null, editMPId = null;
+let editMovId = null, editCatId = null, editBancoId = null, editMPId = null, editTransId = null;
 
 // ════════════════════════════════════════════════════════
 // PERSISTENCIA
@@ -463,6 +539,7 @@ function guardarTodo() {
   localStorage.setItem('categorias', JSON.stringify(categorias));
   localStorage.setItem('bancos', JSON.stringify(bancos));
   localStorage.setItem('mediosPago', JSON.stringify(mediosPago));
+  localStorage.setItem('transferencias', JSON.stringify(transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))));
 }
 
 function cargarTodo() {
@@ -472,7 +549,9 @@ function cargarTodo() {
     categorias = JSON.parse(localStorage.getItem('categorias') || '[]');
     bancos = JSON.parse(localStorage.getItem('bancos') || '[]');
     mediosPago = JSON.parse(localStorage.getItem('mediosPago') || '[]');
-  } catch(e) { movimientos=[]; categorias=[]; bancos=[]; mediosPago=[]; }
+    const t = localStorage.getItem('transferencias');
+    transferencias = t ? JSON.parse(t).map(x=>({...x,fecha:new Date(x.fecha)})) : [];
+  } catch(e) { movimientos=[]; categorias=[]; bancos=[]; mediosPago=[]; transferencias=[]; }
 }
 
 // ════════════════════════════════════════════════════════
@@ -504,9 +583,10 @@ function irAPagina(page) {
   if(page==='categorias') renderCategorias();
   if(page==='bancos') renderBancos();
   if(page==='medios-pago') renderMediosPago();
+  if(page==='transferencias') renderTransferencias();
 }
 
-function cerrarModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; editTransId=null; }
 
 // ════════════════════════════════════════════════════════
 // CATEGORIAS CRUD
@@ -967,6 +1047,157 @@ function renderDashCharts(data) {
   }
 }
 
+// ════════════════════════════════════════════════════════
+// TRANSFERENCIAS CRUD
+// ════════════════════════════════════════════════════════
+function llenarSelectoresTrans() {
+  const selEmp = document.getElementById('frmTransEmpresa');
+  selEmp.innerHTML = '<option value="">Seleccionar</option>'+
+    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+
+  const selOri = document.getElementById('frmTransBancoOrigen');
+  selOri.innerHTML = '<option value="">Seleccionar</option>'+
+    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
+
+  const selDes = document.getElementById('frmTransBancoDestino');
+  selDes.innerHTML = '<option value="">Seleccionar</option>'+
+    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
+}
+
+function mostrarModalTransferencia(data) {
+  editTransId = data ? data.id : null;
+  document.getElementById('modalTransTitle').textContent = data ? '✏️ Editar Transferencia' : '➕ Agregar Transferencia';
+  const f = document.getElementById('formTrans'); if(!f) {}
+  // Reset
+  document.getElementById('frmTransFecha').value = data ? toDateInput(data.fecha) : new Date().toISOString().split('T')[0];
+  llenarSelectoresTrans();
+  if(data) {
+    document.getElementById('frmTransEmpresa').value = data.empresaId;
+    document.getElementById('frmTransBancoOrigen').value = data.bancoOrigenId;
+    document.getElementById('frmTransBancoDestino').value = data.bancoDestinoId;
+    document.getElementById('frmTransMonto').value = data.monto;
+    document.getElementById('frmTransMoneda').value = data.moneda;
+    document.getElementById('frmTransGlosa').value = data.glosa || '';
+  } else {
+    document.getElementById('frmTransMonto').value = '';
+    document.getElementById('frmTransMoneda').value = 'CLP';
+    document.getElementById('frmTransGlosa').value = '';
+  }
+  document.getElementById('btnGuardarTrans').textContent = data ? '🔄 Actualizar' : '💾 Guardar';
+  document.getElementById('modalTrans').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function guardarTransferencia(e) {
+  e.preventDefault();
+  const empresaId = parseInt(document.getElementById('frmTransEmpresa').value);
+  const bancoOrigenId = parseInt(document.getElementById('frmTransBancoOrigen').value);
+  const bancoDestinoId = parseInt(document.getElementById('frmTransBancoDestino').value);
+  const monto = parseFloat(document.getElementById('frmTransMonto').value);
+  const moneda = document.getElementById('frmTransMoneda').value;
+  const glosa = document.getElementById('frmTransGlosa').value.trim();
+  const fecha = document.getElementById('frmTransFecha').value;
+
+  if(!fecha || !empresaId || !bancoOrigenId || !bancoDestinoId || !monto) {
+    mostrarToast('Completa todos los campos obligatorios (*)','error'); return false;
+  }
+  if(bancoOrigenId === bancoDestinoId) {
+    mostrarToast('El banco origen y destino deben ser distintos','error'); return false;
+  }
+
+  const emp = empresaObj(empresaId);
+  const banOri = bancos.find(b=>b.id===bancoOrigenId);
+  const banDes = bancos.find(b=>b.id===bancoDestinoId);
+
+  const obj = {
+    id: editTransId || Date.now(),
+    fecha: new Date(fecha+'T12:00:00'),
+    empresaId, empresaNombre: emp?emp.nombre:'', empresaRut: emp?emp.rut:'',
+    bancoOrigenId, bancoOrigenNombre: banOri?banOri.nombre:'',
+    bancoDestinoId, bancoDestinoNombre: banDes?banDes.nombre:'',
+    monto, moneda, glosa,
+  };
+
+  if(editTransId) {
+    const idx = transferencias.findIndex(t=>t.id===editTransId);
+    if(idx>=0) transferencias[idx]=obj;
+    mostrarToast('✅ Transferencia actualizada','success');
+  } else {
+    transferencias.push(obj);
+    mostrarToast('✅ Transferencia agregada','success');
+  }
+  guardarTodo();
+  document.getElementById('modalTrans').classList.remove('active');
+  document.body.style.overflow='';
+  editTransId=null;
+  if(document.getElementById('page-transferencias').classList.contains('active')) renderTransferencias();
+  return false;
+}
+
+function editarTransferencia(id) {
+  const t = transferencias.find(x=>x.id===id);
+  if(t) mostrarModalTransferencia(t);
+}
+
+function eliminarTransferencia(id) {
+  const t = transferencias.find(x=>x.id===id);
+  if(!t) return;
+  const banOri = bancos.find(b=>b.id===t.bancoOrigenId);
+  const banDes = bancos.find(b=>b.id===t.bancoDestinoId);
+  if(!confirm(`¿Eliminar transferencia?\n${fmtFecha(t.fecha)} - ${banOri?banOri.nombre:'?'} → ${banDes?banDes.nombre:'?'} - ${fmtCLP(t.monto)}`)) return;
+  transferencias = transferencias.filter(x=>x.id!==id);
+  guardarTodo();
+  renderTransferencias();
+  mostrarToast('🗑️ Transferencia eliminada','success');
+}
+
+function renderTransferencias() {
+  // Filtros
+  let data = [...transferencias];
+  const filtroEmp = document.getElementById('transFilterEmpresa').value;
+  const filtroBanco = document.getElementById('transFilterBanco').value;
+  const desde = document.getElementById('transFilterDesde').value;
+  const hasta = document.getElementById('transFilterHasta').value;
+  if(filtroEmp!=='Todas') data = data.filter(t=>t.empresaId===parseInt(filtroEmp));
+  if(filtroBanco!=='Todos') data = data.filter(t=>t.bancoOrigenId===parseInt(filtroBanco)||t.bancoDestinoId===parseInt(filtroBanco));
+  if(desde) data = data.filter(t=>t.fecha>=new Date(desde+'T00:00:00'));
+  if(hasta) data = data.filter(t=>t.fecha<=new Date(hasta+'T23:59:59'));
+  data.sort((a,b)=>b.fecha-a.fecha);
+
+  const tbody = document.getElementById('transBody');
+  const empty = document.getElementById('transEmpty');
+  document.getElementById('transCountLabel').textContent = data.length+' transferencias';
+
+  // KPIs
+  const totalTrans = data.reduce((s,t)=>s+t.monto,0);
+  document.getElementById('kpiTransTotal').textContent = fmtCLP(totalTrans);
+  document.getElementById('kpiTransCant').textContent = data.length;
+  const bancosSet = new Set();
+  data.forEach(t=>{bancosSet.add(t.bancoOrigenId);bancosSet.add(t.bancoDestinoId);});
+  document.getElementById('kpiTransBancos').textContent = bancosSet.size;
+
+  if(data.length===0) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = data.map(t => {
+    const emp = empresaObj(t.empresaId);
+    const banOri = bancos.find(b=>b.id===t.bancoOrigenId);
+    const banDes = bancos.find(b=>b.id===t.bancoDestinoId);
+    return `<tr>
+      <td>${fmtFecha(t.fecha)}</td>
+      <td>${emp?emp.nombre+' ('+emp.rut+')':'—'}</td>
+      <td><strong>${banOri?banOri.nombre:'—'}</strong></td>
+      <td><strong>${banDes?banDes.nombre:'—'}</strong></td>
+      <td class="monto">${fmtCLP(t.monto)}</td>
+      <td>${t.moneda}</td>
+      <td>${t.glosa||''}</td>
+      <td class="actions">
+        <button class="btn btn-primary btn-sm" onclick="editarTransferencia(${t.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarTransferencia(${t.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
 function mostrarSinDatos(id) {
   const canvas = document.getElementById(id);
   Chart.getChart(canvas)?.destroy();
@@ -1003,7 +1234,7 @@ function descargar(content, filename, mime) {
 }
 
 function exportarJSON() {
-  const data = {movimientos: movimientos.map(m=>({...m,fecha:m.fecha.toISOString()})), categorias, bancos, mediosPago};
+  const data = {movimientos: movimientos.map(m=>({...m,fecha:m.fecha.toISOString()})), categorias, bancos, mediosPago, transferencias: transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))};
   descargar(JSON.stringify(data,null,2), 'backup_financiero.json', 'application/json');
   mostrarToast('⬇️ Backup completo descargado','success');
 }
@@ -1034,6 +1265,7 @@ function importarJSON(event) {
         categorias = data.categorias || [];
         bancos = data.bancos || [];
         mediosPago = data.mediosPago || [];
+        transferencias = (data.transferencias||[]).map(t=>({...t,fecha:new Date(t.fecha)}));
       } else if(Array.isArray(data)) {
         movimientos = data.map(m=>({...m,fecha:new Date(m.fecha)}));
       } else throw new Error('Formato inválido');
@@ -1094,7 +1326,10 @@ function cargarDatosEjemplo() {
   ];
 
   movimientos = [];
+  transferencias = [];
   const empIds = EMPRESAS.map(e=>e.id);
+
+  // Movimientos
   for(let i=0;i<45;i++) {
     const d = new Date(hoy); d.setDate(d.getDate()-rng(0,240));
     const empId = empIds[rng(0,empIds.length-1)];
@@ -1114,8 +1349,25 @@ function cargarDatosEjemplo() {
       pagado: Math.random()>0.15 ? 'Sí' : 'No',
     });
   }
+
+  // Transferencias de ejemplo
+  for(let i=0;i<20;i++) {
+    const d = new Date(hoy); d.setDate(d.getDate()-rng(0,210));
+    const empId = empIds[rng(0,empIds.length-1)];
+    const emp = EMPRESAS.find(e=>e.id===empId);
+    let banOri, banDes;
+    do { banOri = bancos[rng(0,bancos.length-1)]; banDes = bancos[rng(0,bancos.length-1)]; } while(banOri.id===banDes.id);
+    transferencias.push({
+      id: Date.now()+500+i, fecha:d, empresaId:empId, empresaNombre:emp.nombre, empresaRut:emp.rut,
+      bancoOrigenId:banOri.id, bancoOrigenNombre:banOri.nombre,
+      bancoDestinoId:banDes.id, bancoDestinoNombre:banDes.nombre,
+      monto: rng(50000, 2000000), moneda: Math.random()>0.9?'USD':'CLP',
+      glosa: 'Traspaso #'+(i+1),
+    });
+  }
+
   guardarTodo(); initAll();
-  mostrarToast('📦 Datos de ejemplo cargados (45 movs, '+categorias.length+' cat, '+bancos.length+' bancos, '+mediosPago.length+' MP)','success');
+  mostrarToast('📦 Datos de ejemplo cargados (45 movs, '+transferencias.length+' trans, '+categorias.length+' cat, '+bancos.length+' bancos, '+mediosPago.length+' MP)','success');
 }
 
 // ════════════════════════════════════════════════════════
@@ -1132,11 +1384,20 @@ function initAll() {
   movSel.innerHTML = '<option value="Todas">Todas empresas</option>'+
     EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
 
+  // Transferencias filters
+  const transEmp = document.getElementById('transFilterEmpresa');
+  transEmp.innerHTML = '<option value="Todas">Todas empresas</option>'+
+    EMPRESAS.map(e => `<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
+  const transBanco = document.getElementById('transFilterBanco');
+  transBanco.innerHTML = '<option value="Todos">Todos los bancos</option>'+
+    bancos.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
+
   renderDashboard();
   renderMovimientos();
   renderCategorias();
   renderBancos();
   renderMediosPago();
+  renderTransferencias();
 }
 
 // ════════════════════════════════════════════════════════
