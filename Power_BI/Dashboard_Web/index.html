@@ -34,6 +34,7 @@
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="movimientos" onclick="cambiarPagina('movimientos')">📋 Movimientos</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="categorias" onclick="cambiarPagina('categorias')">🏷️ Categorías</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="bancos" onclick="cambiarPagina('bancos')">🏦 Bancos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="empresas" onclick="cambiarPagina('empresas')">🏢 Empresas</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="tarjetas" onclick="cambiarPagina('tarjetas')">💳 Tarjetas</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="medios-pago" onclick="cambiarPagina('medios-pago')">💳 Medios de Pago</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="cambiarPagina('transferencias')">🔄 Transferencias</a>
@@ -170,6 +171,23 @@
           </tr></tfoot>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== EMPRESAS ========== -->
+  <section class="page" id="page-empresas">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏢 Empresas</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalEmpresa()">➕ Agregar Empresa</button>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">RUT</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-left font-semibold">Giro</th><th class="p-2.5 text-left font-semibold">Dirección</th><th class="p-2.5 text-left font-semibold">Ciudad</th><th class="p-2.5 text-left font-semibold">País</th><th class="p-2.5 text-left font-semibold">Descripción</th><th class="p-2.5 text-left font-semibold">Sitio Web</th><th class="p-2.5 text-left font-semibold">Correo</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="empBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="empEmpty">No hay empresas registradas.</p>
       </div>
     </div>
   </section>
@@ -415,17 +433,36 @@
 
 <script>
 // ======================== DATA ========================
-const EMPRESAS = [
-  { id: 1, nombre: 'RenoxPell SpA (YoSorteo.cl)',     rut: '76.837.558-5', tipo: 'Plataforma de sorteos' },
-  { id: 2, nombre: 'TransTicket SpA (TransTicket.cl)', rut: '76.837.566-6', tipo: 'Plataforma de sorteos' },
-  { id: 3, nombre: 'Transportes Álvarez SpA',          rut: '78.271.764-2', tipo: 'Transporte / logística' },
-  { id: 4, nombre: 'Servicios PubliTruck SpA',         rut: '78.271.876-2', tipo: 'Publicidad móvil' },
-  { id: 5, nombre: 'Greengo Austral SpA',              rut: '78.321.137-8', tipo: 'Ferretería' },
-  { id: 6, nombre: 'Inversiones Ibiza SpA',            rut: '78.325.207-4', tipo: 'Real estate / inversiones' },
-  { id: 7, nombre: 'Gastos Personales',                rut: '15.884.605-5', tipo: 'Personal' },
-  { id: 8, nombre: 'Propiedades Salvarez',             rut: '15.884.605-5', tipo: 'Propiedades con arriendo' },
-  { id: 9, nombre: 'Best Free Wifi Chile SpA',         rut: '76.718.863-3', tipo: 'Enlaces & CCTV' },
-];
+var EMPRESAS = [];
+
+function cargarEmpresas() {
+  var raw = localStorage.getItem('empresas');
+  if (raw && raw !== '[]') {
+    EMPRESAS = JSON.parse(raw);
+  } else {
+    EMPRESAS = [
+      { id: 1, nombre: 'RenoxPell SpA (YoSorteo.cl)',     rut: '76.837.558-5', tipo: 'Plataforma de sorteos', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 2, nombre: 'TransTicket SpA (TransTicket.cl)', rut: '76.837.566-6', tipo: 'Plataforma de sorteos', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 3, nombre: 'Transportes Álvarez SpA',          rut: '78.271.764-2', tipo: 'Transporte / logística', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 4, nombre: 'Servicios PubliTruck SpA',         rut: '78.271.876-2', tipo: 'Publicidad móvil', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 5, nombre: 'Greengo Austral SpA',              rut: '78.321.137-8', tipo: 'Ferretería', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 6, nombre: 'Inversiones Ibiza SpA',            rut: '78.325.207-4', tipo: 'Real estate / inversiones', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 7, nombre: 'Gastos Personales',                rut: '15.884.605-5', tipo: 'Personal', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 8, nombre: 'Propiedades Salvarez',             rut: '15.884.605-5', tipo: 'Propiedades con arriendo', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+      { id: 9, nombre: 'Best Free Wifi Chile SpA',         rut: '76.718.863-3', tipo: 'Enlaces & CCTV', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
+    ];
+    guardarEmpresas();
+  }
+}
+
+function guardarEmpresas() {
+  localStorage.setItem('empresas', JSON.stringify(EMPRESAS));
+}
+
+function obtenerEmpresa(id) {
+  for (var i = 0; i < EMPRESAS.length; i++) { if (EMPRESAS[i].id === id) return EMPRESAS[i]; }
+  return null;
+}
 
 let categorias = [];
 let bancos = [];
@@ -490,9 +527,7 @@ function toDateInput(d) {
   return d.toISOString().split('T')[0];
 }
 
-function empresaObj(id) {
-  return EMPRESAS.find(function(e) { return e.id === id; });
-}
+
 
 // ======================== TOAST ========================
 var toastTimeout;
@@ -536,6 +571,7 @@ function cambiarPagina(page) {
     case 'movimientos': renderMovimientos(); break;
     case 'categorias': renderCategorias(); break;
     case 'bancos': renderBancos(); break;
+    case 'empresas': renderEmpresas(); break;
     case 'medios-pago': renderMediosPago(); break;
     case 'tarjetas': renderTarjetas(); break;
     case 'transferencias': renderTransferencias(); break;
@@ -732,7 +768,7 @@ function renderBancos() {
   var html = '';
   for (var i = 0; i < dataB.length; i++) {
     var b = dataB[i];
-    var emp = empresaObj(b.empresaId);
+    var emp = obtenerEmpresa(b.empresaId);
     var movsCount = 0, totalIng = 0, totalGas = 0;
     for (var j = 0; j < movimientos.length; j++) {
       if (movimientos[j].bancoId === b.id) {
@@ -832,6 +868,100 @@ function eliminarMedioPago(id) {
   guardarTodo();
   renderMediosPago();
   mostrarToast('🗑️ Eliminado', 'success');
+}
+
+// ======================== EMPRESAS CRUD ========================
+var editEmpId = null;
+
+function getNextEmpId() {
+  var mx = 0;
+  for (var i = 0; i < EMPRESAS.length; i++) { if (EMPRESAS[i].id > mx) mx = EMPRESAS[i].id; }
+  return mx + 1;
+}
+
+function mostrarModalEmpresa(data) {
+  editEmpId = data ? data.id : null;
+  document.getElementById('modalEmpTitle').textContent = data ? '✏️ Editar Empresa' : '➕ Agregar Empresa';
+  document.getElementById('frmEmpRut').value = data ? data.rut : '';
+  document.getElementById('frmEmpNombre').value = data ? data.nombre : '';
+  document.getElementById('frmEmpGiro').value = data ? (data.giro || '') : '';
+  document.getElementById('frmEmpDireccion').value = data ? (data.direccion || '') : '';
+  document.getElementById('frmEmpCiudad').value = data ? (data.ciudad || '') : '';
+  document.getElementById('frmEmpPais').value = data ? (data.pais || '') : '';
+  document.getElementById('frmEmpDescripcion').value = data ? (data.descripcion || '') : '';
+  document.getElementById('frmEmpWeb').value = data ? (data.web || '') : '';
+  document.getElementById('frmEmpCorreo').value = data ? (data.correo || '') : '';
+  document.getElementById('modalEmp').showModal();
+}
+
+function guardarEmpresa(e) {
+  e.preventDefault();
+  var rut = document.getElementById('frmEmpRut').value.trim();
+  var nombre = document.getElementById('frmEmpNombre').value.trim();
+  var giro = document.getElementById('frmEmpGiro').value.trim();
+  var direccion = document.getElementById('frmEmpDireccion').value.trim();
+  var ciudad = document.getElementById('frmEmpCiudad').value.trim();
+  var pais = document.getElementById('frmEmpPais').value.trim();
+  var descripcion = document.getElementById('frmEmpDescripcion').value.trim();
+  var web = document.getElementById('frmEmpWeb').value.trim();
+  var correo = document.getElementById('frmEmpCorreo').value.trim();
+  if (!rut || !nombre) { mostrarToast('RUT y Nombre son obligatorios', 'error'); return false; }
+  if (editEmpId) {
+    for (var i = 0; i < EMPRESAS.length; i++) {
+      if (EMPRESAS[i].id === editEmpId) {
+        EMPRESAS[i].rut = rut; EMPRESAS[i].nombre = nombre; EMPRESAS[i].giro = giro;
+        EMPRESAS[i].direccion = direccion; EMPRESAS[i].ciudad = ciudad; EMPRESAS[i].pais = pais;
+        EMPRESAS[i].descripcion = descripcion; EMPRESAS[i].web = web; EMPRESAS[i].correo = correo;
+        break;
+      }
+    }
+    mostrarToast('✅ Empresa actualizada', 'success');
+  } else {
+    EMPRESAS.push({ id: getNextEmpId(), rut: rut, nombre: nombre, giro: giro, direccion: direccion, ciudad: ciudad, pais: pais, descripcion: descripcion, web: web, correo: correo });
+    mostrarToast('✅ Empresa agregada', 'success');
+  }
+  guardarEmpresas();
+  document.getElementById('modalEmp').close();
+  renderEmpresas();
+  return false;
+}
+
+function editarEmpresa(id) {
+  for (var i = 0; i < EMPRESAS.length; i++) { if (EMPRESAS[i].id === id) { mostrarModalEmpresa(EMPRESAS[i]); return; } }
+}
+
+function eliminarEmpresa(id) {
+  if (!confirm('¿Eliminar esta empresa?')) return;
+  var nuevo = [];
+  for (var i = 0; i < EMPRESAS.length; i++) { if (EMPRESAS[i].id !== id) nuevo.push(EMPRESAS[i]); }
+  EMPRESAS = nuevo;
+  guardarEmpresas();
+  renderEmpresas();
+  mostrarToast('🗑️ Empresa eliminada', 'success');
+}
+
+function renderEmpresas() {
+  var tbody = document.getElementById('empBody');
+  var empty = document.getElementById('empEmpty');
+  if (EMPRESAS.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  var html = '';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    var e = EMPRESAS[i];
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + e.id + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (e.rut || '---') + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (e.nombre || '---') + '</td>';
+    html += '<td class="p-2.5">' + (e.giro || '---') + '</td>';
+    html += '<td class="p-2.5">' + (e.direccion || '---') + '</td>';
+    html += '<td class="p-2.5">' + (e.ciudad || '---') + '</td>';
+    html += '<td class="p-2.5">' + (e.pais || '---') + '</td>';
+    html += '<td class="p-2.5 text-xs max-w-[150px] truncate" title="' + (e.descripcion || '') + '">' + (e.descripcion || '---') + '</td>';
+    html += '<td class="p-2.5 text-xs"><a href="' + (e.web || '#') + '" target="_blank" class="text-[#2E75B6] hover:underline">' + (e.web || '---') + '</a></td>';
+    html += '<td class="p-2.5 text-xs">' + (e.correo || '---') + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarEmpresa(' + e.id + ')">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarEmpresa(' + e.id + ')">🗑️</button></td></tr>';
+  }
+  tbody.innerHTML = html;
 }
 
 // ======================== TARJETAS CRUD ========================
@@ -937,7 +1067,7 @@ function renderTarjetas() {
   var html = '';
   for (var i = 0; i < dataT.length; i++) {
     var t = dataT[i];
-    var emp = empresaObj(t.empresaId);
+    var emp = obtenerEmpresa(t.empresaId);
     var nm = t.numero && t.numero.length > 4 ? '**** **** **** ' + t.numero.substring(t.numero.length - 4) : (t.numero || '---');
     html += '<tr class="hover:bg-gray-50">';
     html += '<td class="p-2.5">' + t.id + '</td>';
@@ -1069,7 +1199,7 @@ function guardarMovimiento(e) {
     return false;
   }
 
-  var emp = empresaObj(empresaId);
+  var emp = obtenerEmpresa(empresaId);
   var cat = null;
   for (var i = 0; i < categorias.length; i++) {
     if (categorias[i].id === categoriaId) { cat = categorias[i]; break; }
@@ -1128,7 +1258,7 @@ function eliminarMovimiento(id) {
     if (movimientos[i].id === id) { m = movimientos[i]; break; }
   }
   if (!m) return;
-  var emp = empresaObj(m.empresaId);
+  var emp = obtenerEmpresa(m.empresaId);
   if (!confirm('¿Eliminar?\n' + fmtFecha(m.fecha) + ' - ' + (emp ? emp.nombre : '?') + ' - ' + fmtCLP(m.monto))) return;
 
   var nuevo = [];
@@ -1195,7 +1325,7 @@ function renderMovimientos() {
   var html = '';
   for (var i = 0; i < data.length; i++) {
     var m = data[i];
-    var emp = empresaObj(m.empresaId);
+    var emp = obtenerEmpresa(m.empresaId);
     var cat = null;
     for (var j = 0; j < categorias.length; j++) { if (categorias[j].id === m.categoriaId) { cat = categorias[j]; break; } }
     var ban = null;
@@ -1282,7 +1412,7 @@ function guardarTransferencia(e) {
     return false;
   }
 
-  var emp = empresaObj(empresaId);
+  var emp = obtenerEmpresa(empresaId);
   var banOri = null, banDes = null;
   for (var i = 0; i < bancos.length; i++) {
     if (bancos[i].id === bancoOrigenId) banOri = bancos[i];
@@ -1398,7 +1528,7 @@ function renderTransferencias() {
   var html = '';
   for (var i = 0; i < data.length; i++) {
     var t = data[i];
-    var emp = empresaObj(t.empresaId);
+    var emp = obtenerEmpresa(t.empresaId);
     var banOri = null, banDes = null;
     for (var j = 0; j < bancos.length; j++) {
       if (bancos[j].id === t.bancoOrigenId) banOri = bancos[j];
@@ -1464,7 +1594,7 @@ function renderDashboard() {
   // Detalle de empresa
   var det = document.getElementById('empresaDetail');
   if (empId !== 'Todas') {
-    var emp = empresaObj(parseInt(empId));
+    var emp = obtenerEmpresa(parseInt(empId));
     if (emp) {
       var ingEmp = 0, gasEmp = 0;
       for (var i = 0; i < data.length; i++) {
@@ -1537,7 +1667,7 @@ function renderDashCharts(data) {
   for (var i = 0; i < data.length; i++) {
     var m = data[i];
     if (!empMap[m.empresaId]) { empMap[m.empresaId] = { i: 0, g: 0, nom: '' }; }
-    var emp = empresaObj(m.empresaId);
+    var emp = obtenerEmpresa(m.empresaId);
     empMap[m.empresaId].nom = emp ? emp.nombre : '?';
     if (m.tipo === 'Ingreso') empMap[m.empresaId].i += m.monto;
     else empMap[m.empresaId].g += m.monto;
@@ -1601,7 +1731,7 @@ function renderMiniTabla(data) {
   var html = '';
   for (var i = 0; i < sorted.length; i++) {
     var m = sorted[i];
-    var emp = empresaObj(m.empresaId);
+    var emp = obtenerEmpresa(m.empresaId);
     var cat = null;
     for (var j = 0; j < categorias.length; j++) { if (categorias[j].id === m.categoriaId) { cat = categorias[j]; break; } }
     var tipoClass = m.tipo === 'Ingreso' ? 'text-[#70AD47] font-semibold' : 'text-[#E74C3C] font-semibold';
@@ -1644,7 +1774,7 @@ function exportarJSON() {
 function exportarCSV() {
   var headers = ['Fecha', 'Empresa', 'RUT', 'Tipo', 'Categoría', 'Banco', 'Medio Pago', 'Monto', 'Moneda', 'Glosa', 'Pagado'];
   var rows = movimientos.map(function(m) {
-    var emp = empresaObj(m.empresaId);
+    var emp = obtenerEmpresa(m.empresaId);
     var cat = null, ban = null, mp = null;
     for (var i = 0; i < categorias.length; i++) { if (categorias[i].id === m.categoriaId) { cat = categorias[i]; break; } }
     for (var i = 0; i < bancos.length; i++) { if (bancos[i].id === m.bancoId) { ban = bancos[i]; break; } }
@@ -1712,6 +1842,7 @@ function confirmarLimpiar() {
 
 function recargarDatos() {
   cargarTodo();
+cargarEmpresas();
   initAll();
   mostrarToast('🔄 Recargado', '');
 }
@@ -1755,7 +1886,7 @@ function cargarDatosEjemplo() {
     var d = new Date(hoy);
     d.setDate(d.getDate() - rng(0, 240));
     var empId = empIds[rng(0, empIds.length - 1)];
-    var emp = empresaObj(empId);
+    var emp = obtenerEmpresa(empId);
     var tipo = i < 20 ? 'Ingreso' : 'Gasto';
     var cats = categorias.filter(function(c) { return c.tipoMov === tipo; });
     var cat = cats[rng(0, cats.length - 1)];
@@ -1784,7 +1915,7 @@ function cargarDatosEjemplo() {
     var d = new Date(hoy);
     d.setDate(d.getDate() - rng(0, 210));
     var empId = empIds[rng(0, empIds.length - 1)];
-    var emp = empresaObj(empId);
+    var emp = obtenerEmpresa(empId);
     var banOri, banDes;
     do {
       banOri = bancos[rng(0, bancos.length - 1)];
@@ -1866,6 +1997,7 @@ function initAll() {
   renderMovimientos();
   renderCategorias();
   renderBancos();
+  renderEmpresas();
   renderMediosPago();
   renderTarjetas();
   renderTransferencias();
@@ -1873,6 +2005,7 @@ function initAll() {
 
 // ======================== BOOT ========================
 cargarTodo();
+cargarEmpresas();
 
 if (categorias.length === 0) {
   categorias = [
