@@ -148,6 +148,16 @@
         <table class="w-full text-sm">
           <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold text-[#3498DB]">🏦 Saldo Actual</th><th class="p-2.5 text-right font-semibold text-[#F39C12]">💳 L. Crédito</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
+          <tfoot id="bancoFoot" class="bg-gray-100 font-semibold text-sm border-t-2 border-[#2E75B6]"><tr>
+            <td class="p-2.5" colspan="4"><strong>TOTALES</strong></td>
+            <td class="p-2.5"></td>
+            <td class="p-2.5 text-right mt text-[#3498DB]" id="totalSaldoActual">$0</td>
+            <td class="p-2.5 text-right mt text-[#F39C12]" id="totalLineaCredito">$0</td>
+            <td class="p-2.5 text-right" id="totalMovsBanco">0</td>
+            <td class="p-2.5 text-right mt text-[#70AD47]" id="totalIngresosBanco">$0</td>
+            <td class="p-2.5 text-right mt text-[#E74C3C]" id="totalGastosBanco">$0</td>
+            <td class="p-2.5"></td>
+          </tr></tfoot>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
       </div>
@@ -666,6 +676,26 @@ function renderBancos() {
     html += '</td></tr>';
   }
   tbody.innerHTML = html;
+
+  // Totales al pie
+  var tSaldo = 0, tCredito = 0, tMovs = 0, tIng = 0, tGas = 0;
+  for (var i = 0; i < bancos.length; i++) {
+    var b = bancos[i];
+    tSaldo += b.saldoActual || 0;
+    tCredito += b.lineaCredito || 0;
+    for (var j = 0; j < movimientos.length; j++) {
+      if (movimientos[j].bancoId === b.id) {
+        tMovs++;
+        if (movimientos[j].tipo === 'Ingreso') tIng += movimientos[j].monto;
+        else tGas += movimientos[j].monto;
+      }
+    }
+  }
+  document.getElementById('totalSaldoActual').textContent = fmtCLP(tSaldo);
+  document.getElementById('totalLineaCredito').textContent = fmtCLP(tCredito);
+  document.getElementById('totalMovsBanco').textContent = tMovs;
+  document.getElementById('totalIngresosBanco').textContent = fmtCLP(tIng);
+  document.getElementById('totalGastosBanco').textContent = fmtCLP(tGas);
 }
 
 // ======================== MEDIOS DE PAGO CRUD ========================
