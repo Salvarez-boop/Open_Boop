@@ -34,6 +34,7 @@
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="movimientos" onclick="cambiarPagina('movimientos')">📋 Movimientos</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="categorias" onclick="cambiarPagina('categorias')">🏷️ Categorías</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="bancos" onclick="cambiarPagina('bancos')">🏦 Bancos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="tarjetas" onclick="cambiarPagina('tarjetas')">💳 Tarjetas</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="medios-pago" onclick="cambiarPagina('medios-pago')">💳 Medios de Pago</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="cambiarPagina('transferencias')">🔄 Transferencias</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="datos" onclick="cambiarPagina('datos')">⚙️ Datos</a>
@@ -169,6 +170,40 @@
           </tr></tfoot>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TARJETAS ========== -->
+  <section class="page" id="page-tarjetas">
+    <div class="flex items-center gap-2 mb-4">
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">💳 Tarjetas de Crédito</h2>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalTarjeta()">➕ Agregar Tarjeta</button>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="text-xs font-semibold text-gray-500">Filtrar por Empresa:</label>
+        <select id="tarjFilterEmpresa" onchange="renderTarjetas()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('tarjFilterEmpresa').value='Todas';renderTarjetas()">Limpiar</button>
+        <span class="flex-1"></span>
+        <span class="text-xs text-gray-400" id="tarjCountLabel"></span>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-left font-semibold">Nro. Tarjeta</th><th class="p-2.5 text-right font-semibold text-[#3498DB]">💰 Monto</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">✅ Disponible</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">❌ Utilizado</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <tbody id="tarjBody" class="divide-y divide-gray-100"></tbody>
+          <tfoot id="tarjFoot" class="bg-gray-100 font-semibold text-sm border-t-2 border-[#2E75B6]"><tr>
+            <td class="p-2.5" colspan="4"><strong>TOTALES</strong></td>
+            <td class="p-2.5"></td>
+            <td class="p-2.5 text-right mt text-[#3498DB]" id="totalTarjMonto">$0</td>
+            <td class="p-2.5 text-right mt text-[#70AD47]" id="totalTarjDisponible">$0</td>
+            <td class="p-2.5 text-right mt text-[#E74C3C]" id="totalTarjUtilizado">$0</td>
+            <td class="p-2.5"></td>
+          </tr></tfoot>
+        </table>
+        <p class="text-center text-gray-400 text-sm py-8 hidden" id="tarjEmpty">No hay tarjetas registradas.</p>
       </div>
     </div>
   </section>
@@ -321,6 +356,34 @@
   </form>
 </dialog>
 
+<dialog id="modalTarj" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
+  <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalTarjTitle">➕ Agregar Tarjeta de Crédito</h2>
+  <form onsubmit="return guardarTarjeta(event)">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmTarjEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco *</label><input type="text" id="frmTarjBanco" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmTarjTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="MasterCard">MasterCard</option><option value="VISA">VISA</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Tarjeta *</label>
+        <div class="relative">
+          <input type="text" id="frmTarjNumero" required placeholder="1234567890123456" maxlength="19" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm pr-10" oninput="tarjFormatear(this)">
+          <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xs" onclick="tarjToggleVer()" id="tarjEyeIcon">👁️</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto</label><input type="number" id="frmTarjMonto" step="1" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Disponible</label><input type="number" id="frmTarjDisponible" step="1" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Utilizado</label><input type="number" id="frmTarjUtilizado" step="1" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalTarj').close()">Cancelar</button>
+      <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition" id="btnGuardarTarj">💾 Guardar</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="modalTrans" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalTransTitle">➕ Agregar Transferencia</h2>
   <form onsubmit="return guardarTransferencia(event)">
@@ -386,6 +449,7 @@ function guardarTodo() {
   localStorage.setItem('categorias', JSON.stringify(categorias));
   localStorage.setItem('bancos', JSON.stringify(bancos));
   localStorage.setItem('mediosPago', JSON.stringify(mediosPago));
+  localStorage.setItem('tarjetas', JSON.stringify(tarjetas));
   localStorage.setItem('transferencias', JSON.stringify(transferencias.map(function(t) {
     var x = Object.assign({}, t);
     x.fecha = x.fecha.toISOString();
@@ -473,6 +537,7 @@ function cambiarPagina(page) {
     case 'categorias': renderCategorias(); break;
     case 'bancos': renderBancos(); break;
     case 'medios-pago': renderMediosPago(); break;
+    case 'tarjetas': renderTarjetas(); break;
     case 'transferencias': renderTransferencias(); break;
   }
 }
@@ -767,6 +832,130 @@ function eliminarMedioPago(id) {
   guardarTodo();
   renderMediosPago();
   mostrarToast('🗑️ Eliminado', 'success');
+}
+
+// ======================== TARJETAS CRUD ========================
+var tarjetas = [];
+var editTarjId = null;
+var tarjNumRaw = '';
+var tarjMostrar = false;
+
+function tarjFormatear(inp) {
+  var v = inp.value.replace(/\D/g, '').substring(0, 16);
+  tarjNumRaw = v;
+  if (!tarjMostrar) {
+    inp.value = v.length > 4 ? '**** **** **** ' + v.substring(v.length - 4) : v;
+  } else {
+    var p = v.match(/.{1,4}/g);
+    inp.value = p ? p.join(' ') : v;
+  }
+}
+
+function tarjToggleVer() {
+  tarjMostrar = !tarjMostrar;
+  var inp = document.getElementById('frmTarjNumero');
+  var icon = document.getElementById('tarjEyeIcon');
+  if (tarjMostrar) {
+    icon.textContent = 'OCULTAR';
+    var p = tarjNumRaw.match(/.{1,4}/g);
+    inp.value = p ? p.join(' ') : tarjNumRaw;
+  } else {
+    icon.textContent = 'OJO';
+    inp.value = tarjNumRaw.length > 4 ? '**** **** **** ' + tarjNumRaw.substring(tarjNumRaw.length - 4) : tarjNumRaw;
+  }
+}
+
+function getNextTarjId() { var mx = 0; for (var i = 0; i < tarjetas.length; i++) { if (tarjetas[i].id > mx) mx = tarjetas[i].id; } return mx + 1; }
+
+function mostrarModalTarjeta(data) {
+  editTarjId = data ? data.id : null;
+  document.getElementById('modalTarjTitle').textContent = data ? 'Editar Tarjeta' : 'Agregar Tarjeta de Credito';
+  var sel = document.getElementById('frmTarjEmpresa');
+  var h = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) { h += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>'; }
+  sel.innerHTML = h;
+  document.getElementById('frmTarjBanco').value = data ? data.banco : '';
+  document.getElementById('frmTarjTipo').value = data ? data.tipo : '';
+  tarjNumRaw = data ? data.numero : '';
+  tarjMostrar = false;
+  document.getElementById('tarjEyeIcon').textContent = 'OJO';
+  var ni = document.getElementById('frmTarjNumero');
+  ni.value = (data && data.numero.length > 4) ? '**** **** **** ' + data.numero.substring(data.numero.length - 4) : (data ? data.numero : '');
+  document.getElementById('frmTarjMonto').value = data ? data.monto : '';
+  document.getElementById('frmTarjDisponible').value = data ? data.disponible : '';
+  document.getElementById('frmTarjUtilizado').value = data ? data.utilizado : '';
+  if (data) sel.value = data.empresaId;
+  document.getElementById('modalTarj').showModal();
+}
+
+function guardarTarjeta(e) {
+  e.preventDefault();
+  var empresaId = parseInt(document.getElementById('frmTarjEmpresa').value);
+  var banco = document.getElementById('frmTarjBanco').value.trim();
+  var tipo = document.getElementById('frmTarjTipo').value;
+  var numero = tarjNumRaw;
+  var monto = parseFloat(document.getElementById('frmTarjMonto').value) || 0;
+  var disponible = parseFloat(document.getElementById('frmTarjDisponible').value) || 0;
+  var utilizado = parseFloat(document.getElementById('frmTarjUtilizado').value) || 0;
+  if (!empresaId || !banco || !tipo || !numero) { mostrarToast('Completa todos los campos obligatorios', 'error'); return false; }
+  if (editTarjId) {
+    for (var i = 0; i < tarjetas.length; i++) { if (tarjetas[i].id === editTarjId) { tarjetas[i].empresaId = empresaId; tarjetas[i].banco = banco; tarjetas[i].tipo = tipo; tarjetas[i].numero = numero; tarjetas[i].monto = monto; tarjetas[i].disponible = disponible; tarjetas[i].utilizado = utilizado; break; } }
+    mostrarToast('Tarjeta actualizada', 'success');
+  } else {
+    tarjetas.push({ id: getNextTarjId(), empresaId: empresaId, banco: banco, tipo: tipo, numero: numero, monto: monto, disponible: disponible, utilizado: utilizado });
+    mostrarToast('Tarjeta agregada', 'success');
+  }
+  guardarTodo();
+  document.getElementById('modalTarj').close();
+  renderTarjetas();
+  return false;
+}
+
+function editarTarjeta(id) { for (var i = 0; i < tarjetas.length; i++) { if (tarjetas[i].id === id) { mostrarModalTarjeta(tarjetas[i]); return; } } }
+
+function eliminarTarjeta(id) {
+  if (!confirm('Eliminar esta tarjeta?')) return;
+  var nuevo = [];
+  for (var i = 0; i < tarjetas.length; i++) { if (tarjetas[i].id !== id) nuevo.push(tarjetas[i]); }
+  tarjetas = nuevo;
+  guardarTodo();
+  renderTarjetas();
+  mostrarToast('Tarjeta eliminada', 'success');
+}
+
+function renderTarjetas() {
+  var tbody = document.getElementById('tarjBody');
+  var empty = document.getElementById('tarjEmpty');
+  var fEmp = document.getElementById('tarjFilterEmpresa').value;
+  var dataT = [];
+  for (var i = 0; i < tarjetas.length; i++) {
+    if (fEmp === 'Todas' || tarjetas[i].empresaId === parseInt(fEmp)) dataT.push(tarjetas[i]);
+  }
+  document.getElementById('tarjCountLabel').textContent = dataT.length + ' tarjetas';
+  if (dataT.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  var html = '';
+  for (var i = 0; i < dataT.length; i++) {
+    var t = dataT[i];
+    var emp = empresaObj(t.empresaId);
+    var nm = t.numero && t.numero.length > 4 ? '**** **** **** ' + t.numero.substring(t.numero.length - 4) : (t.numero || '---');
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + t.id + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : '---') + '</td>';
+    html += '<td class="p-2.5">' + (t.banco || '---') + '</td>';
+    html += '<td class="p-2.5">' + (t.tipo || '---') + '</td>';
+    html += '<td class="p-2.5 font-mono text-sm">' + nm + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#3498DB]">' + fmtCLP(t.monto || 0) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#70AD47]">' + fmtCLP(t.disponible || 0) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#E74C3C]">' + fmtCLP(t.utilizado || 0) + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarTarjeta(' + t.id + ')">EDITAR</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarTarjeta(' + t.id + ')">ELIMINAR</button></td></tr>';
+  }
+  tbody.innerHTML = html;
+  var tM = 0, tD = 0, tU = 0;
+  for (var i = 0; i < dataT.length; i++) { tM += dataT[i].monto || 0; tD += dataT[i].disponible || 0; tU += dataT[i].utilizado || 0; }
+  document.getElementById('totalTarjMonto').textContent = fmtCLP(tM);
+  document.getElementById('totalTarjDisponible').textContent = fmtCLP(tD);
+  document.getElementById('totalTarjUtilizado').textContent = fmtCLP(tU);
 }
 
 function renderMediosPago() {
@@ -1445,6 +1634,7 @@ function exportarJSON() {
     categorias: categorias,
     bancos: bancos,
     mediosPago: mediosPago,
+    tarjetas: tarjetas,
     transferencias: transferencias.map(function(t) { var x = Object.assign({}, t); x.fecha = x.fecha.toISOString(); return x; })
   };
   descargar(JSON.stringify(data, null, 2), 'backup_financiero.json', 'application/json');
@@ -1495,6 +1685,7 @@ function importarJSON(event) {
         categorias = data.categorias || [];
         bancos = data.bancos || [];
         mediosPago = data.mediosPago || [];
+        tarjetas = data.tarjetas || [];
         transferencias = (data.transferencias || []).map(function(t) { t.fecha = new Date(t.fecha); return t; });
       } else if (Array.isArray(data)) {
         movimientos = data.map(function(m) { m.fecha = new Date(m.fecha); return m; });
@@ -1645,6 +1836,15 @@ function initFilters() {
     bEmp.innerHTML += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
   }
 
+  // Tarj filter empresa
+  var tjEmp = document.getElementById('tarjFilterEmpresa');
+  if(tjEmp) {
+    tjEmp.innerHTML = '<option value="Todas">Todas empresas</option>';
+    for (var i = 0; i < EMPRESAS.length; i++) {
+      tjEmp.innerHTML += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+    }
+  }
+
   // Trans filter empresa
   var tEmp = document.getElementById('transFilterEmpresa');
   tEmp.innerHTML = '<option value="Todas">Todas empresas</option>';
@@ -1667,6 +1867,7 @@ function initAll() {
   renderCategorias();
   renderBancos();
   renderMediosPago();
+  renderTarjetas();
   renderTransferencias();
 }
 
