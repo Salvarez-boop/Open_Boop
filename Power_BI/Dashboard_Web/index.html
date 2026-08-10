@@ -40,7 +40,7 @@
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="cambiarPagina('transferencias')">🔄 Transferencias</a>
     <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="datos" onclick="cambiarPagina('datos')">⚙️ Datos</a>
   </nav>
-  <footer class="px-5 py-3 border-t border-white/10 text-blue-300/30 text-[10px]">Boop 🦈 · v3.0</footer>
+  <footer class="px-5 py-3 border-t border-white/10 text-blue-300/30 text-[10px]" id="footerVersion">Boop 🦈 · v3.0</footer>
 </aside>
 
 <!-- MAIN -->
@@ -470,6 +470,17 @@ function cargarEmpresas() {
   var raw = localStorage.getItem('empresas');
   if (raw && raw !== '[]') {
     EMPRESAS = JSON.parse(raw);
+    // Migrar datos viejos: asegurar campos nuevos
+    for (var mi = 0; mi < EMPRESAS.length; mi++) {
+      if (EMPRESAS[mi].giro === undefined) EMPRESAS[mi].giro = (EMPRESAS[mi].tipo || '');
+      if (EMPRESAS[mi].direccion === undefined) EMPRESAS[mi].direccion = '';
+      if (EMPRESAS[mi].ciudad === undefined) EMPRESAS[mi].ciudad = '';
+      if (EMPRESAS[mi].pais === undefined) EMPRESAS[mi].pais = '';
+      if (EMPRESAS[mi].descripcion === undefined) EMPRESAS[mi].descripcion = '';
+      if (EMPRESAS[mi].web === undefined) EMPRESAS[mi].web = '';
+      if (EMPRESAS[mi].correo === undefined) EMPRESAS[mi].correo = '';
+    }
+    guardarEmpresas();
   } else {
     EMPRESAS = [
       { id: 1, nombre: 'RenoxPell SpA (YoSorteo.cl)',     rut: '76.837.558-5', tipo: 'Plataforma de sorteos', giro: '', direccion: '', ciudad: '', pais: '', descripcion: '', web: '', correo: '' },
@@ -1873,7 +1884,7 @@ function confirmarLimpiar() {
 
 function recargarDatos() {
   cargarTodo();
-cargarEmpresas();
+  cargarEmpresas();
   initAll();
   mostrarToast('🔄 Recargado', '');
 }
@@ -2072,6 +2083,8 @@ if (mediosPago.length === 0) {
 }
 
 initAll();
+var __v = document.getElementById('footerVersion');
+if (__v) __v.textContent = 'Boop 🦈 · v3.1 (empresas fix)';
 </script>
 </body>
 </html>
