@@ -181,6 +181,14 @@
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏢 Empresas</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalEmpresa()">➕ Agregar Empresa</button>
     </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="text-xs font-semibold text-gray-500">🔍 Buscar:</label>
+        <input type="text" id="empFilterText" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white w-64" placeholder="Nombre, RUT, Giro, Ciudad..." oninput="renderEmpresas()">
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('empFilterText').value='';renderEmpresas()">Limpiar</button>
+        <span class="text-xs text-gray-400" id="empCountLabel">9 empresas</span>
+      </div>
+    </div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -987,9 +995,30 @@ function renderEmpresas() {
   var empty = document.getElementById('empEmpty');
   if (EMPRESAS.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  var html = '';
+  var filterText = (document.getElementById('empFilterText').value || '').toLowerCase().trim();
+  var dataF = [];
   for (var i = 0; i < EMPRESAS.length; i++) {
     var e = EMPRESAS[i];
+    if (filterText) {
+      var match = (e.nombre || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.rut || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.giro || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.ciudad || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.direccion || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.pais || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.descripcion || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.web || '').toLowerCase().indexOf(filterText) >= 0 ||
+                  (e.correo || '').toLowerCase().indexOf(filterText) >= 0;
+      if (match) dataF.push(e);
+    } else {
+      dataF.push(e);
+    }
+  }
+  document.getElementById('empCountLabel').textContent = dataF.length + ' empresas';
+  if (dataF.length === 0) { tbody.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-400 text-sm">Sin resultados para: "' + filterText + '"</td></tr>'; return; }
+  var html = '';
+  for (var i = 0; i < dataF.length; i++) {
+    var e = dataF[i];
     html += '<tr class="hover:bg-gray-50">';
     html += '<td class="p-2.5">' + e.id + '</td>';
     html += '<td class="p-2.5 font-semibold">' + (e.rut || '---') + '</td>';
