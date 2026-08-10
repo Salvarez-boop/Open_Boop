@@ -7,84 +7,75 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --primary: #2E75B6; --primary-dark: #1F4E7A;
-  --success: #70AD47; --danger: #E74C3C; --warning: #F39C12;
-}
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-.sidebar-link { transition: all .15s; border-left: 3px solid transparent; }
-.sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.08); }
-.sidebar-link.active { border-left-color: #70AD47; }
-.page { display: none; }
-.page.active { display: block; }
-canvas { max-height: 300px; }
-.toast {
-  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-  transform: translateY(80px); opacity: 0; transition: all .3s;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
-td.monto { font-family: 'SF Mono', 'Courier New', monospace; }
-td.tipo-ingreso { color: var(--success); font-weight: 600; }
-td.tipo-gasto { color: var(--danger); font-weight: 600; }
-dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .mt { font-family: 'SF Mono', 'Courier New', monospace; }
+  canvas { max-height: 300px; }
+  dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
+  .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all .3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .sidebar-link { transition: all .15s; border-left: 3px solid transparent; }
+  .sidebar-link:hover { background: rgba(255,255,255,0.08); }
+  .sidebar-link.active { background: rgba(255,255,255,0.08); border-left-color: #70AD47; }
 </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-<!-- ═══ SIDEBAR ═══ -->
+<!-- SIDEBAR -->
 <aside class="fixed left-0 top-0 h-full w-56 bg-[#1F3864] z-50 flex flex-col">
   <header class="px-5 py-4 border-b border-white/10">
-    <h1 class="text-white text-lg font-bold">🚀 Finan-TECH</h1>
+    <p class="text-white text-lg font-bold">🚀 Finan-TECH</p>
     <p class="text-blue-200/60 text-xs">Ingresos & Gastos</p>
   </header>
   <nav class="flex-1 py-2">
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link active" data-page="dashboard" onclick="irAPagina('dashboard')">📊 Dashboard</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="movimientos" onclick="irAPagina('movimientos')">📋 Movimientos</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="categorias" onclick="irAPagina('categorias')">🏷️ Categorías</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="bancos" onclick="irAPagina('bancos')">🏦 Bancos</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="medios-pago" onclick="irAPagina('medios-pago')">💳 Medios de Pago</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="irAPagina('transferencias')">🔄 Transferencias</a>
-    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="datos" onclick="irAPagina('datos')">⚙️ Datos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link active" data-page="dashboard" onclick="cambiarPagina('dashboard')">📊 Dashboard</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="movimientos" onclick="cambiarPagina('movimientos')">📋 Movimientos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="categorias" onclick="cambiarPagina('categorias')">🏷️ Categorías</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="bancos" onclick="cambiarPagina('bancos')">🏦 Bancos</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="medios-pago" onclick="cambiarPagina('medios-pago')">💳 Medios de Pago</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="transferencias" onclick="cambiarPagina('transferencias')">🔄 Transferencias</a>
+    <a class="flex items-center gap-3 px-5 py-2.5 text-blue-200 text-sm cursor-pointer sidebar-link" data-page="datos" onclick="cambiarPagina('datos')">⚙️ Datos</a>
   </nav>
   <footer class="px-5 py-3 border-t border-white/10 text-blue-300/30 text-[10px]">Boop 🦈 · v3.0</footer>
 </aside>
 
-<!-- ═══ MAIN ═══ -->
-<main class="ml-56 p-6 bg-gray-50 min-h-screen">
+<!-- MAIN -->
+<main class="ml-56 p-6 min-h-screen">
 
-  <!-- ===== DASHBOARD ===== -->
+  <!-- ========== DASHBOARD ========== -->
   <section class="page active" id="page-dashboard">
-    <header class="flex items-center gap-3 mb-1">
+    <div class="flex items-center gap-3 mb-1">
       <h2 class="text-xl font-bold text-[#1F3864]">📊 Dashboard</h2>
       <span class="bg-[#2E75B6] text-white text-xs font-semibold px-3 py-0.5 rounded-full" id="badgeCount">0</span>
-    </header>
-    <p class="text-gray-500 text-sm mb-4">Panel general · selecciona una empresa para ver KPIs individuales</p>
+    </div>
+    <p class="text-gray-500 text-sm mb-4">Panel general · selecciona una empresa para ver KPIs</p>
 
     <div class="flex items-center gap-3 mb-5">
       <label class="text-sm font-semibold text-gray-600">Empresa:</label>
       <select id="dashEmpresa" onchange="renderDashboard()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white min-w-[260px]"></select>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5" id="kpiRow">
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Ingresos</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiIngresos">$0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💸 Total Gastos</p><p class="text-2xl font-bold text-[#E74C3C]" id="kpiGastos">$0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📈 Saldo Neto</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiSaldo">$0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Total Mov.</p><p class="text-2xl font-bold text-gray-700" id="kpiMovs">0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">✅ Pagados</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiPagados">0</p></article>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Ingresos</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiIngresos">$0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💸 Gastos</p><p class="text-2xl font-bold text-[#E74C3C]" id="kpiGastos">$0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📈 Saldo</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiSaldo">$0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Mov.</p><p class="text-2xl font-bold text-gray-700" id="kpiMovs">0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">✅ Pagados</p><p class="text-2xl font-bold text-[#70AD47]" id="kpiPagados">0</p></div>
     </div>
 
     <div id="empresaDetail" class="hidden mb-5"></div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🥧 Ingresos vs Gastos</h3><canvas id="chartPie"></canvas></article>
-      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📈 Evolución Mensual</h3><canvas id="chartMonthly"></canvas></article>
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🥧 Ingresos vs Gastos</h3><canvas id="chartPie"></canvas></div>
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📈 Evolución Mensual</h3><canvas id="chartMonthly"></canvas></div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🏢 Por Empresa</h3><canvas id="chartEmpresa"></canvas></article>
-      <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📂 Por Categoría (Top 12)</h3><canvas id="chartCategoria"></canvas></article>
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">🏢 Por Empresa</h3><canvas id="chartEmpresa"></canvas></div>
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100"><h3 class="text-sm font-bold text-gray-700 mb-3">📂 Por Categoría</h3><canvas id="chartCategoria"></canvas></div>
     </div>
 
-    <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
       <h3 class="text-sm font-bold text-gray-700 mb-3">📋 Últimos 10 movimientos</h3>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -92,17 +83,18 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
           <tbody id="miniTablaBody" class="divide-y divide-gray-100"></tbody>
         </table>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== MOVIMIENTOS ===== -->
+  <!-- ========== MOVIMIENTOS ========== -->
   <section class="page" id="page-movimientos">
     <div class="flex items-center gap-2 flex-wrap mb-4">
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">📋 Movimientos</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalMovimiento()">➕ Agregar</button>
-      <button class="border border-gray-300 text-gray-500 text-xs px-3 py-2 rounded-lg cursor-pointer transition hover:bg-gray-50" onclick="recargarDatos()">🔄</button>
+      <button class="border border-gray-300 text-gray-500 text-xs px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="recargarDatos()">🔄</button>
     </div>
-    <article class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
       <div class="flex items-center gap-3 flex-wrap">
         <label class="text-xs font-semibold text-gray-500">Filtrar:</label>
         <select id="movFilterEmpresa" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
@@ -110,12 +102,13 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
         <input type="date" id="movFilterDesde" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
         <span class="text-gray-400 text-xs">a</span>
         <input type="date" id="movFilterHasta" onchange="renderMovimientos()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
-        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('movFilterEmpresa').value='Todas';document.getElementById('movFilterTipo').value='';document.getElementById('movFilterDesde').value='';document.getElementById('movFilterHasta').value='';renderMovimientos()">Limpiar</button>
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="limpiarFiltrosMov()">Limpiar</button>
         <span class="flex-1"></span>
         <span class="text-xs text-gray-400" id="movCountLabel"></span>
       </div>
-    </article>
-    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table class="w-full text-sm">
           <thead><tr class="bg-[#2E75B6] text-white sticky top-0 z-10"><th class="p-2.5 text-left font-semibold whitespace-nowrap">Fecha</th><th class="p-2.5 text-left font-semibold whitespace-nowrap">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-left font-semibold">Categoría</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Medio Pago</th><th class="p-2.5 text-right font-semibold">Monto</th><th class="p-2.5 text-left font-semibold">Moneda</th><th class="p-2.5 text-left font-semibold">Glosa</th><th class="p-2.5 text-left font-semibold">Pagado</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
@@ -123,72 +116,72 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="movEmpty">No hay movimientos registrados.</p>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== CATEGORÍAS ===== -->
+  <!-- ========== CATEGORÍAS ========== -->
   <section class="page" id="page-categorias">
     <div class="flex items-center gap-2 mb-4">
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏷️ Categorías</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalCategoria()">➕ Agregar</button>
     </div>
-    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-left font-semibold">Tipo</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="catBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="catEmpty">No hay categorías.</p>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== BANCOS ===== -->
+  <!-- ========== BANCOS ========== -->
   <section class="page" id="page-bancos">
     <div class="flex items-center gap-2 mb-4">
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">🏦 Bancos</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalBanco()">➕ Agregar</button>
     </div>
-    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay bancos.</p>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== MEDIOS DE PAGO ===== -->
+  <!-- ========== MEDIOS DE PAGO ========== -->
   <section class="page" id="page-medios-pago">
     <div class="flex items-center gap-2 mb-4">
       <h2 class="text-lg font-bold text-[#1F3864] flex-1">💳 Medios de Pago</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalMedioPago()">➕ Agregar</button>
     </div>
-    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Total Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="mpBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="mpEmpty">No hay medios de pago.</p>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== TRANSFERENCIAS ===== -->
+  <!-- ========== TRANSFERENCIAS ========== -->
   <section class="page" id="page-transferencias">
     <div class="flex items-center gap-2 flex-wrap mb-4">
-      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🔄 Transferencias Bancarias</h2>
+      <h2 class="text-lg font-bold text-[#1F3864] flex-1">🔄 Transferencias</h2>
       <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="mostrarModalTransferencia()">➕ Agregar</button>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Transferido</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiTransTotal">$0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Cantidad</p><p class="text-2xl font-bold text-gray-700" id="kpiTransCant">0</p></article>
-      <article class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">🏦 Bancos Involucrados</p><p class="text-2xl font-bold text-gray-700" id="kpiTransBancos">0</p></article>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">💰 Total Transferido</p><p class="text-2xl font-bold text-[#2E75B6]" id="kpiTransTotal">$0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">📊 Cantidad</p><p class="text-2xl font-bold text-gray-700" id="kpiTransCant">0</p></div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"><p class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">🏦 Bancos</p><p class="text-2xl font-bold text-gray-700" id="kpiTransBancos">0</p></div>
     </div>
-    <article class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
       <div class="flex items-center gap-3 flex-wrap">
         <label class="text-xs font-semibold text-gray-500">Filtrar:</label>
         <select id="transFilterEmpresa" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white"></select>
@@ -196,12 +189,12 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
         <input type="date" id="transFilterDesde" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
         <span class="text-gray-400 text-xs">a</span>
         <input type="date" id="transFilterHasta" onchange="renderTransferencias()" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs">
-        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('transFilterEmpresa').value='Todas';document.getElementById('transFilterBanco').value='Todos';document.getElementById('transFilterDesde').value='';document.getElementById('transFilterHasta').value='';renderTransferencias()">Limpiar</button>
+        <button class="border border-gray-300 text-gray-500 text-xs px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50" onclick="limpiarFiltrosTrans()">Limpiar</button>
         <span class="flex-1"></span>
         <span class="text-xs text-gray-400" id="transCountLabel"></span>
       </div>
-    </article>
-    <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table class="w-full text-sm">
           <thead><tr class="bg-[#2E75B6] text-white sticky top-0 z-10"><th class="p-2.5 text-left font-semibold">Fecha</th><th class="p-2.5 text-left font-semibold">Empresa</th><th class="p-2.5 text-left font-semibold">Banco Origen</th><th class="p-2.5 text-left font-semibold">Banco Destino</th><th class="p-2.5 text-right font-semibold">Monto</th><th class="p-2.5 text-left font-semibold">Moneda</th><th class="p-2.5 text-left font-semibold">Glosa</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
@@ -209,57 +202,56 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="transEmpty">No hay transferencias.</p>
       </div>
-    </article>
+    </div>
   </section>
 
-  <!-- ===== DATOS ===== -->
+  <!-- ========== DATOS ========== -->
   <section class="page" id="page-datos">
     <h2 class="text-lg font-bold text-[#1F3864] mb-4">⚙️ Gestión de Datos</h2>
     <div class="flex items-center gap-2 flex-wrap mb-4">
-      <button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarJSON()">⬇️ Exportar Todo (JSON)</button>
-      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarCSV()">📥 Exportar CSV (Excel)</button>
-      <button class="border border-gray-300 text-gray-600 text-xs px-4 py-2 rounded-lg cursor-pointer transition hover:bg-gray-50" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
-      <button class="bg-[#F39C12] hover:bg-[#D68910] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="cargarDatosEjemplo()">📦 Cargar Ejemplo</button>
-      <button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="if(confirm('¿Eliminar TODOS los datos?')){localStorage.clear();location.reload();}">🗑️ Limpiar Todo</button>
+      <button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarJSON()">⬇️ Exportar JSON</button>
+      <button class="bg-[#70AD47] hover:bg-[#5D8F3A] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="exportarCSV()">📥 Exportar CSV</button>
+      <button class="border border-gray-300 text-gray-600 text-xs px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('importFile').click()">📂 Importar JSON</button>
+      <button class="bg-[#F39C12] hover:bg-[#D68910] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="cargarDatosEjemplo()">📦 Ejemplo</button>
+      <button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition" onclick="confirmarLimpiar()">🗑️ Limpiar</button>
     </div>
     <input type="file" id="importFile" accept=".json" class="hidden" onchange="importarJSON(event)">
-    <article class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-sm text-gray-600">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-sm text-gray-600">
       <p class="font-semibold">¿Cómo funciona?</p>
-      <p>Todo se guarda automáticamente en tu navegador. No necesita internet. Exporta un backup JSON frecuentemente.</p>
-      <p class="mt-2">Para pasar datos al Excel: Exportar CSV → abrir en Excel → Guardar como .xlsx</p>
-      <p class="mt-1">Para restaurar: Exportaste un JSON antes → Importar JSON → selecciona el archivo.</p>
-    </article>
+      <p>Todo se guarda automáticamente en tu navegador (localStorage). No necesita internet.</p>
+      <p class="mt-2">Para Excel: Exportar CSV → abrir en Excel → Guardar como .xlsx</p>
+      <p class="mt-1">Para restaurar: Exportaste un JSON → Importar JSON.</p>
+    </div>
   </section>
-
 </main>
 
-<!-- ═══ MODAL MOVIMIENTO ═══ -->
+<!-- MODALS -->
 <dialog id="modalMov" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalMovTitle">➕ Agregar Movimiento</h2>
   <form id="formMov" onsubmit="return guardarMovimiento(event)">
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmTipo" required onchange="actualizarSelectCategorias()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Categoría *</label><select id="frmCategoria" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmTipo" required onchange="actualizarSelectCategorias()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Categoría *</label><select id="frmCategoria" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco</label><select id="frmBanco" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Ninguno</option></select></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Medio de Pago</label><select id="frmMedioPago" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Ninguno</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco</label><select id="frmBanco" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Ninguno</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Medio Pago</label><select id="frmMedioPago" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Ninguno</option></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Pagado</label><select id="frmPagado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="Sí">Sí</option><option value="No">No</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Pagado</label><select id="frmPagado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="Sí">Sí</option><option value="No">No</option></select></div>
       <div></div>
     </div>
     <div class="mb-3">
       <label class="block text-xs font-semibold text-gray-500 mb-1">Glosa</label>
-      <textarea id="frmGlosa" rows="2" placeholder="Ej: Venta 100 tickets" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white resize-none"></textarea>
+      <textarea id="frmGlosa" rows="2" placeholder="Ej: Venta 100 tickets" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalMov').close()">Cancelar</button>
@@ -268,12 +260,11 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
   </form>
 </dialog>
 
-<!-- ═══ MODAL CATEGORIA ═══ -->
 <dialog id="modalCat" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalCatTitle">➕ Agregar Categoría</h2>
   <form onsubmit="return guardarCategoria(event)">
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmCatNombre" required placeholder="Ej: Marketing Digital" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmCatTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmCatNombre" required placeholder="Ej: Marketing Digital" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmCatTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="Ingreso">Ingreso</option><option value="Gasto">Gasto</option></select></div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalCat').close()">Cancelar</button>
       <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
@@ -281,11 +272,10 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
   </form>
 </dialog>
 
-<!-- ═══ MODAL BANCO ═══ -->
 <dialog id="modalBanco" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalBancoTitle">➕ Agregar Banco</h2>
   <form onsubmit="return guardarBanco(event)">
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalBanco').close()">Cancelar</button>
       <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
@@ -293,11 +283,10 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
   </form>
 </dialog>
 
-<!-- ═══ MODAL MEDIO PAGO ═══ -->
 <dialog id="modalMP" class="rounded-2xl w-[420px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalMPTitle">➕ Agregar Medio de Pago</h2>
   <form onsubmit="return guardarMedioPago(event)">
-    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmMPNombre" required placeholder="Ej: Transferencia" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Nombre *</label><input type="text" id="frmMPNombre" required placeholder="Ej: Transferencia" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalMP').close()">Cancelar</button>
       <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
@@ -305,25 +294,24 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
   </form>
 </dialog>
 
-<!-- ═══ MODAL TRANSFERENCIA ═══ -->
 <dialog id="modalTrans" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalTransTitle">➕ Agregar Transferencia</h2>
   <form onsubmit="return guardarTransferencia(event)">
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmTransFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmTransEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha *</label><input type="date" id="frmTransFecha" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Empresa *</label><select id="frmTransEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Origen *</label><select id="frmTransBancoOrigen" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option></select></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Destino *</label><select id="frmTransBancoDestino" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Seleccionar</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Origen *</label><select id="frmTransBancoOrigen" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco Destino *</label><select id="frmTransBancoDestino" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option></select></div>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmTransMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmTransMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto *</label><input type="number" id="frmTransMonto" min="0" step="1" required placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Moneda</label><select id="frmTransMoneda" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
     </div>
     <div class="mb-3">
       <label class="block text-xs font-semibold text-gray-500 mb-1">Glosa</label>
-      <textarea id="frmTransGlosa" rows="2" placeholder="Ej: Traspaso fondo operacional" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white resize-none"></textarea>
+      <textarea id="frmTransGlosa" rows="2" placeholder="Ej: Traspaso fondo operacional" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalTrans').close()">Cancelar</button>
@@ -332,79 +320,146 @@ dialog::backdrop { background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
   </form>
 </dialog>
 
-<!-- ═══ TOAST ═══ -->
+<!-- TOAST -->
 <div class="toast bg-gray-800 text-white px-5 py-3 rounded-xl text-sm shadow-lg" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════
-// DATA
-// ════════════════════════════════════════════════════════
+// ======================== DATA ========================
 const EMPRESAS = [
-  { id:1, nombre:'RenoxPell SpA (YoSorteo.cl)',     rut:'76.837.558-5', tipo:'Plataforma de sorteos' },
-  { id:2, nombre:'TransTicket SpA (TransTicket.cl)', rut:'76.837.566-6', tipo:'Plataforma de sorteos' },
-  { id:3, nombre:'Transportes Álvarez SpA',          rut:'78.271.764-2', tipo:'Transporte / logística' },
-  { id:4, nombre:'Servicios PubliTruck SpA',         rut:'78.271.876-2', tipo:'Publicidad móvil' },
-  { id:5, nombre:'Greengo Austral SpA',              rut:'78.321.137-8', tipo:'Ferretería' },
-  { id:6, nombre:'Inversiones Ibiza SpA',            rut:'78.325.207-4', tipo:'Real estate / inversiones' },
-  { id:7, nombre:'Gastos Personales',                rut:'15.884.605-5', tipo:'Personal' },
-  { id:8, nombre:'Propiedades Salvarez',             rut:'15.884.605-5', tipo:'Propiedades con arriendo' },
-  { id:9, nombre:'Best Free Wifi Chile SpA',         rut:'76.718.863-3', tipo:'Enlaces & CCTV' },
+  { id: 1, nombre: 'RenoxPell SpA (YoSorteo.cl)',     rut: '76.837.558-5', tipo: 'Plataforma de sorteos' },
+  { id: 2, nombre: 'TransTicket SpA (TransTicket.cl)', rut: '76.837.566-6', tipo: 'Plataforma de sorteos' },
+  { id: 3, nombre: 'Transportes Álvarez SpA',          rut: '78.271.764-2', tipo: 'Transporte / logística' },
+  { id: 4, nombre: 'Servicios PubliTruck SpA',         rut: '78.271.876-2', tipo: 'Publicidad móvil' },
+  { id: 5, nombre: 'Greengo Austral SpA',              rut: '78.321.137-8', tipo: 'Ferretería' },
+  { id: 6, nombre: 'Inversiones Ibiza SpA',            rut: '78.325.207-4', tipo: 'Real estate / inversiones' },
+  { id: 7, nombre: 'Gastos Personales',                rut: '15.884.605-5', tipo: 'Personal' },
+  { id: 8, nombre: 'Propiedades Salvarez',             rut: '15.884.605-5', tipo: 'Propiedades con arriendo' },
+  { id: 9, nombre: 'Best Free Wifi Chile SpA',         rut: '76.718.863-3', tipo: 'Enlaces & CCTV' },
 ];
 
-let categorias = [], bancos = [], mediosPago = [], transferencias = [], movimientos = [];
-let editMovId = null, editCatId = null, editBancoId = null, editMPId = null, editTransId = null;
+let categorias = [];
+let bancos = [];
+let mediosPago = [];
+let transferencias = [];
+let movimientos = [];
 
-// ════════════════════════════════════════════════════════
-// PERSISTENCIA
-// ════════════════════════════════════════════════════════
+let editMovId = null;
+let editCatId = null;
+let editBancoId = null;
+let editMPId = null;
+let editTransId = null;
+
+// ======================== PERSISTENCIA ========================
 function guardarTodo() {
-  localStorage.setItem('movimientos', JSON.stringify(movimientos.map(m=>({...m,fecha:m.fecha.toISOString()}))));
+  localStorage.setItem('movimientos', JSON.stringify(movimientos.map(function(m) {
+    var x = Object.assign({}, m);
+    x.fecha = x.fecha.toISOString();
+    return x;
+  })));
   localStorage.setItem('categorias', JSON.stringify(categorias));
   localStorage.setItem('bancos', JSON.stringify(bancos));
   localStorage.setItem('mediosPago', JSON.stringify(mediosPago));
-  localStorage.setItem('transferencias', JSON.stringify(transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))));
+  localStorage.setItem('transferencias', JSON.stringify(transferencias.map(function(t) {
+    var x = Object.assign({}, t);
+    x.fecha = x.fecha.toISOString();
+    return x;
+  })));
 }
+
 function cargarTodo() {
   try {
-    movimientos = JSON.parse(localStorage.getItem('movimientos')||'[]').map(x=>({...x,fecha:new Date(x.fecha)}));
-    categorias = JSON.parse(localStorage.getItem('categorias')||'[]');
-    bancos = JSON.parse(localStorage.getItem('bancos')||'[]');
-    mediosPago = JSON.parse(localStorage.getItem('mediosPago')||'[]');
-    transferencias = JSON.parse(localStorage.getItem('transferencias')||'[]').map(x=>({...x,fecha:new Date(x.fecha)}));
-  } catch(e) { [movimientos,categorias,bancos,mediosPago,transferencias]=[[],[],[],[],[]]; }
+    var raw = localStorage.getItem('movimientos');
+    movimientos = raw ? JSON.parse(raw).map(function(x) { x.fecha = new Date(x.fecha); return x; }) : [];
+    categorias = JSON.parse(localStorage.getItem('categorias') || '[]');
+    bancos = JSON.parse(localStorage.getItem('bancos') || '[]');
+    mediosPago = JSON.parse(localStorage.getItem('mediosPago') || '[]');
+    var rawT = localStorage.getItem('transferencias');
+    transferencias = rawT ? JSON.parse(rawT).map(function(x) { x.fecha = new Date(x.fecha); return x; }) : [];
+  } catch(e) {
+    movimientos = [];
+    categorias = [];
+    bancos = [];
+    mediosPago = [];
+    transferencias = [];
+  }
 }
 
-// ════════════════════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════════════════════
-const fmtCLP = n => '$' + Math.abs(n).toLocaleString('es-CL');
-const fmtFecha = d => { if(typeof d==='string') d=new Date(d); return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}); };
-const toDateInput = d => { if(typeof d==='string') d=new Date(d); return d.toISOString().split('T')[0]; };
-const empresaObj = id => EMPRESAS.find(x=>x.id===id);
+// ======================== HELPERS ========================
+function fmtCLP(n) {
+  return '$' + Math.abs(n).toLocaleString('es-CL');
+}
 
-let toastTimeout;
-function mostrarToast(msg,tipo='') {
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className='toast show px-5 py-3 rounded-xl text-sm shadow-lg '+
-    (tipo==='success'?'bg-[#70AD47] text-white':tipo==='error'?'bg-[#E74C3C] text-white':'bg-gray-800 text-white');
+function fmtFecha(d) {
+  if (typeof d === 'string') d = new Date(d);
+  return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function toDateInput(d) {
+  if (typeof d === 'string') d = new Date(d);
+  return d.toISOString().split('T')[0];
+}
+
+function empresaObj(id) {
+  return EMPRESAS.find(function(e) { return e.id === id; });
+}
+
+// ======================== TOAST ========================
+var toastTimeout;
+
+function mostrarToast(msg, tipo) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show px-5 py-3 rounded-xl text-sm shadow-lg';
+  if (tipo === 'success') {
+    el.classList.add('bg-[#70AD47]', 'text-white');
+  } else if (tipo === 'error') {
+    el.classList.add('bg-[#E74C3C]', 'text-white');
+  } else {
+    el.classList.add('bg-gray-800', 'text-white');
+  }
   clearTimeout(toastTimeout);
-  toastTimeout=setTimeout(()=>el.classList.remove('show'),3000);
+  toastTimeout = setTimeout(function() { el.classList.remove('show'); }, 3000);
 }
 
-function irAPagina(page) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.sidebar-link').forEach(a=>a.classList.remove('active'));
-  document.querySelector(`.sidebar-link[data-page="${page}"]`)?.classList.add('active');
-  const fn = { dashboard:renderDashboard, movimientos:renderMovimientos, categorias:renderCategorias,
-    bancos:renderBancos, 'medios-pago':renderMediosPago, transferencias:renderTransferencias };
-  if(fn[page]) fn[page]();
+// ======================== NAVEGACIÓN ========================
+function cambiarPagina(page) {
+  // Ocultar todas las páginas
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].classList.remove('active');
+  }
+  // Mostrar la seleccionada
+  document.getElementById('page-' + page).classList.add('active');
+
+  // Sidebar links
+  var links = document.querySelectorAll('.sidebar-link');
+  for (var i = 0; i < links.length; i++) {
+    links[i].classList.remove('active');
+  }
+  var activeLink = document.querySelector('.sidebar-link[data-page="' + page + '"]');
+  if (activeLink) activeLink.classList.add('active');
+
+  // Renderizar según página
+  switch (page) {
+    case 'dashboard': renderDashboard(); break;
+    case 'movimientos': renderMovimientos(); break;
+    case 'categorias': renderCategorias(); break;
+    case 'bancos': renderBancos(); break;
+    case 'medios-pago': renderMediosPago(); break;
+    case 'transferencias': renderTransferencias(); break;
+  }
 }
 
-// ════════════════════════════════════════════════════════
-// CATEGORIAS CRUD
-// ════════════════════════════════════════════════════════
-function getNextCatId() { return categorias.length ? Math.max(...categorias.map(c=>c.id))+1 : 1; }
+// ======================== CATEGORÍAS CRUD ========================
+function getNextCatId() {
+  if (categorias.length === 0) return 1;
+  var max = 0;
+  for (var i = 0; i < categorias.length; i++) {
+    if (categorias[i].id > max) max = categorias[i].id;
+  }
+  return max + 1;
+}
+
 function mostrarModalCategoria(data) {
   editCatId = data ? data.id : null;
   document.getElementById('modalCatTitle').textContent = data ? '✏️ Editar Categoría' : '➕ Agregar Categoría';
@@ -412,232 +467,1155 @@ function mostrarModalCategoria(data) {
   document.getElementById('frmCatTipo').value = data ? data.tipoMov : '';
   document.getElementById('modalCat').showModal();
 }
+
 function guardarCategoria(e) {
   e.preventDefault();
-  const nombre = document.getElementById('frmCatNombre').value.trim();
-  const tipoMov = document.getElementById('frmCatTipo').value;
-  if(!nombre||!tipoMov) { mostrarToast('Completa todos los campos','error'); return false; }
-  if(editCatId) { const i=categorias.findIndex(c=>c.id===editCatId); if(i>=0){categorias[i].nombre=nombre;categorias[i].tipoMov=tipoMov;} mostrarToast('✅ Actualizada','success'); }
-  else { categorias.push({id:getNextCatId(),nombre,tipoMov}); mostrarToast('✅ Agregada','success'); }
-  guardarTodo(); document.getElementById('modalCat').close(); renderCategorias(); return false;
-}
-function editarCategoria(id) { const c=categorias.find(x=>x.id===id); if(c) mostrarModalCategoria(c); }
-function eliminarCategoria(id) { if(!confirm('¿Eliminar?')) return; categorias=categorias.filter(c=>c.id!==id); guardarTodo(); renderCategorias(); mostrarToast('🗑️ Eliminada','success'); }
-function renderCategorias() {
-  const tbody=document.getElementById('catBody'), empty=document.getElementById('catEmpty');
-  if(!categorias.length) { tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
-  empty.classList.add('hidden');
-  tbody.innerHTML = categorias.map(c => {
-    const movs=movimientos.filter(m=>m.categoriaId===c.id), total=movs.reduce((s,m)=>s+m.monto,0);
-    return `<tr class="hover:bg-gray-50"><td class="p-2.5">${c.id}</td><td class="p-2.5 font-semibold">${c.nombre}</td><td class="p-2.5 ${c.tipoMov==='Ingreso'?'text-[#70AD47]':'text-[#E74C3C]'} font-semibold">${c.tipoMov}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarCategoria(${c.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarCategoria(${c.id})">🗑️</button></td></tr>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════════════
-// BANCOS CRUD
-// ════════════════════════════════════════════════════════
-function getNextBancoId() { return bancos.length ? Math.max(...bancos.map(b=>b.id))+1 : 1; }
-function mostrarModalBanco(data) {
-  editBancoId=data?data.id:null; document.getElementById('modalBancoTitle').textContent=data?'✏️ Editar Banco':'➕ Agregar Banco';
-  document.getElementById('frmBancoNombre').value=data?data.nombre:''; document.getElementById('modalBanco').showModal();
-}
-function guardarBanco(e) {
-  e.preventDefault();
-  const nombre=document.getElementById('frmBancoNombre').value.trim();
-  if(!nombre){mostrarToast('Ingresa el nombre','error');return false;}
-  if(editBancoId){const i=bancos.findIndex(b=>b.id===editBancoId);if(i>=0)bancos[i].nombre=nombre;mostrarToast('✅ Actualizado','success');}
-  else{bancos.push({id:getNextBancoId(),nombre});mostrarToast('✅ Agregado','success');}
-  guardarTodo();document.getElementById('modalBanco').close();renderBancos();return false;
-}
-function editarBanco(id){const b=bancos.find(x=>x.id===id);if(b)mostrarModalBanco(b);}
-function eliminarBanco(id){if(!confirm('¿Eliminar?'))return;bancos=bancos.filter(b=>b.id!==id);guardarTodo();renderBancos();mostrarToast('🗑️ Eliminado','success');}
-function renderBancos() {
-  const tbody=document.getElementById('bancoBody'),empty=document.getElementById('bancoEmpty');
-  if(!bancos.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
-  empty.classList.add('hidden');
-  tbody.innerHTML=bancos.map(b=>{const movs=movimientos.filter(m=>m.bancoId===b.id),total=movs.reduce((s,m)=>s+m.monto,0);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${b.id}</td><td class="p-2.5 font-semibold">${b.nombre}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarBanco(${b.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarBanco(${b.id})">🗑️</button></td></tr>`;}).join('');
-}
-
-// ════════════════════════════════════════════════════════
-// MEDIOS DE PAGO CRUD
-// ════════════════════════════════════════════════════════
-function getNextMPId(){return mediosPago.length?Math.max(...mediosPago.map(m=>m.id))+1:1;}
-function mostrarModalMedioPago(data){editMPId=data?data.id:null;document.getElementById('modalMPTitle').textContent=data?'✏️ Editar':'➕ Agregar';document.getElementById('frmMPNombre').value=data?data.nombre:'';document.getElementById('modalMP').showModal();}
-function guardarMedioPago(e){e.preventDefault();const nombre=document.getElementById('frmMPNombre').value.trim();if(!nombre){mostrarToast('Ingresa el nombre','error');return false;}if(editMPId){const i=mediosPago.findIndex(m=>m.id===editMPId);if(i>=0)mediosPago[i].nombre=nombre;mostrarToast('✅ Actualizado','success');}else{mediosPago.push({id:getNextMPId(),nombre});mostrarToast('✅ Agregado','success');}guardarTodo();document.getElementById('modalMP').close();renderMediosPago();return false;}
-function editarMedioPago(id){const m=mediosPago.find(x=>x.id===id);if(m)mostrarModalMedioPago(m);}
-function eliminarMedioPago(id){if(!confirm('¿Eliminar?'))return;mediosPago=mediosPago.filter(m=>m.id!==id);guardarTodo();renderMediosPago();mostrarToast('🗑️ Eliminado','success');}
-function renderMediosPago(){const tbody=document.getElementById('mpBody'),empty=document.getElementById('mpEmpty');if(!mediosPago.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');tbody.innerHTML=mediosPago.map(mp=>{const movs=movimientos.filter(m=>m.medioPagoId===mp.id),total=movs.reduce((s,m)=>s+m.monto,0);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${mp.id}</td><td class="p-2.5 font-semibold">${mp.nombre}</td><td class="p-2.5 text-right">${movs.length}</td><td class="p-2.5 text-right monto">${fmtCLP(total)}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMedioPago(${mp.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMedioPago(${mp.id})">🗑️</button></td></tr>`;}).join('');}
-
-// ════════════════════════════════════════════════════════
-// MOVIMIENTOS CRUD
-// ════════════════════════════════════════════════════════
-function llenarSelectoresMov() {
-  document.getElementById('frmEmpresa').innerHTML='<option value="">Seleccionar</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  document.getElementById('frmBanco').innerHTML='<option value="">Ninguno</option>'+bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
-  document.getElementById('frmMedioPago').innerHTML='<option value="">Ninguno</option>'+mediosPago.map(mp=>`<option value="${mp.id}">${mp.nombre}</option>`).join('');
-}
-function actualizarSelectCategorias() {
-  const tipo=document.getElementById('frmTipo').value;
-  const sel=document.getElementById('frmCategoria');
-  if(!tipo){sel.innerHTML='<option value="">Primero selecciona Tipo</option>';return;}
-  sel.innerHTML='<option value="">Seleccionar</option>'+categorias.filter(c=>c.tipoMov===tipo).map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
-}
-function mostrarModalMovimiento(data) {
-  editMovId=data?data.id:null; document.getElementById('modalMovTitle').textContent=data?'✏️ Editar Movimiento':'➕ Agregar Movimiento';
-  document.getElementById('frmFecha').value=data?toDateInput(data.fecha):new Date().toISOString().split('T')[0];
-  llenarSelectoresMov();
-  if(data){
-    document.getElementById('frmEmpresa').value=data.empresaId;document.getElementById('frmTipo').value=data.tipo;
-    actualizarSelectCategorias();document.getElementById('frmCategoria').value=data.categoriaId;
-    document.getElementById('frmBanco').value=data.bancoId||'';document.getElementById('frmMedioPago').value=data.medioPagoId||'';
-    document.getElementById('frmMonto').value=data.monto;document.getElementById('frmMoneda').value=data.moneda;
-    document.getElementById('frmPagado').value=data.pagado;document.getElementById('frmGlosa').value=data.glosa||'';
-  } else { document.getElementById('frmTipo').value=''; actualizarSelectCategorias(); }
-  document.getElementById('btnGuardarMov').textContent=data?'🔄 Actualizar':'💾 Guardar';
-  document.getElementById('modalMov').showModal();
-}
-function guardarMovimiento(e) {
-  e.preventDefault();
-  const empresaId=parseInt(document.getElementById('frmEmpresa').value),tipo=document.getElementById('frmTipo').value;
-  const categoriaId=parseInt(document.getElementById('frmCategoria').value),bancoId=parseInt(document.getElementById('frmBanco').value)||0;
-  const medioPagoId=parseInt(document.getElementById('frmMedioPago').value)||0,monto=parseFloat(document.getElementById('frmMonto').value);
-  const moneda=document.getElementById('frmMoneda').value,glosa=document.getElementById('frmGlosa').value.trim();
-  const pagado=document.getElementById('frmPagado').value,fecha=document.getElementById('frmFecha').value;
-  if(!fecha||!empresaId||!tipo||!categoriaId||!monto){mostrarToast('Completa campos obligatorios','error');return false;}
-  const emp=EMPRESAS.find(e=>e.id===empresaId),cat=categorias.find(c=>c.id===categoriaId);
-  const obj={id:editMovId||Date.now(),fecha:new Date(fecha+'T12:00:00'),empresaId,empresaNombre:emp?emp.nombre:'',empresaRut:emp?emp.rut:'',tipo,categoriaId,categoriaNombre:cat?cat.nombre:'',bancoId,medioPagoId,monto,moneda,glosa,pagado};
-  if(editMovId){const i=movimientos.findIndex(m=>m.id===editMovId);if(i>=0)movimientos[i]=obj;mostrarToast('✅ Actualizado','success');}
-  else{movimientos.push(obj);mostrarToast('✅ Agregado','success');}
-  guardarTodo();document.getElementById('modalMov').close();
-  const active=document.querySelector('.page.active');if(active&&active.id==='page-movimientos')renderMovimientos();else if(active&&active.id==='page-dashboard')renderDashboard();
+  var nombre = document.getElementById('frmCatNombre').value.trim();
+  var tipoMov = document.getElementById('frmCatTipo').value;
+  if (!nombre || !tipoMov) {
+    mostrarToast('Completa todos los campos', 'error');
+    return false;
+  }
+  if (editCatId) {
+    for (var i = 0; i < categorias.length; i++) {
+      if (categorias[i].id === editCatId) {
+        categorias[i].nombre = nombre;
+        categorias[i].tipoMov = tipoMov;
+        break;
+      }
+    }
+    mostrarToast('✅ Categoría actualizada', 'success');
+  } else {
+    categorias.push({ id: getNextCatId(), nombre: nombre, tipoMov: tipoMov });
+    mostrarToast('✅ Categoría agregada', 'success');
+  }
+  guardarTodo();
+  document.getElementById('modalCat').close();
+  renderCategorias();
   return false;
 }
-function editarMovimiento(id){const m=movimientos.find(x=>x.id===id);if(m)mostrarModalMovimiento(m);}
-function eliminarMovimiento(id){const m=movimientos.find(x=>x.id===id);if(!m)return;const emp=empresaObj(m.empresaId);if(!confirm(`¿Eliminar?\n${fmtFecha(m.fecha)} - ${emp?emp.nombre:'?'} - ${fmtCLP(m.monto)}`))return;movimientos=movimientos.filter(x=>x.id!==id);guardarTodo();const active=document.querySelector('.page.active');if(active&&active.id==='page-movimientos')renderMovimientos();else if(active&&active.id==='page-dashboard')renderDashboard();mostrarToast('🗑️ Eliminado','success');}
-function renderMovimientos() {
-  let data=[...movimientos]; const fEmp=document.getElementById('movFilterEmpresa').value,fTipo=document.getElementById('movFilterTipo').value,desde=document.getElementById('movFilterDesde').value,hasta=document.getElementById('movFilterHasta').value;
-  if(fEmp!=='Todas')data=data.filter(m=>m.empresaId===parseInt(fEmp));if(fTipo)data=data.filter(m=>m.tipo===fTipo);if(desde)data=data.filter(m=>m.fecha>=new Date(desde+'T00:00:00'));if(hasta)data=data.filter(m=>m.fecha<=new Date(hasta+'T23:59:59'));
-  data.sort((a,b)=>b.fecha-a.fecha);
-  document.getElementById('movCountLabel').textContent=data.length+' registros';
-  const tbody=document.getElementById('movBody'),empty=document.getElementById('movEmpty');
-  if(!data.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
-  tbody.innerHTML=data.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId),ban=bancos.find(b=>b.id===m.bancoId),mp=mediosPago.find(x=>x.id===m.medioPagoId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(m.fecha)}</td><td class="p-2.5">${emp?emp.nombre+' ('+emp.rut+')':'—'}</td><td class="p-2.5 tipo-${m.tipo.toLowerCase()}">${m.tipo}</td><td class="p-2.5">${cat?cat.nombre:'—'}</td><td class="p-2.5">${ban?ban.nombre:'—'}</td><td class="p-2.5">${mp?mp.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(m.monto)}</td><td class="p-2.5">${m.moneda}</td><td class="p-2.5">${m.glosa||''}</td><td class="p-2.5">${m.pagado==='Sí'?'✅':'❌'}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMovimiento(${m.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMovimiento(${m.id})">🗑️</button></td></tr>`;}).join('');
+
+function editarCategoria(id) {
+  for (var i = 0; i < categorias.length; i++) {
+    if (categorias[i].id === id) {
+      mostrarModalCategoria(categorias[i]);
+      return;
+    }
+  }
 }
 
-// ════════════════════════════════════════════════════════
-// TRANSFERENCIAS CRUD
-// ════════════════════════════════════════════════════════
-function llenarSelectoresTrans() {
-  document.getElementById('frmTransEmpresa').innerHTML='<option value="">Seleccionar</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  const opts=bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
-  document.getElementById('frmTransBancoOrigen').innerHTML='<option value="">Seleccionar</option>'+opts;
-  document.getElementById('frmTransBancoDestino').innerHTML='<option value="">Seleccionar</option>'+opts;
+function eliminarCategoria(id) {
+  if (!confirm('¿Eliminar esta categoría?')) return;
+  var nuevo = [];
+  for (var i = 0; i < categorias.length; i++) {
+    if (categorias[i].id !== id) nuevo.push(categorias[i]);
+  }
+  categorias = nuevo;
+  guardarTodo();
+  renderCategorias();
+  mostrarToast('🗑️ Categoría eliminada', 'success');
 }
+
+function renderCategorias() {
+  var tbody = document.getElementById('catBody');
+  var empty = document.getElementById('catEmpty');
+  if (categorias.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  var html = '';
+  for (var i = 0; i < categorias.length; i++) {
+    var c = categorias[i];
+    var movsCount = 0;
+    var total = 0;
+    for (var j = 0; j < movimientos.length; j++) {
+      if (movimientos[j].categoriaId === c.id) {
+        movsCount++;
+        total += movimientos[j].monto;
+      }
+    }
+    var tipoClass = c.tipoMov === 'Ingreso' ? 'text-[#70AD47]' : 'text-[#E74C3C]';
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + c.id + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + c.nombre + '</td>';
+    html += '<td class="p-2.5 font-semibold ' + tipoClass + '">' + c.tipoMov + '</td>';
+    html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(total) + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap">';
+    html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarCategoria(' + c.id + ')">✏️</button>';
+    html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarCategoria(' + c.id + ')">🗑️</button>';
+    html += '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ======================== BANCOS CRUD ========================
+function getNextBancoId() {
+  if (bancos.length === 0) return 1;
+  var max = 0;
+  for (var i = 0; i < bancos.length; i++) {
+    if (bancos[i].id > max) max = bancos[i].id;
+  }
+  return max + 1;
+}
+
+function mostrarModalBanco(data) {
+  editBancoId = data ? data.id : null;
+  document.getElementById('modalBancoTitle').textContent = data ? '✏️ Editar Banco' : '➕ Agregar Banco';
+  document.getElementById('frmBancoNombre').value = data ? data.nombre : '';
+  document.getElementById('modalBanco').showModal();
+}
+
+function guardarBanco(e) {
+  e.preventDefault();
+  var nombre = document.getElementById('frmBancoNombre').value.trim();
+  if (!nombre) { mostrarToast('Ingresa el nombre', 'error'); return false; }
+  if (editBancoId) {
+    for (var i = 0; i < bancos.length; i++) {
+      if (bancos[i].id === editBancoId) { bancos[i].nombre = nombre; break; }
+    }
+    mostrarToast('✅ Banco actualizado', 'success');
+  } else {
+    bancos.push({ id: getNextBancoId(), nombre: nombre });
+    mostrarToast('✅ Banco agregado', 'success');
+  }
+  guardarTodo();
+  document.getElementById('modalBanco').close();
+  renderBancos();
+  return false;
+}
+
+function editarBanco(id) {
+  for (var i = 0; i < bancos.length; i++) {
+    if (bancos[i].id === id) { mostrarModalBanco(bancos[i]); return; }
+  }
+}
+
+function eliminarBanco(id) {
+  if (!confirm('¿Eliminar este banco?')) return;
+  var nuevo = [];
+  for (var i = 0; i < bancos.length; i++) {
+    if (bancos[i].id !== id) nuevo.push(bancos[i]);
+  }
+  bancos = nuevo;
+  guardarTodo();
+  renderBancos();
+  mostrarToast('🗑️ Banco eliminado', 'success');
+}
+
+function renderBancos() {
+  var tbody = document.getElementById('bancoBody');
+  var empty = document.getElementById('bancoEmpty');
+  if (bancos.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  var html = '';
+  for (var i = 0; i < bancos.length; i++) {
+    var b = bancos[i];
+    var movsCount = 0;
+    var total = 0;
+    for (var j = 0; j < movimientos.length; j++) {
+      if (movimientos[j].bancoId === b.id) { movsCount++; total += movimientos[j].monto; }
+    }
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + b.id + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + b.nombre + '</td>';
+    html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(total) + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap">';
+    html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarBanco(' + b.id + ')">✏️</button>';
+    html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarBanco(' + b.id + ')">🗑️</button>';
+    html += '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ======================== MEDIOS DE PAGO CRUD ========================
+function getNextMPId() {
+  if (mediosPago.length === 0) return 1;
+  var max = 0;
+  for (var i = 0; i < mediosPago.length; i++) {
+    if (mediosPago[i].id > max) max = mediosPago[i].id;
+  }
+  return max + 1;
+}
+
+function mostrarModalMedioPago(data) {
+  editMPId = data ? data.id : null;
+  document.getElementById('modalMPTitle').textContent = data ? '✏️ Editar' : '➕ Agregar Medio de Pago';
+  document.getElementById('frmMPNombre').value = data ? data.nombre : '';
+  document.getElementById('modalMP').showModal();
+}
+
+function guardarMedioPago(e) {
+  e.preventDefault();
+  var nombre = document.getElementById('frmMPNombre').value.trim();
+  if (!nombre) { mostrarToast('Ingresa el nombre', 'error'); return false; }
+  if (editMPId) {
+    for (var i = 0; i < mediosPago.length; i++) {
+      if (mediosPago[i].id === editMPId) { mediosPago[i].nombre = nombre; break; }
+    }
+    mostrarToast('✅ Actualizado', 'success');
+  } else {
+    mediosPago.push({ id: getNextMPId(), nombre: nombre });
+    mostrarToast('✅ Agregado', 'success');
+  }
+  guardarTodo();
+  document.getElementById('modalMP').close();
+  renderMediosPago();
+  return false;
+}
+
+function editarMedioPago(id) {
+  for (var i = 0; i < mediosPago.length; i++) {
+    if (mediosPago[i].id === id) { mostrarModalMedioPago(mediosPago[i]); return; }
+  }
+}
+
+function eliminarMedioPago(id) {
+  if (!confirm('¿Eliminar este medio de pago?')) return;
+  var nuevo = [];
+  for (var i = 0; i < mediosPago.length; i++) {
+    if (mediosPago[i].id !== id) nuevo.push(mediosPago[i]);
+  }
+  mediosPago = nuevo;
+  guardarTodo();
+  renderMediosPago();
+  mostrarToast('🗑️ Eliminado', 'success');
+}
+
+function renderMediosPago() {
+  var tbody = document.getElementById('mpBody');
+  var empty = document.getElementById('mpEmpty');
+  if (mediosPago.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  var html = '';
+  for (var i = 0; i < mediosPago.length; i++) {
+    var mp = mediosPago[i];
+    var movsCount = 0;
+    var total = 0;
+    for (var j = 0; j < movimientos.length; j++) {
+      if (movimientos[j].medioPagoId === mp.id) { movsCount++; total += movimientos[j].monto; }
+    }
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + mp.id + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + mp.nombre + '</td>';
+    html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(total) + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap">';
+    html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMedioPago(' + mp.id + ')">✏️</button>';
+    html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMedioPago(' + mp.id + ')">🗑️</button>';
+    html += '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ======================== MOVIMIENTOS CRUD ========================
+function llenarSelectoresMov() {
+  var empHtml = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    empHtml += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+  }
+  document.getElementById('frmEmpresa').innerHTML = empHtml;
+
+  var banHtml = '<option value="">Ninguno</option>';
+  for (var i = 0; i < bancos.length; i++) {
+    banHtml += '<option value="' + bancos[i].id + '">' + bancos[i].nombre + '</option>';
+  }
+  document.getElementById('frmBanco').innerHTML = banHtml;
+
+  var mpHtml = '<option value="">Ninguno</option>';
+  for (var i = 0; i < mediosPago.length; i++) {
+    mpHtml += '<option value="' + mediosPago[i].id + '">' + mediosPago[i].nombre + '</option>';
+  }
+  document.getElementById('frmMedioPago').innerHTML = mpHtml;
+}
+
+function actualizarSelectCategorias() {
+  var tipo = document.getElementById('frmTipo').value;
+  var sel = document.getElementById('frmCategoria');
+  if (!tipo) {
+    sel.innerHTML = '<option value="">Primero selecciona Tipo</option>';
+    return;
+  }
+  var html = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < categorias.length; i++) {
+    if (categorias[i].tipoMov === tipo) {
+      html += '<option value="' + categorias[i].id + '">' + categorias[i].nombre + '</option>';
+    }
+  }
+  sel.innerHTML = html;
+}
+
+function mostrarModalMovimiento(data) {
+  editMovId = data ? data.id : null;
+  document.getElementById('modalMovTitle').textContent = data ? '✏️ Editar Movimiento' : '➕ Agregar Movimiento';
+  document.getElementById('frmFecha').value = data ? toDateInput(data.fecha) : new Date().toISOString().split('T')[0];
+  llenarSelectoresMov();
+
+  if (data) {
+    document.getElementById('frmEmpresa').value = data.empresaId;
+    document.getElementById('frmTipo').value = data.tipo;
+    actualizarSelectCategorias();
+    document.getElementById('frmCategoria').value = data.categoriaId;
+    document.getElementById('frmBanco').value = data.bancoId || '';
+    document.getElementById('frmMedioPago').value = data.medioPagoId || '';
+    document.getElementById('frmMonto').value = data.monto;
+    document.getElementById('frmMoneda').value = data.moneda;
+    document.getElementById('frmPagado').value = data.pagado;
+    document.getElementById('frmGlosa').value = data.glosa || '';
+    document.getElementById('btnGuardarMov').textContent = '🔄 Actualizar';
+  } else {
+    document.getElementById('frmTipo').value = '';
+    actualizarSelectCategorias();
+    document.getElementById('frmMonto').value = '';
+    document.getElementById('frmMoneda').value = 'CLP';
+    document.getElementById('frmPagado').value = 'Sí';
+    document.getElementById('frmGlosa').value = '';
+    document.getElementById('btnGuardarMov').textContent = '💾 Guardar';
+  }
+  document.getElementById('modalMov').showModal();
+}
+
+function guardarMovimiento(e) {
+  e.preventDefault();
+  var empresaId = parseInt(document.getElementById('frmEmpresa').value);
+  var tipo = document.getElementById('frmTipo').value;
+  var categoriaId = parseInt(document.getElementById('frmCategoria').value);
+  var bancoId = parseInt(document.getElementById('frmBanco').value) || 0;
+  var medioPagoId = parseInt(document.getElementById('frmMedioPago').value) || 0;
+  var monto = parseFloat(document.getElementById('frmMonto').value);
+  var moneda = document.getElementById('frmMoneda').value;
+  var glosa = document.getElementById('frmGlosa').value.trim();
+  var pagado = document.getElementById('frmPagado').value;
+  var fecha = document.getElementById('frmFecha').value;
+
+  if (!fecha || !empresaId || !tipo || !categoriaId || !monto) {
+    mostrarToast('Completa los campos obligatorios', 'error');
+    return false;
+  }
+
+  var emp = empresaObj(empresaId);
+  var cat = null;
+  for (var i = 0; i < categorias.length; i++) {
+    if (categorias[i].id === categoriaId) { cat = categorias[i]; break; }
+  }
+
+  var obj = {
+    id: editMovId || Date.now(),
+    fecha: new Date(fecha + 'T12:00:00'),
+    empresaId: empresaId,
+    empresaNombre: emp ? emp.nombre : '',
+    empresaRut: emp ? emp.rut : '',
+    tipo: tipo,
+    categoriaId: categoriaId,
+    categoriaNombre: cat ? cat.nombre : '',
+    bancoId: bancoId,
+    medioPagoId: medioPagoId,
+    monto: monto,
+    moneda: moneda,
+    glosa: glosa,
+    pagado: pagado
+  };
+
+  if (editMovId) {
+    for (var i = 0; i < movimientos.length; i++) {
+      if (movimientos[i].id === editMovId) {
+        movimientos[i] = obj;
+        break;
+      }
+    }
+    mostrarToast('✅ Movimiento actualizado', 'success');
+  } else {
+    movimientos.push(obj);
+    mostrarToast('✅ Movimiento agregado', 'success');
+  }
+
+  guardarTodo();
+  document.getElementById('modalMov').close();
+
+  var active = document.querySelector('.page.active');
+  if (active) {
+    if (active.id === 'page-movimientos') renderMovimientos();
+    else if (active.id === 'page-dashboard') renderDashboard();
+  }
+  return false;
+}
+
+function editarMovimiento(id) {
+  for (var i = 0; i < movimientos.length; i++) {
+    if (movimientos[i].id === id) { mostrarModalMovimiento(movimientos[i]); return; }
+  }
+}
+
+function eliminarMovimiento(id) {
+  var m = null;
+  for (var i = 0; i < movimientos.length; i++) {
+    if (movimientos[i].id === id) { m = movimientos[i]; break; }
+  }
+  if (!m) return;
+  var emp = empresaObj(m.empresaId);
+  if (!confirm('¿Eliminar?\n' + fmtFecha(m.fecha) + ' - ' + (emp ? emp.nombre : '?') + ' - ' + fmtCLP(m.monto))) return;
+
+  var nuevo = [];
+  for (var i = 0; i < movimientos.length; i++) {
+    if (movimientos[i].id !== id) nuevo.push(movimientos[i]);
+  }
+  movimientos = nuevo;
+  guardarTodo();
+
+  var active = document.querySelector('.page.active');
+  if (active) {
+    if (active.id === 'page-movimientos') renderMovimientos();
+    else if (active.id === 'page-dashboard') renderDashboard();
+  }
+  mostrarToast('🗑️ Eliminado', 'success');
+}
+
+function limpiarFiltrosMov() {
+  document.getElementById('movFilterEmpresa').value = 'Todas';
+  document.getElementById('movFilterTipo').value = '';
+  document.getElementById('movFilterDesde').value = '';
+  document.getElementById('movFilterHasta').value = '';
+  renderMovimientos();
+}
+
+function renderMovimientos() {
+  var data = [];
+  for (var i = 0; i < movimientos.length; i++) {
+    data.push(movimientos[i]);
+  }
+
+  var fEmp = document.getElementById('movFilterEmpresa').value;
+  var fTipo = document.getElementById('movFilterTipo').value;
+  var desde = document.getElementById('movFilterDesde').value;
+  var hasta = document.getElementById('movFilterHasta').value;
+
+  if (fEmp !== 'Todas') {
+    data = data.filter(function(m) { return m.empresaId === parseInt(fEmp); });
+  }
+  if (fTipo) {
+    data = data.filter(function(m) { return m.tipo === fTipo; });
+  }
+  if (desde) {
+    data = data.filter(function(m) { return m.fecha >= new Date(desde + 'T00:00:00'); });
+  }
+  if (hasta) {
+    data = data.filter(function(m) { return m.fecha <= new Date(hasta + 'T23:59:59'); });
+  }
+
+  data.sort(function(a, b) { return b.fecha - a.fecha; });
+
+  document.getElementById('movCountLabel').textContent = data.length + ' registros';
+
+  var tbody = document.getElementById('movBody');
+  var empty = document.getElementById('movEmpty');
+
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var emp = empresaObj(m.empresaId);
+    var cat = null;
+    for (var j = 0; j < categorias.length; j++) { if (categorias[j].id === m.categoriaId) { cat = categorias[j]; break; } }
+    var ban = null;
+    for (var j = 0; j < bancos.length; j++) { if (bancos[j].id === m.bancoId) { ban = bancos[j]; break; } }
+    var mp = null;
+    for (var j = 0; j < mediosPago.length; j++) { if (mediosPago[j].id === m.medioPagoId) { mp = mediosPago[j]; break; } }
+
+    var tipoClass = m.tipo === 'Ingreso' ? 'text-[#70AD47] font-semibold' : 'text-[#E74C3C] font-semibold';
+
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + fmtFecha(m.fecha) + '</td>';
+    html += '<td class="p-2.5">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : '—') + '</td>';
+    html += '<td class="p-2.5 ' + tipoClass + '">' + m.tipo + '</td>';
+    html += '<td class="p-2.5">' + (cat ? cat.nombre : '—') + '</td>';
+    html += '<td class="p-2.5">' + (ban ? ban.nombre : '—') + '</td>';
+    html += '<td class="p-2.5">' + (mp ? mp.nombre : '—') + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(m.monto) + '</td>';
+    html += '<td class="p-2.5">' + m.moneda + '</td>';
+    html += '<td class="p-2.5">' + (m.glosa || '') + '</td>';
+    html += '<td class="p-2.5">' + (m.pagado === 'Sí' ? '✅' : '❌') + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap">';
+    html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarMovimiento(' + m.id + ')">✏️</button>';
+    html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarMovimiento(' + m.id + ')">🗑️</button>';
+    html += '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ======================== TRANSFERENCIAS CRUD ========================
+function llenarSelectoresTrans() {
+  var empHtml = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    empHtml += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+  }
+  document.getElementById('frmTransEmpresa').innerHTML = empHtml;
+
+  var banHtml = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < bancos.length; i++) {
+    banHtml += '<option value="' + bancos[i].id + '">' + bancos[i].nombre + '</option>';
+  }
+  document.getElementById('frmTransBancoOrigen').innerHTML = banHtml;
+  document.getElementById('frmTransBancoDestino').innerHTML = banHtml;
+}
+
 function mostrarModalTransferencia(data) {
-  editTransId=data?data.id:null; document.getElementById('modalTransTitle').textContent=data?'✏️ Editar Transferencia':'➕ Agregar Transferencia';
-  document.getElementById('frmTransFecha').value=data?toDateInput(data.fecha):new Date().toISOString().split('T')[0];
+  editTransId = data ? data.id : null;
+  document.getElementById('modalTransTitle').textContent = data ? '✏️ Editar Transferencia' : '➕ Agregar Transferencia';
+  document.getElementById('frmTransFecha').value = data ? toDateInput(data.fecha) : new Date().toISOString().split('T')[0];
   llenarSelectoresTrans();
-  if(data){document.getElementById('frmTransEmpresa').value=data.empresaId;document.getElementById('frmTransBancoOrigen').value=data.bancoOrigenId;document.getElementById('frmTransBancoDestino').value=data.bancoDestinoId;document.getElementById('frmTransMonto').value=data.monto;document.getElementById('frmTransMoneda').value=data.moneda;document.getElementById('frmTransGlosa').value=data.glosa||'';}
-  document.getElementById('btnGuardarTrans').textContent=data?'🔄 Actualizar':'💾 Guardar';
+
+  if (data) {
+    document.getElementById('frmTransEmpresa').value = data.empresaId;
+    document.getElementById('frmTransBancoOrigen').value = data.bancoOrigenId;
+    document.getElementById('frmTransBancoDestino').value = data.bancoDestinoId;
+    document.getElementById('frmTransMonto').value = data.monto;
+    document.getElementById('frmTransMoneda').value = data.moneda;
+    document.getElementById('frmTransGlosa').value = data.glosa || '';
+    document.getElementById('btnGuardarTrans').textContent = '🔄 Actualizar';
+  } else {
+    document.getElementById('frmTransMonto').value = '';
+    document.getElementById('frmTransMoneda').value = 'CLP';
+    document.getElementById('frmTransGlosa').value = '';
+    document.getElementById('btnGuardarTrans').textContent = '💾 Guardar';
+  }
   document.getElementById('modalTrans').showModal();
 }
+
 function guardarTransferencia(e) {
-  e.preventDefault();const empresaId=parseInt(document.getElementById('frmTransEmpresa').value),bancoOrigenId=parseInt(document.getElementById('frmTransBancoOrigen').value),bancoDestinoId=parseInt(document.getElementById('frmTransBancoDestino').value),monto=parseFloat(document.getElementById('frmTransMonto').value),moneda=document.getElementById('frmTransMoneda').value,glosa=document.getElementById('frmTransGlosa').value.trim(),fecha=document.getElementById('frmTransFecha').value;
-  if(!fecha||!empresaId||!bancoOrigenId||!bancoDestinoId||!monto){mostrarToast('Completa campos obligatorios','error');return false;}
-  if(bancoOrigenId===bancoDestinoId){mostrarToast('Origen y destino deben ser distintos','error');return false;}
-  const emp=empresaObj(empresaId),banOri=bancos.find(b=>b.id===bancoOrigenId),banDes=bancos.find(b=>b.id===bancoDestinoId);
-  const obj={id:editTransId||Date.now(),fecha:new Date(fecha+'T12:00:00'),empresaId,empresaNombre:emp?emp.nombre:'',empresaRut:emp?emp.rut:'',bancoOrigenId,bancoOrigenNombre:banOri?banOri.nombre:'',bancoDestinoId,bancoDestinoNombre:banDes?banDes.nombre:'',monto,moneda,glosa};
-  if(editTransId){const i=transferencias.findIndex(t=>t.id===editTransId);if(i>=0)transferencias[i]=obj;mostrarToast('✅ Actualizada','success');}
-  else{transferencias.push(obj);mostrarToast('✅ Agregada','success');}
-  guardarTodo();document.getElementById('modalTrans').close();editTransId=null;renderTransferencias();return false;
+  e.preventDefault();
+  var empresaId = parseInt(document.getElementById('frmTransEmpresa').value);
+  var bancoOrigenId = parseInt(document.getElementById('frmTransBancoOrigen').value);
+  var bancoDestinoId = parseInt(document.getElementById('frmTransBancoDestino').value);
+  var monto = parseFloat(document.getElementById('frmTransMonto').value);
+  var moneda = document.getElementById('frmTransMoneda').value;
+  var glosa = document.getElementById('frmTransGlosa').value.trim();
+  var fecha = document.getElementById('frmTransFecha').value;
+
+  if (!fecha || !empresaId || !bancoOrigenId || !bancoDestinoId || !monto) {
+    mostrarToast('Completa campos obligatorios', 'error');
+    return false;
+  }
+  if (bancoOrigenId === bancoDestinoId) {
+    mostrarToast('Origen y destino deben ser distintos', 'error');
+    return false;
+  }
+
+  var emp = empresaObj(empresaId);
+  var banOri = null, banDes = null;
+  for (var i = 0; i < bancos.length; i++) {
+    if (bancos[i].id === bancoOrigenId) banOri = bancos[i];
+    if (bancos[i].id === bancoDestinoId) banDes = bancos[i];
+  }
+
+  var obj = {
+    id: editTransId || Date.now(),
+    fecha: new Date(fecha + 'T12:00:00'),
+    empresaId: empresaId,
+    empresaNombre: emp ? emp.nombre : '',
+    empresaRut: emp ? emp.rut : '',
+    bancoOrigenId: bancoOrigenId,
+    bancoOrigenNombre: banOri ? banOri.nombre : '',
+    bancoDestinoId: bancoDestinoId,
+    bancoDestinoNombre: banDes ? banDes.nombre : '',
+    monto: monto,
+    moneda: moneda,
+    glosa: glosa
+  };
+
+  if (editTransId) {
+    for (var i = 0; i < transferencias.length; i++) {
+      if (transferencias[i].id === editTransId) { transferencias[i] = obj; break; }
+    }
+    mostrarToast('✅ Transferencia actualizada', 'success');
+  } else {
+    transferencias.push(obj);
+    mostrarToast('✅ Transferencia agregada', 'success');
+  }
+
+  guardarTodo();
+  document.getElementById('modalTrans').close();
+  editTransId = null;
+  limpiarFiltrosTrans();
+  renderTransferencias();
+  return false;
 }
-function editarTransferencia(id){const t=transferencias.find(x=>x.id===id);if(t)mostrarModalTransferencia(t);}
-function eliminarTransferencia(id){const t=transferencias.find(x=>x.id===id);if(!t)return;if(!confirm('¿Eliminar transferencia?'))return;transferencias=transferencias.filter(x=>x.id!==id);guardarTodo();renderTransferencias();mostrarToast('🗑️ Eliminada','success');}
+
+function editarTransferencia(id) {
+  for (var i = 0; i < transferencias.length; i++) {
+    if (transferencias[i].id === id) { mostrarModalTransferencia(transferencias[i]); return; }
+  }
+}
+
+function eliminarTransferencia(id) {
+  if (!confirm('¿Eliminar esta transferencia?')) return;
+  var nuevo = [];
+  for (var i = 0; i < transferencias.length; i++) {
+    if (transferencias[i].id !== id) nuevo.push(transferencias[i]);
+  }
+  transferencias = nuevo;
+  guardarTodo();
+  renderTransferencias();
+  mostrarToast('🗑️ Eliminada', 'success');
+}
+
+function limpiarFiltrosTrans() {
+  document.getElementById('transFilterEmpresa').value = 'Todas';
+  document.getElementById('transFilterBanco').value = 'Todos';
+  document.getElementById('transFilterDesde').value = '';
+  document.getElementById('transFilterHasta').value = '';
+}
+
 function renderTransferencias() {
-  let data=[...transferencias];const fEmp=document.getElementById('transFilterEmpresa').value,fBanco=document.getElementById('transFilterBanco').value,desde=document.getElementById('transFilterDesde').value,hasta=document.getElementById('transFilterHasta').value;
-  if(fEmp!=='Todas')data=data.filter(t=>t.empresaId===parseInt(fEmp));if(fBanco!=='Todos')data=data.filter(t=>t.bancoOrigenId===parseInt(fBanco)||t.bancoDestinoId===parseInt(fBanco));if(desde)data=data.filter(t=>t.fecha>=new Date(desde+'T00:00:00'));if(hasta)data=data.filter(t=>t.fecha<=new Date(hasta+'T23:59:59'));data.sort((a,b)=>b.fecha-a.fecha);
-  document.getElementById('transCountLabel').textContent=data.length+' transferencias';
-  const totalTrans=data.reduce((s,t)=>s+t.monto,0);document.getElementById('kpiTransTotal').textContent=fmtCLP(totalTrans);document.getElementById('kpiTransCant').textContent=data.length;const bs=new Set();data.forEach(t=>{bs.add(t.bancoOrigenId);bs.add(t.bancoDestinoId);});document.getElementById('kpiTransBancos').textContent=bs.size;
-  const tbody=document.getElementById('transBody'),empty=document.getElementById('transEmpty');if(!data.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
-  tbody.innerHTML=data.map(t=>{const emp=empresaObj(t.empresaId),banOri=bancos.find(b=>b.id===t.bancoOrigenId),banDes=bancos.find(b=>b.id===t.bancoDestinoId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(t.fecha)}</td><td class="p-2.5">${emp?emp.nombre+' ('+emp.rut+')':'—'}</td><td class="p-2.5 font-semibold">${banOri?banOri.nombre:'—'}</td><td class="p-2.5 font-semibold">${banDes?banDes.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(t.monto)}</td><td class="p-2.5">${t.moneda}</td><td class="p-2.5">${t.glosa||''}</td><td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarTransferencia(${t.id})">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarTransferencia(${t.id})">🗑️</button></td></tr>`;}).join('');
+  var data = [];
+  for (var i = 0; i < transferencias.length; i++) {
+    data.push(transferencias[i]);
+  }
+
+  var fEmp = document.getElementById('transFilterEmpresa').value;
+  var fBanco = document.getElementById('transFilterBanco').value;
+  var desde = document.getElementById('transFilterDesde').value;
+  var hasta = document.getElementById('transFilterHasta').value;
+
+  if (fEmp !== 'Todas') {
+    data = data.filter(function(t) { return t.empresaId === parseInt(fEmp); });
+  }
+  if (fBanco !== 'Todos') {
+    data = data.filter(function(t) { return t.bancoOrigenId === parseInt(fBanco) || t.bancoDestinoId === parseInt(fBanco); });
+  }
+  if (desde) {
+    data = data.filter(function(t) { return t.fecha >= new Date(desde + 'T00:00:00'); });
+  }
+  if (hasta) {
+    data = data.filter(function(t) { return t.fecha <= new Date(hasta + 'T23:59:59'); });
+  }
+  data.sort(function(a, b) { return b.fecha - a.fecha; });
+
+  document.getElementById('transCountLabel').textContent = data.length + ' transferencias';
+
+  // KPIs
+  var totalTrans = 0;
+  for (var i = 0; i < data.length; i++) totalTrans += data[i].monto;
+  document.getElementById('kpiTransTotal').textContent = fmtCLP(totalTrans);
+  document.getElementById('kpiTransCant').textContent = data.length;
+
+  var bancosSet = {};
+  for (var i = 0; i < data.length; i++) {
+    bancosSet[data[i].bancoOrigenId] = true;
+    bancosSet[data[i].bancoDestinoId] = true;
+  }
+  var count = 0;
+  for (var k in bancosSet) count++;
+  document.getElementById('kpiTransBancos').textContent = count;
+
+  var tbody = document.getElementById('transBody');
+  var empty = document.getElementById('transEmpty');
+
+  if (data.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var t = data[i];
+    var emp = empresaObj(t.empresaId);
+    var banOri = null, banDes = null;
+    for (var j = 0; j < bancos.length; j++) {
+      if (bancos[j].id === t.bancoOrigenId) banOri = bancos[j];
+      if (bancos[j].id === t.bancoDestinoId) banDes = bancos[j];
+    }
+
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + fmtFecha(t.fecha) + '</td>';
+    html += '<td class="p-2.5">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : '—') + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (banOri ? banOri.nombre : '—') + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (banDes ? banDes.nombre : '—') + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(t.monto) + '</td>';
+    html += '<td class="p-2.5">' + t.moneda + '</td>';
+    html += '<td class="p-2.5">' + (t.glosa || '') + '</td>';
+    html += '<td class="p-2.5 text-center whitespace-nowrap">';
+    html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarTransferencia(' + t.id + ')">✏️</button>';
+    html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarTransferencia(' + t.id + ')">🗑️</button>';
+    html += '</td></tr>';
+  }
+  tbody.innerHTML = html;
 }
 
-// ════════════════════════════════════════════════════════
-// DASHBOARD
-// ════════════════════════════════════════════════════════
-let charts={};
-function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
-function renderDashboard(){
-  destroyCharts();const empId=document.getElementById('dashEmpresa').value;const data=empId==='Todas'?[...movimientos]:movimientos.filter(m=>m.empresaId===parseInt(empId));
-  const ing=data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0),gas=data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0),saldo=ing-gas,pagados=data.filter(m=>m.pagado==='Sí').length;
-  document.getElementById('kpiIngresos').textContent=fmtCLP(ing);document.getElementById('kpiGastos').textContent=fmtCLP(gas);
-  const sel=document.getElementById('kpiSaldo');sel.textContent=fmtCLP(saldo);sel.style.color=saldo>=0?'#70AD47':'#E74C3C';
-  document.getElementById('kpiMovs').textContent=data.length;document.getElementById('kpiPagados').textContent=pagados;document.getElementById('badgeCount').textContent=movimientos.length+' reg.';
-  const det=document.getElementById('empresaDetail');if(empId!=='Todas'){const emp=EMPRESAS.find(e=>e.id===parseInt(empId));if(emp){det.classList.remove('hidden');det.innerHTML=`<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center border-l-4 border-l-[#2E75B6]"><p class="text-lg font-bold text-gray-800">${emp.nombre}</p><p class="text-sm text-gray-500">RUT ${emp.rut}</p><p class="text-xs text-[#2E75B6] font-semibold mb-2">${emp.tipo}</p><div class="flex justify-center gap-6 text-sm"><span class="font-semibold text-[#70AD47]">💰 Ingresos: ${fmtCLP(data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0))}</span><span class="font-semibold text-[#E74C3C]">💸 Gastos: ${fmtCLP(data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0))}</span><span class="font-semibold text-[#2E75B6]">📈 Saldo: ${fmtCLP(saldo)}</span></div></div>`;}}else{det.classList.add('hidden');}
-  renderDashCharts(data);renderMiniTabla(data);
-}
-function renderDashCharts(data){
-  const ing=data.filter(m=>m.tipo==='Ingreso').reduce((s,m)=>s+m.monto,0),gas=data.filter(m=>m.tipo==='Gasto').reduce((s,m)=>s+m.monto,0);
-  if(ing+gas===0){mostrarSinDatos('chartPie');}else{charts.pie=new Chart(document.getElementById('chartPie'),{type:'doughnut',data:{labels:['Ingresos','Gastos'],datasets:[{data:[ing,gas],backgroundColor:['#70AD47','#E74C3C'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtCLP(ctx.parsed)}}}}});}
-  const map={};data.forEach(m=>{const key=m.fecha.getFullYear()+'-'+String(m.fecha.getMonth()+1).padStart(2,'0');if(!map[key])map[key]={i:0,g:0};if(m.tipo==='Ingreso')map[key].i+=m.monto;else map[key].g+=m.monto;});
-  const labels=Object.keys(map).sort(),meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  if(!labels.length){mostrarSinDatos('chartMonthly');}else{charts.monthly=new Chart(document.getElementById('chartMonthly'),{type:'bar',data:{labels:labels.map(k=>{const[y,m]=k.split('-');return meses[parseInt(m)-1]+' '+y;}),datasets:[{label:'Ingresos',data:labels.map(k=>map[k].i),backgroundColor:'#70AD47',borderRadius:4},{label:'Gastos',data:labels.map(k=>map[k].g),backgroundColor:'#E74C3C',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.y)}}}}}});}
-  const empMap={};data.forEach(m=>{if(!empMap[m.empresaId])empMap[m.empresaId]={i:0,g:0,nom:''};const emp=EMPRESAS.find(e=>e.id===m.empresaId);empMap[m.empresaId].nom=emp?emp.nombre:'?';if(m.tipo==='Ingreso')empMap[m.empresaId].i+=m.monto;else empMap[m.empresaId].g+=m.monto;});
-  const empLabels=Object.keys(empMap).sort((a,b)=>(empMap[b].i+empMap[b].g)-(empMap[a].i+empMap[a].g));
-  if(!empLabels.length){mostrarSinDatos('chartEmpresa');}else{charts.empresa=new Chart(document.getElementById('chartEmpresa'),{type:'bar',data:{labels:empLabels.map(k=>{const n=empMap[k].nom;return n.length>22?n.substring(0,20)+'…':n;}),datasets:[{label:'Ingresos',data:empLabels.map(k=>empMap[k].i),backgroundColor:'#70AD47',borderRadius:4},{label:'Gastos',data:empLabels.map(k=>empMap[k].g),backgroundColor:'#E74C3C',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtCLP(ctx.parsed.x)}}}}}});}
-  const catMap={};data.forEach(m=>{const cat=categorias.find(c=>c.id===m.categoriaId),nombre=cat?cat.nombre:'Sin categoría';if(!catMap[nombre])catMap[nombre]=0;catMap[nombre]+=m.monto;});
-  const catEntries=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  if(!catEntries.length){mostrarSinDatos('chartCategoria');}else{const colors=catEntries.map(e=>{const c=categorias.find(x=>x.nombre===e[0]);return c&&c.tipoMov==='Gasto'?'#E74C3C':'#70AD47';});charts.categoria=new Chart(document.getElementById('chartCategoria'),{type:'bar',data:{labels:catEntries.map(e=>e[0].length>24?e[0].substring(0,22)+'…':e[0]),datasets:[{label:'Monto',data:catEntries.map(e=>e[1]),backgroundColor:colors,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtCLP(v)}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtCLP(ctx.parsed.x)}}}}}});}
-}
-function mostrarSinDatos(id){const canvas=document.getElementById(id);Chart.getChart(canvas)?.destroy();const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.font='14px sans-serif';ctx.fillStyle='#bbb';ctx.textAlign='center';ctx.fillText('Sin datos',canvas.width/2,canvas.height/2);}
-function renderMiniTabla(data){const sorted=[...data].sort((a,b)=>b.fecha-a.fecha).slice(0,10);document.getElementById('miniTablaBody').innerHTML=sorted.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId);return`<tr class="hover:bg-gray-50"><td class="p-2.5">${fmtFecha(m.fecha)}</td><td class="p-2.5">${emp?emp.nombre:'—'}</td><td class="p-2.5 tipo-${m.tipo.toLowerCase()}">${m.tipo}</td><td class="p-2.5">${cat?cat.nombre:'—'}</td><td class="p-2.5 text-right monto">${fmtCLP(m.monto)}</td></tr>`;}).join('');}
+// ======================== DASHBOARD ========================
+var charts = {};
 
-// ════════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ════════════════════════════════════════════════════════
-function descargar(content,filename,mime){const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function exportarJSON(){const data={movimientos:movimientos.map(m=>({...m,fecha:m.fecha.toISOString()})),categorias,bancos,mediosPago,transferencias:transferencias.map(t=>({...t,fecha:t.fecha.toISOString()}))};descargar(JSON.stringify(data,null,2),'backup_financiero.json','application/json');mostrarToast('⬇️ Backup descargado','success');}
-function exportarCSV(){const headers=['Fecha','Empresa','RUT','Tipo','Categoría','Banco','Medio Pago','Monto','Moneda','Glosa','Pagado'];const rows=movimientos.map(m=>{const emp=empresaObj(m.empresaId),cat=categorias.find(c=>c.id===m.categoriaId),ban=bancos.find(b=>b.id===m.bancoId),mp=mediosPago.find(x=>x.id===m.medioPagoId);return[toDateInput(m.fecha),emp?emp.nombre:'',emp?emp.rut:'',m.tipo,cat?cat.nombre:'',ban?ban.nombre:'',mp?mp.nombre:'',m.monto,m.moneda,m.glosa||'',m.pagado];});const csv=[headers.join(','),...rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))].join('\n');descargar('\uFEFF'+csv,'movimientos_financieros.csv','text/csv;charset=utf-8;');mostrarToast('⬇️ CSV descargado — ábrelo en Excel','success');}
-function importarJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(e=>{try{const data=JSON.parse(e.target.result);if(data.movimientos){movimientos=data.movimientos.map(m=>({...m,fecha:new Date(m.fecha)}));categorias=data.categorias||[];bancos=data.bancos||[];mediosPago=data.mediosPago||[];transferencias=(data.transferencias||[]).map(t=>({...t,fecha:new Date(t.fecha)}));}else if(Array.isArray(data)){movimientos=data.map(m=>({...m,fecha:new Date(m.fecha)}));}else throw new Error('Formato inválido');guardarTodo();initAll();mostrarToast('✅ '+movimientos.length+' registros importados','success');}catch(err){mostrarToast('❌ Error: '+err.message,'error');}});reader.readAsText(file);event.target.value='';}
+function destroyCharts() {
+  for (var k in charts) {
+    try { charts[k].destroy(); } catch(e) {}
+  }
+  charts = {};
+}
 
-// ════════════════════════════════════════════════════════
-// SAMPLE DATA
-// ════════════════════════════════════════════════════════
+function renderDashboard() {
+  destroyCharts();
+  var empId = document.getElementById('dashEmpresa').value;
+  var data = [];
+  if (empId === 'Todas') {
+    data = movimientos.slice();
+  } else {
+    for (var i = 0; i < movimientos.length; i++) {
+      if (movimientos[i].empresaId === parseInt(empId)) data.push(movimientos[i]);
+    }
+  }
+
+  var ing = 0, gas = 0;
+  var pagados = 0;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].tipo === 'Ingreso') ing += data[i].monto;
+    else gas += data[i].monto;
+    if (data[i].pagado === 'Sí') pagados++;
+  }
+  var saldo = ing - gas;
+
+  document.getElementById('kpiIngresos').textContent = fmtCLP(ing);
+  document.getElementById('kpiGastos').textContent = fmtCLP(gas);
+  var sel = document.getElementById('kpiSaldo');
+  sel.textContent = fmtCLP(saldo);
+  sel.style.color = saldo >= 0 ? '#70AD47' : '#E74C3C';
+  document.getElementById('kpiMovs').textContent = data.length;
+  document.getElementById('kpiPagados').textContent = pagados;
+  document.getElementById('badgeCount').textContent = movimientos.length + ' reg.';
+
+  // Detalle de empresa
+  var det = document.getElementById('empresaDetail');
+  if (empId !== 'Todas') {
+    var emp = empresaObj(parseInt(empId));
+    if (emp) {
+      var ingEmp = 0, gasEmp = 0;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].tipo === 'Ingreso') ingEmp += data[i].monto;
+        else gasEmp += data[i].monto;
+      }
+      det.classList.remove('hidden');
+      det.innerHTML = '<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center border-l-4 border-l-[#2E75B6]">' +
+        '<p class="text-lg font-bold text-gray-800">' + emp.nombre + '</p>' +
+        '<p class="text-sm text-gray-500">RUT ' + emp.rut + '</p>' +
+        '<p class="text-xs text-[#2E75B6] font-semibold mb-2">' + emp.tipo + '</p>' +
+        '<div class="flex justify-center gap-6 text-sm">' +
+        '<span class="font-semibold text-[#70AD47]">💰 Ingresos: ' + fmtCLP(ingEmp) + '</span>' +
+        '<span class="font-semibold text-[#E74C3C]">💸 Gastos: ' + fmtCLP(gasEmp) + '</span>' +
+        '<span class="font-semibold text-[#2E75B6]">📈 Saldo: ' + fmtCLP(saldo) + '</span></div></div>';
+    }
+  } else {
+    det.classList.add('hidden');
+  }
+
+  renderDashCharts(data);
+  renderMiniTabla(data);
+}
+
+function renderDashCharts(data) {
+  var ing = 0, gas = 0;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].tipo === 'Ingreso') ing += data[i].monto;
+    else gas += data[i].monto;
+  }
+
+  // Pie chart
+  if (ing + gas === 0) {
+    mostrarSinDatos('chartPie');
+  } else {
+    charts.pie = new Chart(document.getElementById('chartPie'), {
+      type: 'doughnut',
+      data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [ing, gas], backgroundColor: ['#70AD47', '#E74C3C'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + fmtCLP(ctx.parsed); } } } } }
+    });
+  }
+
+  // Monthly chart
+  var map = {};
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var key = m.fecha.getFullYear() + '-' + String(m.fecha.getMonth() + 1).padStart(2, '0');
+    if (!map[key]) map[key] = { i: 0, g: 0 };
+    if (m.tipo === 'Ingreso') map[key].i += m.monto;
+    else map[key].g += m.monto;
+  }
+  var labels = Object.keys(map).sort();
+  var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  if (labels.length === 0) {
+    mostrarSinDatos('chartMonthly');
+  } else {
+    var chartLabels = labels.map(function(k) { var parts = k.split('-'); return meses[parseInt(parts[1]) - 1] + ' ' + parts[0]; });
+    var ingresosData = labels.map(function(k) { return map[k].i; });
+    var gastosData = labels.map(function(k) { return map[k].g; });
+    charts.monthly = new Chart(document.getElementById('chartMonthly'), {
+      type: 'bar',
+      data: { labels: chartLabels, datasets: [{ label: 'Ingresos', data: ingresosData, backgroundColor: '#70AD47', borderRadius: 4 }, { label: 'Gastos', data: gastosData, backgroundColor: '#E74C3C', borderRadius: 4 }] },
+      options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return fmtCLP(v); } } } }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fmtCLP(ctx.parsed.y); } } } } }
+    });
+  }
+
+  // By company
+  var empMap = {};
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    if (!empMap[m.empresaId]) { empMap[m.empresaId] = { i: 0, g: 0, nom: '' }; }
+    var emp = empresaObj(m.empresaId);
+    empMap[m.empresaId].nom = emp ? emp.nombre : '?';
+    if (m.tipo === 'Ingreso') empMap[m.empresaId].i += m.monto;
+    else empMap[m.empresaId].g += m.monto;
+  }
+  var empLabels = Object.keys(empMap).sort(function(a, b) { return (empMap[b].i + empMap[b].g) - (empMap[a].i + empMap[a].g); });
+  if (empLabels.length === 0) {
+    mostrarSinDatos('chartEmpresa');
+  } else {
+    var eLabels = empLabels.map(function(k) { var n = empMap[k].nom; return n.length > 22 ? n.substring(0, 20) + '…' : n; });
+    var eIngresos = empLabels.map(function(k) { return empMap[k].i; });
+    var eGastos = empLabels.map(function(k) { return empMap[k].g; });
+    charts.empresa = new Chart(document.getElementById('chartEmpresa'), {
+      type: 'bar',
+      data: { labels: eLabels, datasets: [{ label: 'Ingresos', data: eIngresos, backgroundColor: '#70AD47', borderRadius: 4 }, { label: 'Gastos', data: eGastos, backgroundColor: '#E74C3C', borderRadius: 4 }] },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true, scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return fmtCLP(v); } } } }, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fmtCLP(ctx.parsed.x); } } } } }
+    });
+  }
+
+  // By category
+  var catMap = {};
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var cat = null;
+    for (var j = 0; j < categorias.length; j++) { if (categorias[j].id === m.categoriaId) { cat = categorias[j]; break; } }
+    var nombre = cat ? cat.nombre : 'Sin categoría';
+    if (!catMap[nombre]) catMap[nombre] = 0;
+    catMap[nombre] += m.monto;
+  }
+  var catEntries = Object.entries(catMap).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 12);
+  if (catEntries.length === 0) {
+    mostrarSinDatos('chartCategoria');
+  } else {
+    var catLabels = catEntries.map(function(e) { return e[0].length > 24 ? e[0].substring(0, 22) + '…' : e[0]; });
+    var catValues = catEntries.map(function(e) { return e[1]; });
+    var catColors = catEntries.map(function(e) {
+      for (var j = 0; j < categorias.length; j++) { if (categorias[j].nombre === e[0]) { return categorias[j].tipoMov === 'Gasto' ? '#E74C3C' : '#70AD47'; } }
+      return '#70AD47';
+    });
+    charts.categoria = new Chart(document.getElementById('chartCategoria'), {
+      type: 'bar',
+      data: { labels: catLabels, datasets: [{ label: 'Monto', data: catValues, backgroundColor: catColors, borderRadius: 4 }] },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true, scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return fmtCLP(v); } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return fmtCLP(ctx.parsed.x); } } } } }
+    });
+  }
+}
+
+function mostrarSinDatos(id) {
+  var canvas = document.getElementById(id);
+  if (Chart.getChart(canvas)) Chart.getChart(canvas).destroy();
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = '14px sans-serif';
+  ctx.fillStyle = '#bbb';
+  ctx.textAlign = 'center';
+  ctx.fillText('Sin datos', canvas.width / 2, canvas.height / 2);
+}
+
+function renderMiniTabla(data) {
+  var sorted = data.slice().sort(function(a, b) { return b.fecha - a.fecha; }).slice(0, 10);
+  var tbody = document.getElementById('miniTablaBody');
+  var html = '';
+  for (var i = 0; i < sorted.length; i++) {
+    var m = sorted[i];
+    var emp = empresaObj(m.empresaId);
+    var cat = null;
+    for (var j = 0; j < categorias.length; j++) { if (categorias[j].id === m.categoriaId) { cat = categorias[j]; break; } }
+    var tipoClass = m.tipo === 'Ingreso' ? 'text-[#70AD47] font-semibold' : 'text-[#E74C3C] font-semibold';
+    html += '<tr class="hover:bg-gray-50">';
+    html += '<td class="p-2.5">' + fmtFecha(m.fecha) + '</td>';
+    html += '<td class="p-2.5">' + (emp ? emp.nombre : '—') + '</td>';
+    html += '<td class="p-2.5 ' + tipoClass + '">' + m.tipo + '</td>';
+    html += '<td class="p-2.5">' + (cat ? cat.nombre : '—') + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(m.monto) + '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ======================== EXPORT / IMPORT ========================
+function descargar(content, filename, mime) {
+  var blob = new Blob([content], { type: mime });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+}
+
+function exportarJSON() {
+  var data = {
+    movimientos: movimientos.map(function(m) { var x = Object.assign({}, m); x.fecha = x.fecha.toISOString(); return x; }),
+    categorias: categorias,
+    bancos: bancos,
+    mediosPago: mediosPago,
+    transferencias: transferencias.map(function(t) { var x = Object.assign({}, t); x.fecha = x.fecha.toISOString(); return x; })
+  };
+  descargar(JSON.stringify(data, null, 2), 'backup_financiero.json', 'application/json');
+  mostrarToast('⬇️ Backup descargado', 'success');
+}
+
+function exportarCSV() {
+  var headers = ['Fecha', 'Empresa', 'RUT', 'Tipo', 'Categoría', 'Banco', 'Medio Pago', 'Monto', 'Moneda', 'Glosa', 'Pagado'];
+  var rows = movimientos.map(function(m) {
+    var emp = empresaObj(m.empresaId);
+    var cat = null, ban = null, mp = null;
+    for (var i = 0; i < categorias.length; i++) { if (categorias[i].id === m.categoriaId) { cat = categorias[i]; break; } }
+    for (var i = 0; i < bancos.length; i++) { if (bancos[i].id === m.bancoId) { ban = bancos[i]; break; } }
+    for (var i = 0; i < mediosPago.length; i++) { if (mediosPago[i].id === m.medioPagoId) { mp = mediosPago[i]; break; } }
+    return [
+      toDateInput(m.fecha),
+      emp ? emp.nombre : '',
+      emp ? emp.rut : '',
+      m.tipo,
+      cat ? cat.nombre : '',
+      ban ? ban.nombre : '',
+      mp ? mp.nombre : '',
+      m.monto,
+      m.moneda,
+      m.glosa || '',
+      m.pagado
+    ];
+  });
+  var csvLines = [headers.join(',')];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var escaped = r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; });
+    csvLines.push(escaped.join(','));
+  }
+  descargar('\uFEFF' + csvLines.join('\n'), 'movimientos_financieros.csv', 'text/csv;charset=utf-8;');
+  mostrarToast('⬇️ CSV descargado — ábrelo en Excel', 'success');
+}
+
+function importarJSON(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (data.movimientos) {
+        movimientos = data.movimientos.map(function(m) { m.fecha = new Date(m.fecha); return m; });
+        categorias = data.categorias || [];
+        bancos = data.bancos || [];
+        mediosPago = data.mediosPago || [];
+        transferencias = (data.transferencias || []).map(function(t) { t.fecha = new Date(t.fecha); return t; });
+      } else if (Array.isArray(data)) {
+        movimientos = data.map(function(m) { m.fecha = new Date(m.fecha); return m; });
+      } else {
+        throw new Error('Formato inválido');
+      }
+      guardarTodo();
+      initAll();
+      mostrarToast('✅ ' + movimientos.length + ' registros importados', 'success');
+    } catch (err) {
+      mostrarToast('❌ Error: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function confirmarLimpiar() {
+  if (confirm('¿Eliminar TODOS los datos?')) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+function recargarDatos() {
+  cargarTodo();
+  initAll();
+  mostrarToast('🔄 Recargado', '');
+}
+
+// ======================== SAMPLE DATA ========================
 function cargarDatosEjemplo() {
-  if(movimientos.length&&!confirm('¿Reemplazar los datos actuales?'))return;
-  const rng=(min,max)=>Math.floor(Math.random()*(max-min+1))+min,hoy=new Date();
-  categorias=[{id:1,nombre:'Ventas / Servicios',tipoMov:'Ingreso'},{id:2,nombre:'Publicidad / Sponsors',tipoMov:'Ingreso'},{id:3,nombre:'Arriendos',tipoMov:'Ingreso'},{id:4,nombre:'Inversiones / Rentas',tipoMov:'Ingreso'},{id:5,nombre:'Otros Ingresos',tipoMov:'Ingreso'},{id:10,nombre:'Hosting & Dominios',tipoMov:'Gasto'},{id:11,nombre:'Servicios Cloud / APIs',tipoMov:'Gasto'},{id:12,nombre:'Sueldos / Honorarios',tipoMov:'Gasto'},{id:13,nombre:'Marketing & Publicidad',tipoMov:'Gasto'},{id:14,nombre:'Transporte & Logística',tipoMov:'Gasto'},{id:15,nombre:'Insumos Ferretería',tipoMov:'Gasto'},{id:16,nombre:'Mantenimiento Equipos',tipoMov:'Gasto'},{id:17,nombre:'Servicios Básicos',tipoMov:'Gasto'},{id:18,nombre:'Arriendos (gasto)',tipoMov:'Gasto'},{id:19,nombre:'Seguros',tipoMov:'Gasto'},{id:20,nombre:'Impuestos / Contribuciones',tipoMov:'Gasto'},{id:21,nombre:'Comisiones Bancarias',tipoMov:'Gasto'},{id:22,nombre:'Alimentación',tipoMov:'Gasto'},{id:23,nombre:'Salud',tipoMov:'Gasto'},{id:24,nombre:'Educación',tipoMov:'Gasto'},{id:25,nombre:'Entretención',tipoMov:'Gasto'},{id:26,nombre:'Varios / Otros Gastos',tipoMov:'Gasto'}];
-  bancos=[{id:1,nombre:'Banco Estado'},{id:2,nombre:'Banco de Chile'},{id:3,nombre:'Banco Santander'},{id:4,nombre:'Banco BCI'},{id:5,nombre:'Banco Internacional'}];
-  mediosPago=[{id:1,nombre:'Transferencia'},{id:2,nombre:'Débito'},{id:3,nombre:'Crédito'},{id:4,nombre:'Efectivo'},{id:5,nombre:'Cheque'},{id:6,nombre:'WebPay / Khipu'}];
-  movimientos=[];transferencias=[];const empIds=EMPRESAS.map(e=>e.id);
-  for(let i=0;i<45;i++){const d=new Date(hoy);d.setDate(d.getDate()-rng(0,240));const empId=empIds[rng(0,empIds.length-1)],emp=EMPRESAS.find(e=>e.id===empId),tipo=i<20?'Ingreso':'Gasto',cats=categorias.filter(c=>c.tipoMov===tipo),cat=cats[rng(0,cats.length-1)],ban=bancos[rng(0,bancos.length-1)],mp=mediosPago[rng(0,mediosPago.length-1)];movimientos.push({id:Date.now()+i,fecha:d,empresaId:empId,empresaNombre:emp.nombre,empresaRut:emp.rut,tipo,categoriaId:cat.id,categoriaNombre:cat.nombre,bancoId:ban.id,medioPagoId:mp.id,monto:tipo==='Ingreso'?rng(150000,5500000):rng(5000,850000),moneda:Math.random()>0.9?'USD':'CLP',glosa:(tipo==='Ingreso'?'Venta #':'Gasto #')+(i+1),pagado:Math.random()>0.15?'Sí':'No'});}
-  for(let i=0;i<20;i++){const d=new Date(hoy);d.setDate(d.getDate()-rng(0,210));const empId=empIds[rng(0,empIds.length-1)],emp=EMPRESAS.find(e=>e.id===empId);let banOri,banDes;do{banOri=bancos[rng(0,bancos.length-1)];banDes=bancos[rng(0,bancos.length-1)];}while(banOri.id===banDes.id);transferencias.push({id:Date.now()+500+i,fecha:d,empresaId:empId,empresaNombre:emp.nombre,empresaRut:emp.rut,bancoOrigenId:banOri.id,bancoOrigenNombre:banOri.nombre,bancoDestinoId:banDes.id,bancoDestinoNombre:banDes.nombre,monto:rng(50000,2000000),moneda:Math.random()>0.9?'USD':'CLP',glosa:'Traspaso #'+(i+1)});}
-  guardarTodo();initAll();mostrarToast('📦 Datos cargados (45 movs, 20 trans)','success');
+  if (movimientos.length > 0 && !confirm('¿Reemplazar los datos actuales con datos de ejemplo?')) return;
+
+  var rng = function(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; };
+  var hoy = new Date();
+
+  categorias = [
+    { id: 1, nombre: 'Ventas / Servicios', tipoMov: 'Ingreso' }, { id: 2, nombre: 'Publicidad / Sponsors', tipoMov: 'Ingreso' },
+    { id: 3, nombre: 'Arriendos', tipoMov: 'Ingreso' }, { id: 4, nombre: 'Inversiones / Rentas', tipoMov: 'Ingreso' },
+    { id: 5, nombre: 'Otros Ingresos', tipoMov: 'Ingreso' }, { id: 10, nombre: 'Hosting & Dominios', tipoMov: 'Gasto' },
+    { id: 11, nombre: 'Servicios Cloud / APIs', tipoMov: 'Gasto' }, { id: 12, nombre: 'Sueldos / Honorarios', tipoMov: 'Gasto' },
+    { id: 13, nombre: 'Marketing & Publicidad', tipoMov: 'Gasto' }, { id: 14, nombre: 'Transporte & Logística', tipoMov: 'Gasto' },
+    { id: 15, nombre: 'Insumos Ferretería', tipoMov: 'Gasto' }, { id: 16, nombre: 'Mantenimiento Equipos', tipoMov: 'Gasto' },
+    { id: 17, nombre: 'Servicios Básicos', tipoMov: 'Gasto' }, { id: 18, nombre: 'Arriendos (gasto)', tipoMov: 'Gasto' },
+    { id: 19, nombre: 'Seguros', tipoMov: 'Gasto' }, { id: 20, nombre: 'Impuestos / Contribuciones', tipoMov: 'Gasto' },
+    { id: 21, nombre: 'Comisiones Bancarias', tipoMov: 'Gasto' }, { id: 22, nombre: 'Alimentación', tipoMov: 'Gasto' },
+    { id: 23, nombre: 'Salud', tipoMov: 'Gasto' }, { id: 24, nombre: 'Educación', tipoMov: 'Gasto' },
+    { id: 25, nombre: 'Entretención', tipoMov: 'Gasto' }, { id: 26, nombre: 'Varios / Otros Gastos', tipoMov: 'Gasto' }
+  ];
+
+  bancos = [
+    { id: 1, nombre: 'Banco Estado' }, { id: 2, nombre: 'Banco de Chile' }, { id: 3, nombre: 'Banco Santander' },
+    { id: 4, nombre: 'Banco BCI' }, { id: 5, nombre: 'Banco Internacional' }
+  ];
+
+  mediosPago = [
+    { id: 1, nombre: 'Transferencia' }, { id: 2, nombre: 'Débito' }, { id: 3, nombre: 'Crédito' },
+    { id: 4, nombre: 'Efectivo' }, { id: 5, nombre: 'Cheque' }, { id: 6, nombre: 'WebPay / Khipu' }
+  ];
+
+  movimientos = [];
+  transferencias = [];
+  var empIds = EMPRESAS.map(function(e) { return e.id; });
+
+  for (var i = 0; i < 45; i++) {
+    var d = new Date(hoy);
+    d.setDate(d.getDate() - rng(0, 240));
+    var empId = empIds[rng(0, empIds.length - 1)];
+    var emp = empresaObj(empId);
+    var tipo = i < 20 ? 'Ingreso' : 'Gasto';
+    var cats = categorias.filter(function(c) { return c.tipoMov === tipo; });
+    var cat = cats[rng(0, cats.length - 1)];
+    var ban = bancos[rng(0, bancos.length - 1)];
+    var mp = mediosPago[rng(0, mediosPago.length - 1)];
+
+    movimientos.push({
+      id: Date.now() + i,
+      fecha: d,
+      empresaId: empId,
+      empresaNombre: emp.nombre,
+      empresaRut: emp.rut,
+      tipo: tipo,
+      categoriaId: cat.id,
+      categoriaNombre: cat.nombre,
+      bancoId: ban.id,
+      medioPagoId: mp.id,
+      monto: tipo === 'Ingreso' ? rng(150000, 5500000) : rng(5000, 850000),
+      moneda: Math.random() > 0.9 ? 'USD' : 'CLP',
+      glosa: (tipo === 'Ingreso' ? 'Venta #' : 'Gasto #') + (i + 1),
+      pagado: Math.random() > 0.15 ? 'Sí' : 'No'
+    });
+  }
+
+  for (var i = 0; i < 20; i++) {
+    var d = new Date(hoy);
+    d.setDate(d.getDate() - rng(0, 210));
+    var empId = empIds[rng(0, empIds.length - 1)];
+    var emp = empresaObj(empId);
+    var banOri, banDes;
+    do {
+      banOri = bancos[rng(0, bancos.length - 1)];
+      banDes = bancos[rng(0, bancos.length - 1)];
+    } while (banOri.id === banDes.id);
+
+    transferencias.push({
+      id: Date.now() + 500 + i,
+      fecha: d,
+      empresaId: empId,
+      empresaNombre: emp.nombre,
+      empresaRut: emp.rut,
+      bancoOrigenId: banOri.id,
+      bancoOrigenNombre: banOri.nombre,
+      bancoDestinoId: banDes.id,
+      bancoDestinoNombre: banDes.nombre,
+      monto: rng(50000, 2000000),
+      moneda: Math.random() > 0.9 ? 'USD' : 'CLP',
+      glosa: 'Traspaso #' + (i + 1)
+    });
+  }
+
+  guardarTodo();
+  initAll();
+  mostrarToast('📦 Datos cargados (45 movs, 20 trans)', 'success');
 }
 
-// ════════════════════════════════════════════════════════
-// RECARGAR
-// ════════════════════════════════════════════════════════
-function recargarDatos(){cargarTodo();initAll();mostrarToast('🔄 Recargado','');}
-
-// ════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════
+// ======================== INIT ========================
 function initFilters() {
-  const selEmp=document.getElementById('dashEmpresa');selEmp.innerHTML='<option value="Todas">🌐 Todas las empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  const movSel=document.getElementById('movFilterEmpresa');movSel.innerHTML='<option value="Todas">Todas empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  const tEmp=document.getElementById('transFilterEmpresa');tEmp.innerHTML='<option value="Todas">Todas empresas</option>'+EMPRESAS.map(e=>`<option value="${e.id}">${e.nombre} (${e.rut})</option>`).join('');
-  const tBan=document.getElementById('transFilterBanco');tBan.innerHTML='<option value="Todos">Todos los bancos</option>'+bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
-}
-function initAll() { initFilters(); renderDashboard(); renderMovimientos(); renderCategorias(); renderBancos(); renderMediosPago(); renderTransferencias(); }
+  // Dashboard empresa
+  var selEmp = document.getElementById('dashEmpresa');
+  var html = '<option value="Todas">🌐 Todas las empresas</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    html += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+  }
+  selEmp.innerHTML = html;
 
-// ════════════════════════════════════════════════════════
-// BOOT
-// ════════════════════════════════════════════════════════
+  // Mov filter empresa
+  var movSel = document.getElementById('movFilterEmpresa');
+  movSel.innerHTML = '<option value="Todas">Todas empresas</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    movSel.innerHTML += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+  }
+
+  // Trans filter empresa
+  var tEmp = document.getElementById('transFilterEmpresa');
+  tEmp.innerHTML = '<option value="Todas">Todas empresas</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) {
+    tEmp.innerHTML += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>';
+  }
+
+  // Trans filter banco
+  var tBan = document.getElementById('transFilterBanco');
+  tBan.innerHTML = '<option value="Todos">Todos los bancos</option>';
+  for (var i = 0; i < bancos.length; i++) {
+    tBan.innerHTML += '<option value="' + bancos[i].id + '">' + bancos[i].nombre + '</option>';
+  }
+}
+
+function initAll() {
+  initFilters();
+  renderDashboard();
+  renderMovimientos();
+  renderCategorias();
+  renderBancos();
+  renderMediosPago();
+  renderTransferencias();
+}
+
+// ======================== BOOT ========================
 cargarTodo();
-if(!categorias.length){categorias=[{id:1,nombre:'Ventas / Servicios',tipoMov:'Ingreso'},{id:2,nombre:'Publicidad / Sponsors',tipoMov:'Ingreso'},{id:3,nombre:'Arriendos',tipoMov:'Ingreso'},{id:4,nombre:'Inversiones / Rentas',tipoMov:'Ingreso'},{id:5,nombre:'Otros Ingresos',tipoMov:'Ingreso'},{id:10,nombre:'Hosting & Dominios',tipoMov:'Gasto'},{id:11,nombre:'Servicios Cloud / APIs',tipoMov:'Gasto'},{id:12,nombre:'Sueldos / Honorarios',tipoMov:'Gasto'},{id:13,nombre:'Marketing & Publicidad',tipoMov:'Gasto'},{id:14,nombre:'Transporte & Logística',tipoMov:'Gasto'},{id:15,nombre:'Insumos Ferretería',tipoMov:'Gasto'},{id:16,nombre:'Mantenimiento Equipos',tipoMov:'Gasto'},{id:17,nombre:'Servicios Básicos',tipoMov:'Gasto'},{id:18,nombre:'Arriendos (gasto)',tipoMov:'Gasto'},{id:19,nombre:'Seguros',tipoMov:'Gasto'},{id:20,nombre:'Impuestos / Contribuciones',tipoMov:'Gasto'},{id:21,nombre:'Comisiones Bancarias',tipoMov:'Gasto'},{id:22,nombre:'Alimentación',tipoMov:'Gasto'},{id:23,nombre:'Salud',tipoMov:'Gasto'},{id:24,nombre:'Educación',tipoMov:'Gasto'},{id:25,nombre:'Entretención',tipoMov:'Gasto'},{id:26,nombre:'Varios / Otros Gastos',tipoMov:'Gasto'}];guardarTodo();}
-if(!bancos.length){bancos=[{id:1,nombre:'Banco Estado'},{id:2,nombre:'Banco de Chile'},{id:3,nombre:'Banco Santander'},{id:4,nombre:'Banco BCI'},{id:5,nombre:'Banco Internacional'}];guardarTodo();}
-if(!mediosPago.length){mediosPago=[{id:1,nombre:'Transferencia'},{id:2,nombre:'Débito'},{id:3,nombre:'Crédito'},{id:4,nombre:'Efectivo'},{id:5,nombre:'Cheque'},{id:6,nombre:'WebPay / Khipu'}];guardarTodo();}
+
+if (categorias.length === 0) {
+  categorias = [
+    { id: 1, nombre: 'Ventas / Servicios', tipoMov: 'Ingreso' }, { id: 2, nombre: 'Publicidad / Sponsors', tipoMov: 'Ingreso' },
+    { id: 3, nombre: 'Arriendos', tipoMov: 'Ingreso' }, { id: 4, nombre: 'Inversiones / Rentas', tipoMov: 'Ingreso' },
+    { id: 5, nombre: 'Otros Ingresos', tipoMov: 'Ingreso' }, { id: 10, nombre: 'Hosting & Dominios', tipoMov: 'Gasto' },
+    { id: 11, nombre: 'Servicios Cloud / APIs', tipoMov: 'Gasto' }, { id: 12, nombre: 'Sueldos / Honorarios', tipoMov: 'Gasto' },
+    { id: 13, nombre: 'Marketing & Publicidad', tipoMov: 'Gasto' }, { id: 14, nombre: 'Transporte & Logística', tipoMov: 'Gasto' },
+    { id: 15, nombre: 'Insumos Ferretería', tipoMov: 'Gasto' }, { id: 16, nombre: 'Mantenimiento Equipos', tipoMov: 'Gasto' },
+    { id: 17, nombre: 'Servicios Básicos', tipoMov: 'Gasto' }, { id: 18, nombre: 'Arriendos (gasto)', tipoMov: 'Gasto' },
+    { id: 19, nombre: 'Seguros', tipoMov: 'Gasto' }, { id: 20, nombre: 'Impuestos / Contribuciones', tipoMov: 'Gasto' },
+    { id: 21, nombre: 'Comisiones Bancarias', tipoMov: 'Gasto' }, { id: 22, nombre: 'Alimentación', tipoMov: 'Gasto' },
+    { id: 23, nombre: 'Salud', tipoMov: 'Gasto' }, { id: 24, nombre: 'Educación', tipoMov: 'Gasto' },
+    { id: 25, nombre: 'Entretención', tipoMov: 'Gasto' }, { id: 26, nombre: 'Varios / Otros Gastos', tipoMov: 'Gasto' }
+  ];
+  guardarTodo();
+}
+
+if (bancos.length === 0) {
+  bancos = [
+    { id: 1, nombre: 'Banco Estado' }, { id: 2, nombre: 'Banco de Chile' }, { id: 3, nombre: 'Banco Santander' },
+    { id: 4, nombre: 'Banco BCI' }, { id: 5, nombre: 'Banco Internacional' }
+  ];
+  guardarTodo();
+}
+
+if (mediosPago.length === 0) {
+  mediosPago = [
+    { id: 1, nombre: 'Transferencia' }, { id: 2, nombre: 'Débito' }, { id: 3, nombre: 'Crédito' },
+    { id: 4, nombre: 'Efectivo' }, { id: 5, nombre: 'Cheque' }, { id: 6, nombre: 'WebPay / Khipu' }
+  ];
+  guardarTodo();
+}
+
 initAll();
 </script>
 </body>
