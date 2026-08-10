@@ -145,7 +145,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold">Monto Total</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nombre</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#FE53BB]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay bancos.</p>
@@ -615,15 +615,21 @@ function renderBancos() {
   for (var i = 0; i < bancos.length; i++) {
     var b = bancos[i];
     var movsCount = 0;
-    var total = 0;
+    var totalIng = 0;
+    var totalGas = 0;
     for (var j = 0; j < movimientos.length; j++) {
-      if (movimientos[j].bancoId === b.id) { movsCount++; total += movimientos[j].monto; }
+      if (movimientos[j].bancoId === b.id) {
+        movsCount++;
+        if (movimientos[j].tipo === 'Ingreso') totalIng += movimientos[j].monto;
+        else totalGas += movimientos[j].monto;
+      }
     }
     html += '<tr class="hover:bg-gray-50">';
     html += '<td class="p-2.5">' + b.id + '</td>';
     html += '<td class="p-2.5 font-semibold">' + b.nombre + '</td>';
     html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
-    html += '<td class="p-2.5 text-right mt">' + fmtCLP(total) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#70AD47]">' + fmtCLP(totalIng) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#E74C3C]">' + fmtCLP(totalGas) + '</td>';
     html += '<td class="p-2.5 text-center whitespace-nowrap">';
     html += '<button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarBanco(' + b.id + ')">✏️</button>';
     html += '<button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarBanco(' + b.id + ')">🗑️</button>';
