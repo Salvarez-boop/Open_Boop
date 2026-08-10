@@ -424,7 +424,7 @@
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label><select id="frmTarjTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="MasterCard">MasterCard</option><option value="VISA">VISA</option></select></div>
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Tarjeta *</label>
         <div class="relative">
-          <input type="text" id="frmTarjNumero" required placeholder="1234567890123456" maxlength="19" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm pr-10" oninput="tarjFormatear(this)">
+          <input type="text" id="frmTarjNumero" required placeholder="1234567890123456" inputmode="numeric" autocomplete="off" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm pr-10" oninput="tarjFormatear(this)">
           <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xs" onclick="tarjToggleVer()" id="tarjEyeIcon">👁️</span>
         </div>
       </div>
@@ -1041,14 +1041,42 @@ var editTarjId = null;
 var tarjNumRaw = '';
 var tarjMostrar = false;
 
+function tarjOcultar(v) {
+  // Devuelve '**** **** **** XXXX' (16 digitos, ultimos 4 visibles)
+  var d = (v || '').replace(/\D/g, '');
+  if (d.length <= 4) return d;
+  return '**** **** **** ' + d.substring(d.length - 4);
+}
+
+function tarjMostrarNum(v) {
+  // Devuelve '1234 5678 9012 3456' (16 digitos en grupos de 4)
+  var d = (v || '').replace(/\D/g, '');
+  var p = d.match(/.{1,4}/g);
+  return p ? p.join(' ') : d;
+}
+
+function tarjRefrescar(inp) {
+  // Aplica la visualizacion segun el estado actual SIN perder los digitos reales
+  inp.value = tarjMostrar ? tarjMostrarNum(tarjNumRaw) : tarjOcultar(tarjNumRaw);
+}
+
 function tarjFormatear(inp) {
-  var v = inp.value.replace(/\D/g, '').substring(0, 16);
-  tarjNumRaw = v;
-  if (!tarjMostrar) {
-    inp.value = v.length > 4 ? '**** **** **** ' + v.substring(v.length - 4) : v;
+  // Al escribir, SIEMPRE capturamos solo los digitos reales y mostramos de forma segura.
+  // Evitamos que el texto con asteriscos se reformatee: si el campo tiene asteriscos
+  // (estado oculto), no interferimos con lo que el usuario escribe y solo guardamos digitos.
+  var raw = inp.value.replace(/\D/g, '').substring(0, 16);
+  tarjNumRaw = raw;
+  // Mientras se edita, mostrar en grupos de 4 los digitos reales (sin asteriscos)
+  // para que el usuario vea lo que escribe y no se bloquee por el limite de caracteres.
+  if (!tarjMostrar && inp.value.indexOf('*') === -1) {
+    // modo edicion normal: mostrar digitos en grupos de 4
+    var p = raw.match(/.{1,4}/g);
+    inp.value = p ? p.join(' ') : raw;
+  } else if (tarjMostrar) {
+    inp.value = tarjMostrarNum(raw);
   } else {
-    var p = v.match(/.{1,4}/g);
-    inp.value = p ? p.join(' ') : v;
+    // si ya habia asteriscos (oculto) y el usuario escribe, convertimos a digitos
+    inp.value = raw;
   }
 }
 
@@ -1057,12 +1085,11 @@ function tarjToggleVer() {
   var inp = document.getElementById('frmTarjNumero');
   var icon = document.getElementById('tarjEyeIcon');
   if (tarjMostrar) {
-    icon.textContent = 'OCULTAR';
-    var p = tarjNumRaw.match(/.{1,4}/g);
-    inp.value = p ? p.join(' ') : tarjNumRaw;
+    icon.textContent = '👁️';  // mostrar
+    inp.value = tarjMostrarNum(tarjNumRaw);
   } else {
-    icon.textContent = 'OJO';
-    inp.value = tarjNumRaw.length > 4 ? '**** **** **** ' + tarjNumRaw.substring(tarjNumRaw.length - 4) : tarjNumRaw;
+    icon.textContent = '🙈';  // ocultar
+    inp.value = tarjOcultar(tarjNumRaw);
   }
 }
 
@@ -1077,11 +1104,11 @@ function mostrarModalTarjeta(data) {
   sel.innerHTML = h;
   document.getElementById('frmTarjBanco').value = data ? data.banco : '';
   document.getElementById('frmTarjTipo').value = data ? data.tipo : '';
-  tarjNumRaw = data ? data.numero : '';
+  tarjNumRaw = data ? (data.numero || '').replace(/\D/g, '') : '';
   tarjMostrar = false;
-  document.getElementById('tarjEyeIcon').textContent = 'OJO';
+  document.getElementById('tarjEyeIcon').textContent = '🙈';
   var ni = document.getElementById('frmTarjNumero');
-  ni.value = (data && data.numero.length > 4) ? '**** **** **** ' + data.numero.substring(data.numero.length - 4) : (data ? data.numero : '');
+  ni.value = tarjOcultar(tarjNumRaw);
   document.getElementById('frmTarjMonto').value = data ? data.monto : '';
   document.getElementById('frmTarjDisponible').value = data ? data.disponible : '';
   document.getElementById('frmTarjUtilizado').value = data ? data.utilizado : '';
@@ -1094,8 +1121,7 @@ function guardarTarjeta(e) {
   var empresaId = parseInt(document.getElementById('frmTarjEmpresa').value);
   var banco = document.getElementById('frmTarjBanco').value.trim();
   var tipo = document.getElementById('frmTarjTipo').value;
-  var numero = tarjNumRaw;
-  var monto = parseFloat(document.getElementById('frmTarjMonto').value) || 0;
+  var numero = tarjNumRaw;  var monto = parseFloat(document.getElementById('frmTarjMonto').value) || 0;
   var disponible = parseFloat(document.getElementById('frmTarjDisponible').value) || 0;
   var utilizado = parseFloat(document.getElementById('frmTarjUtilizado').value) || 0;
   if (!empresaId || !banco || !tipo || !numero) { mostrarToast('Completa todos los campos obligatorios', 'error'); return false; }
@@ -1104,7 +1130,6 @@ function guardarTarjeta(e) {
     mostrarToast('Tarjeta actualizada', 'success');
   } else {
     tarjetas.push({ id: getNextTarjId(), empresaId: empresaId, banco: banco, tipo: tipo, numero: numero, monto: monto, disponible: disponible, utilizado: utilizado });
-    mostrarToast('Tarjeta agregada', 'success');
   }
   guardarTodo();
   document.getElementById('modalTarj').close();
