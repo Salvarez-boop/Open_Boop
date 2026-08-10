@@ -1,0 +1,222 @@
+// Modelo Power BI - Ingresos y Gastos Empresarial
+// Tablas calculadas con DATATABLE (100% portable, sin datos externos)
+
+// ════════════════════════════════════════════════════════════
+// 1. DIMENSIONES
+// ════════════════════════════════════════════════════════════
+
+DimEmpresa =
+DATATABLE(
+    "EmpresaId", INTEGER,
+    "Nombre", STRING,
+    "RUT", STRING,
+    "Tipo", STRING,
+    {
+        {1, "RenoxPell SpA (YoSorteo.cl)", "76.837.558-5", "Plataforma de sorteos"},
+        {2, "TransTicket SpA (TransTicket.cl)", "76.837.566-6", "Plataforma de sorteos"},
+        {3, "Transportes Álvarez SpA", "78.271.764-2", "Transporte / logística"},
+        {4, "Servicios PubliTruck SpA", "78.271.876-2", "Publicidad móvil"},
+        {5, "Greengo Austral SpA", "78.321.137-8", "Ferretería"},
+        {6, "Inversiones Ibiza SpA", "78.325.207-4", "Real estate / inversiones"},
+        {7, "Gastos Personales", "15.884.605-5", "Personal"},
+        {8, "Propiedades Salvarez", "15.884.605-5", "Propiedades con arriendo"},
+        {9, "Best Free Wifi Chile SpA", "76.718.863-3", "Enlaces & CCTV"}
+    }
+)
+
+-- Ordenar Nombre por EmpresaId
+-- Marcar como tabla de fechas: NO
+-- Marcado como tabla de dimensión: SÍ
+
+// ──────────────────────────────────────────────────────────
+DimCategoria =
+DATATABLE(
+    "CategoriaId", INTEGER,
+    "Nombre", STRING,
+    "TipoMovimiento", STRING,
+    {
+        {1,  "Ventas / Servicios",         "Ingreso"},
+        {2,  "Publicidad / Sponsors",      "Ingreso"},
+        {3,  "Arriendos",                  "Ingreso"},
+        {4,  "Inversiones / Rentas",       "Ingreso"},
+        {5,  "Otros Ingresos",             "Ingreso"},
+        {10, "Hosting & Dominios",         "Gasto"},
+        {11, "Servicios Cloud / APIs",     "Gasto"},
+        {12, "Sueldos / Honorarios",       "Gasto"},
+        {13, "Marketing & Publicidad",     "Gasto"},
+        {14, "Transporte & Logística",     "Gasto"},
+        {15, "Insumos Ferretería",         "Gasto"},
+        {16, "Mantenimiento Equipos",      "Gasto"},
+        {17, "Servicios Básicos",          "Gasto"},
+        {18, "Arriendos (gasto)",          "Gasto"},
+        {19, "Seguros",                    "Gasto"},
+        {20, "Impuestos / Contribuciones", "Gasto"},
+        {21, "Comisiones Bancarias",       "Gasto"},
+        {22, "Alimentación",               "Gasto"},
+        {23, "Salud",                      "Gasto"},
+        {24, "Educación",                  "Gasto"},
+        {25, "Entretención",               "Gasto"},
+        {26, "Varios / Otros Gastos",      "Gasto"}
+    }
+)
+
+// ──────────────────────────────────────────────────────────
+DimCalendario =
+VAR FechaMin = DATE(2024, 1, 1)
+VAR FechaMax = DATE(2027, 12, 31)
+RETURN
+ADDCOLUMNS(
+    CALENDAR(FechaMin, FechaMax),
+    "Año", YEAR([Date]),
+    "MesNumero", MONTH([Date]),
+    "MesNombre", FORMAT([Date], "MMMM"),
+    "MesAño", FORMAT([Date], "MMM-YYYY"),
+    "Trimestre", "Q" & FORMAT([Date], "Q"),
+    "DiaSemana", WEEKDAY([Date], 2),
+    "NombreDia", FORMAT([Date], "dddd"),
+    "SemanaAño", WEEKNUM([Date], 2),
+    "EsFinDeSemana", WEEKDAY([Date], 2) >= 6
+)
+-- Marcar como tabla de fechas: [Date]
+
+// ════════════════════════════════════════════════════════════
+// 2. TABLA DE HECHOS (importar desde Excel/CSV o DATATABLE)
+// ════════════════════════════════════════════════════════════
+
+// Opción A: Importar desde Excel
+// Power Query > Obtener datos > Excel > seleccionar Hoja Movimientos
+
+// Opción B: DATATABLE de ejemplo
+HechoMovimientos_Ejemplo =
+DATATABLE(
+    "Fecha", DATETIME,
+    "EmpresaId", INTEGER,
+    "CategoriaId", INTEGER,
+    "Monto", CURRENCY,
+    "Moneda", STRING,
+    "Glosa", STRING,
+    "Pagado", STRING,
+    {
+        {DATE(2026, 1, 15), 1, 1, 3500000, "CLP", "Venta tickets YoSorteo enero", "Sí"},
+        {DATE(2026, 1, 20), 2, 1, 1800000, "CLP", "Venta tickets TransTicket enero", "Sí"},
+        {DATE(2026, 1, 31), 3, 14, 450000, "CLP", "Flete cliente Puerto Montt", "Sí"},
+        {DATE(2026, 2, 5),  7, 12, 800000,  "CLP", "Honorarios contador", "Sí"},
+        {DATE(2026, 2, 10), 5, 15, 320000,  "CLP", "Compra insumos ferretería", "Sí"},
+        {DATE(2026, 2, 15), 1, 10, 120000,  "CLP", "Hosting YoSorteo mensual", "No"}
+    }
+)
+
+// ════════════════════════════════════════════════════════════
+// 3. MEDIDAS DAX
+// ════════════════════════════════════════════════════════════
+
+-- Medida base: Total Monto
+Total Monto = SUM(HechoMovimientos[Monto])
+
+-- Ingresos
+Total Ingresos =
+CALCULATE(
+    [Total Monto],
+    DimCategoria[TipoMovimiento] = "Ingreso"
+)
+
+-- Gastos
+Total Gastos =
+CALCULATE(
+    [Total Monto],
+    DimCategoria[TipoMovimiento] = "Gasto"
+)
+
+-- Saldo Neto
+Saldo Neto = [Total Ingresos] - [Total Gastos]
+
+-- % Gastos s/ Ingresos
+% Gastos s/ Ingresos =
+DIVIDE([Total Gastos], [Total Ingresos], BLANK())
+
+-- Promedio mensual de ingresos
+Promedio Ingresos Mensual =
+AVERAGEX(
+    VALUES(DimCalendario[MesAño]),
+    [Total Ingresos]
+)
+
+-- Gastos acumulados del año
+Gastos Acumulados Año =
+TOTALYTD([Total Gastos], DimCalendario[Date])
+
+-- Ingresos acumulados del año
+Ingresos Acumulados Año =
+TOTALYTD([Total Ingresos], DimCalendario[Date])
+
+-- Variación vs mes anterior (ingresos)
+Ingresos Var % Mes Ant =
+VAR MesActual = [Total Ingresos]
+VAR MesAnterior =
+    CALCULATE(
+        [Total Ingresos],
+        PREVIOUSMONTH(DimCalendario[Date])
+    )
+RETURN
+DIVIDE(MesActual - MesAnterior, MesAnterior, BLANK())
+
+-- Pagado % (de gastos)
+% Gastos Pagados =
+VAR GastosPagados =
+    CALCULATE(
+        [Total Monto],
+        HechoMovimientos[Pagado] = "Sí",
+        DimCategoria[TipoMovimiento] = "Gasto"
+    )
+RETURN
+DIVIDE(GastosPagados, [Total Gastos], BLANK())
+
+-- Ranking de empresas por ingreso
+Rank Empresa Ingresos =
+RANKX(
+    ALL(DimEmpresa[Nombre]),
+    [Total Ingresos],
+    ,
+    DESC,
+    Dense
+)
+
+-- Número de movimientos
+Num Movimientos = COUNTROWS(HechoMovimientos)
+
+-- Última fecha con movimiento
+Ultima Fecha Movimiento = MAX(HechoMovimientos[Fecha])
+
+// ════════════════════════════════════════════════════════════
+// 4. RELACIONES DEL MODELO
+// ════════════════════════════════════════════════════════════
+
+/*
+  DimEmpresa[EmpresaId] ─1────N─ HechoMovimientos[EmpresaId]
+  DimCategoria[CategoriaId] ─1────N─ HechoMovimientos[CategoriaId]
+  DimCalendario[Date] ─1────N─ HechoMovimientos[Fecha]
+
+  Cardinalidad cruzada: todas Uno a Muchos, dirección de filtro Única
+*/
+
+// ════════════════════════════════════════════════════════════
+// 5. ESTRATEGIA DE ACTUALIZACIÓN
+// ════════════════════════════════════════════════════════════
+
+/*
+  Recomendación:
+
+  1. Datos maestros (Empresa, Categoría, Calendario):
+     - Cargar desde DATATABLE (como arriba) → no requieren actualización
+     - O desde Excel/CSV para editar fácil
+
+  2. Datos transaccionales (Movimientos):
+     - Cargar desde el Excel de registro (Power Query → Excel)
+     - O desde un CSV exportado
+     - Opcional: base de datos (PostgreSQL/SQLite) cuando convenga
+
+  3. Actualización:
+     - Power BI Desktop: click en "Actualizar"
+     - Power BI Service: programar actualización diaria
+     - Publicar workbook: guardar nuevo .xlsx en la misma ruta
+*/
