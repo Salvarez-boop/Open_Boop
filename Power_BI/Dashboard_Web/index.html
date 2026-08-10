@@ -146,7 +146,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-right font-semibold text-[#F39C12]">💰 L. Crédito</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold text-[#3498DB]">🏦 Saldo Actual</th><th class="p-2.5 text-right font-semibold text-[#F39C12]">💳 L. Crédito</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
@@ -655,7 +655,7 @@ function renderBancos() {
     html += '<td class="p-2.5">' + b.nombre + '</td>';
     html += '<td class="p-2.5">' + (b.tipoCuenta || '—') + '</td>';
     html += '<td class="p-2.5 font-mono text-sm">' + (b.nroCuenta || '—') + '</td>';
-    html += '<td class="p-2.5 text-right mt">' + fmtCLP(b.saldoActual || 0) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#3498DB]">' + fmtCLP(b.saldoActual || 0) + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#F39C12]">' + fmtCLP(b.lineaCredito || 0) + '</td>';
     html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#70AD47]">' + fmtCLP(totalIng) + '</td>';
