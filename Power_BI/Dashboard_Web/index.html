@@ -146,7 +146,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa (RUT)</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-left font-semibold">Tipo Cuenta</th><th class="p-2.5 text-left font-semibold">Nro. Cuenta</th><th class="p-2.5 text-right font-semibold">Mov.</th><th class="p-2.5 text-right font-semibold text-[#70AD47]">💰 Ingresos</th><th class="p-2.5 text-right font-semibold text-[#E74C3C]">💸 Gastos</th><th class="p-2.5 text-right font-semibold text-[#F39C12]">💰 L. Crédito</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="bancoBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="bancoEmpty">No hay cuentas bancarias registradas.</p>
@@ -280,8 +280,10 @@
     <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Banco *</label><input type="text" id="frmBancoNombre" required placeholder="Ej: Banco Estado" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     <div class="grid grid-cols-2 gap-3 mb-3">
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Tipo Cuenta *</label><select id="frmBancoTipo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"><option value="">Seleccionar</option><option value="Cta. Cte">Cta. Cte</option><option value="Cta. Vista">Cta. Vista</option><option value="Cta. USD">Cta. USD</option></select></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Cuenta *</label><input type="text" id="frmBancoNumero" required placeholder="Ej: 12345678" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Cuenta *</label><input type="number" id="frmBancoNumero" required placeholder="Ej: 12345678" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     </div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Saldo Actual</label><input type="number" id="frmBancoSaldo" step="1" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+    <div class="mb-3"><label class="block text-xs font-semibold text-gray-500 mb-1">Saldo Línea Crédito</label><input type="number" id="frmBancoCredito" step="1" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalBanco').close()">Cancelar</button>
       <button type="submit" class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">💾 Guardar</button>
@@ -574,6 +576,8 @@ function mostrarModalBanco(data) {
   document.getElementById('frmBancoNombre').value = data ? data.nombre : '';
   document.getElementById('frmBancoTipo').value = data ? data.tipoCuenta : '';
   document.getElementById('frmBancoNumero').value = data ? data.nroCuenta : '';
+  document.getElementById('frmBancoSaldo').value = data ? (data.saldoActual || '') : '';
+  document.getElementById('frmBancoCredito').value = data ? (data.lineaCredito || '') : '';
   // Llenar select empresas
   var selEmp = document.getElementById('frmBancoEmpresa');
   var empHtml = '<option value="">Seleccionar</option>';
@@ -590,15 +594,18 @@ function guardarBanco(e) {
   var empresaId = parseInt(document.getElementById('frmBancoEmpresa').value);
   var nombre = document.getElementById('frmBancoNombre').value.trim();
   var tipoCuenta = document.getElementById('frmBancoTipo').value;
-  var nroCuenta = document.getElementById('frmBancoNumero').value.trim();
+  var nroCuenta = parseInt(document.getElementById('frmBancoNumero').value);
+  var saldoActual = parseFloat(document.getElementById('frmBancoSaldo').value) || 0;
+  var lineaCredito = parseFloat(document.getElementById('frmBancoCredito').value) || 0;
   if (!empresaId || !nombre || !tipoCuenta || !nroCuenta) { mostrarToast('Completa todos los campos', 'error'); return false; }
+  if (isNaN(nroCuenta)) { mostrarToast('Nro. Cuenta debe ser un número válido', 'error'); return false; }
   if (editBancoId) {
     for (var i = 0; i < bancos.length; i++) {
-      if (bancos[i].id === editBancoId) { bancos[i].empresaId = empresaId; bancos[i].nombre = nombre; bancos[i].tipoCuenta = tipoCuenta; bancos[i].nroCuenta = nroCuenta; break; }
+      if (bancos[i].id === editBancoId) { bancos[i].empresaId = empresaId; bancos[i].nombre = nombre; bancos[i].tipoCuenta = tipoCuenta; bancos[i].nroCuenta = nroCuenta; bancos[i].saldoActual = saldoActual; bancos[i].lineaCredito = lineaCredito; break; }
     }
     mostrarToast('✅ Cuenta actualizada', 'success');
   } else {
-    bancos.push({ id: getNextBancoId(), empresaId: empresaId, nombre: nombre, tipoCuenta: tipoCuenta, nroCuenta: nroCuenta });
+    bancos.push({ id: getNextBancoId(), empresaId: empresaId, nombre: nombre, tipoCuenta: tipoCuenta, nroCuenta: nroCuenta, saldoActual: saldoActual, lineaCredito: lineaCredito });
     mostrarToast('✅ Cuenta agregada', 'success');
   }
   guardarTodo();
@@ -648,6 +655,8 @@ function renderBancos() {
     html += '<td class="p-2.5">' + b.nombre + '</td>';
     html += '<td class="p-2.5">' + (b.tipoCuenta || '—') + '</td>';
     html += '<td class="p-2.5 font-mono text-sm">' + (b.nroCuenta || '—') + '</td>';
+    html += '<td class="p-2.5 text-right mt">' + fmtCLP(b.saldoActual || 0) + '</td>';
+    html += '<td class="p-2.5 text-right mt text-[#F39C12]">' + fmtCLP(b.lineaCredito || 0) + '</td>';
     html += '<td class="p-2.5 text-right">' + movsCount + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#70AD47]">' + fmtCLP(totalIng) + '</td>';
     html += '<td class="p-2.5 text-right mt text-[#E74C3C]">' + fmtCLP(totalGas) + '</td>';
@@ -1491,8 +1500,8 @@ function cargarDatosEjemplo() {
   ];
 
   bancos = [
-    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: '10012345' }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: '20067890' }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: '30011223' },
-    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: '40044556' }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: '50077889' }
+    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: 10012345, saldoActual: 500000, lineaCredito: 2000000 }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: 20067890, saldoActual: 1200000, lineaCredito: 3000000 }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: 30011223, saldoActual: 0, lineaCredito: 0 },
+    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: 40044556, saldoActual: 800000, lineaCredito: 1500000 }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: 50077889, saldoActual: 350000, lineaCredito: 1000000 }
   ];
 
   mediosPago = [
@@ -1629,8 +1638,8 @@ if (categorias.length === 0) {
 
 if (bancos.length === 0) {
   bancos = [
-    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: '10012345' }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: '20067890' }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: '30011223' },
-    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: '40044556' }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: '50077889' }
+    { id: 1, nombre: 'Banco Estado', empresaId: 1, tipoCuenta: 'Cta. Cte', nroCuenta: 10012345, saldoActual: 500000, lineaCredito: 2000000 }, { id: 2, nombre: 'Banco de Chile', empresaId: 2, tipoCuenta: 'Cta. Vista', nroCuenta: 20067890, saldoActual: 1200000, lineaCredito: 3000000 }, { id: 3, nombre: 'Banco Santander', empresaId: 1, tipoCuenta: 'Cta. USD', nroCuenta: 30011223, saldoActual: 0, lineaCredito: 0 },
+    { id: 4, nombre: 'Banco BCI', empresaId: 3, tipoCuenta: 'Cta. Cte', nroCuenta: 40044556, saldoActual: 800000, lineaCredito: 1500000 }, { id: 5, nombre: 'Banco Internacional', empresaId: 5, tipoCuenta: 'Cta. Vista', nroCuenta: 50077889, saldoActual: 350000, lineaCredito: 1000000 }
   ];
   guardarTodo();
 }
