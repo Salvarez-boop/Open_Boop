@@ -605,6 +605,7 @@ function cargarTodo() {
     bancos = JSON.parse(localStorage.getItem('bancos') || '[]');
     mediosPago = JSON.parse(localStorage.getItem('mediosPago') || '[]');
     creditos = JSON.parse(localStorage.getItem('creditos')||'[]');
+    tarjetas = JSON.parse(localStorage.getItem('tarjetas')||'[]');
     var rawT = localStorage.getItem('transferencias');
     transferencias = rawT ? JSON.parse(rawT).map(function(x) { x.fecha = new Date(x.fecha); return x; }) : [];
   } catch(e) {
@@ -612,6 +613,8 @@ function cargarTodo() {
     categorias = [];
     bancos = [];
     mediosPago = [];
+    creditos = [];
+    tarjetas = [];
     transferencias = [];
   }
 }
