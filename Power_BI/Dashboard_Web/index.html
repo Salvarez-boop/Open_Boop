@@ -1280,6 +1280,7 @@ function guardarTarjeta(e) {
   var disponible = parseFloat(document.getElementById('frmTarjDisponible').value) || 0;
   var utilizado = parseFloat(document.getElementById('frmTarjUtilizado').value) || 0;
   if (!empresaId || !banco || !tipo || !numero) { mostrarToast('Completa todos los campos obligatorios', 'error'); return false; }
+  if (numero.length < 16 || tarjMostrarNum(numero).length < 19) { mostrarToast('El Nro. de Tarjeta debe tener 16 dígitos completos (mín. 19 caracteres con formato)', 'error'); return false; }
   if (editTarjId) {
     for (var i = 0; i < tarjetas.length; i++) { if (tarjetas[i].id === editTarjId) { tarjetas[i].empresaId = empresaId; tarjetas[i].banco = banco; tarjetas[i].tipo = tipo; tarjetas[i].numero = numero; tarjetas[i].monto = monto; tarjetas[i].disponible = disponible; tarjetas[i].utilizado = utilizado; break; } }
     mostrarToast('Tarjeta actualizada', 'success');
