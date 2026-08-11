@@ -304,7 +304,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Nro. Crédito</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-right font-semibold">Monto UF</th><th class="p-2.5 text-center font-semibold">Nro. Cuotas</th><th class="p-2.5 text-left font-semibold">Fecha Vencimiento</th><th class="p-2.5 text-left font-semibold">Fecha Pago</th><th class="p-2.5 text-right font-semibold">Monto a Pagar</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
+          <thead><tr class="bg-[#2E75B6] text-white"><th class="p-2.5 text-left font-semibold">ID</th><th class="p-2.5 text-left font-semibold">Empresa</th><th class="p-2.5 text-left font-semibold">Nro. Crédito</th><th class="p-2.5 text-left font-semibold">Banco</th><th class="p-2.5 text-right font-semibold">Monto UF</th><th class="p-2.5 text-center font-semibold">Nro. Cuotas</th><th class="p-2.5 text-left font-semibold">Vencimiento</th><th class="p-2.5 text-left font-semibold">Pago</th><th class="p-2.5 text-right font-semibold">Monto Pagar</th><th class="p-2.5 text-left font-semibold">Propiedad - ROL</th><th class="p-2.5 text-center font-semibold">Acción</th></tr></thead>
           <tbody id="credBody" class="divide-y divide-gray-100"></tbody>
         </table>
         <p class="text-center text-gray-400 text-sm py-8 hidden" id="credEmpty">No hay créditos registrados.</p>
@@ -367,6 +367,10 @@
 <dialog id="modalCred" class="rounded-2xl w-[520px] max-w-[94vw] p-6 border-0 shadow-2xl">
   <h2 class="text-lg font-bold text-[#2E75B6] mb-4" id="modalCredTitle">➕ Agregar Crédito Hipotecario</h2>
   <form onsubmit="return guardarCredito(event)">
+    <div class="mb-3">
+      <label class="block text-xs font-semibold text-gray-500 mb-1">Empresa Responsable *</label>
+      <select id="frmCredEmpresa" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></select>
+    </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nro. Crédito *</label><input type="text" id="frmCredNro" required placeholder="Ej: 12345" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Banco *</label><input type="text" id="frmCredBanco" required placeholder="Banco" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
@@ -379,9 +383,9 @@
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha Vencimiento</label><input type="date" id="frmCredVenc" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
       <div><label class="block text-xs font-semibold text-gray-500 mb-1">Fecha Pago</label><input type="date" id="frmCredPago" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     </div>
-    <div class="mb-3">
-      <label class="block text-xs font-semibold text-gray-500 mb-1">Monto a Pagar *</label>
-      <input type="number" id="frmCredMontoPagar" required step="1" min="0" placeholder="Monto en CLP" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Monto a Pagar *</label><input type="number" id="frmCredMontoPagar" required step="1" min="0" placeholder="Monto en CLP" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1">Propiedad - ROL Avaluo</label><input type="text" id="frmCredPropiedad" placeholder="Ej: 1234-5" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="border border-gray-300 text-gray-600 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="document.getElementById('modalCred').close()">Cancelar</button>
@@ -1106,6 +1110,10 @@ function getNextCredId() {
 function mostrarModalCredito(data) {
   editCredId = data ? data.id : null;
   document.getElementById('modalCredTitle').textContent = data ? '✏️ Editar Crédito Hipotecario' : '➕ Agregar Crédito Hipotecario';
+  var selEmp = document.getElementById('frmCredEmpresa');
+  var h = '<option value="">Seleccionar</option>';
+  for (var i = 0; i < EMPRESAS.length; i++) { h += '<option value="' + EMPRESAS[i].id + '">' + EMPRESAS[i].nombre + ' (' + EMPRESAS[i].rut + ')</option>'; }
+  selEmp.innerHTML = h;
   document.getElementById('frmCredNro').value = data ? data.nro : '';
   document.getElementById('frmCredBanco').value = data ? data.banco : '';
   document.getElementById('frmCredMonto').value = data ? data.montoUF : '';
@@ -1113,11 +1121,14 @@ function mostrarModalCredito(data) {
   document.getElementById('frmCredVenc').value = data ? data.fechaVenc : '';
   document.getElementById('frmCredPago').value = data ? data.fechaPago : '';
   document.getElementById('frmCredMontoPagar').value = data ? data.montoPagar : '';
+  document.getElementById('frmCredPropiedad').value = data ? (data.propiedad || '') : '';
+  if (data && data.empresaId) selEmp.value = data.empresaId;
   document.getElementById('modalCred').showModal();
 }
 
 function guardarCredito(e) {
   e.preventDefault();
+  var empresaId = parseInt(document.getElementById('frmCredEmpresa').value);
   var nro = document.getElementById('frmCredNro').value.trim();
   var banco = document.getElementById('frmCredBanco').value.trim();
   var montoUF = parseFloat(document.getElementById('frmCredMonto').value) || 0;
@@ -1125,19 +1136,20 @@ function guardarCredito(e) {
   var fechaVenc = document.getElementById('frmCredVenc').value;
   var fechaPago = document.getElementById('frmCredPago').value;
   var montoPagar = parseFloat(document.getElementById('frmCredMontoPagar').value) || 0;
-  if (!nro || !banco || !montoUF || !cuotas) { mostrarToast('Completa Nro. Crédito, Banco, Monto UF y Cuotas', 'error'); return false; }
+  var propiedad = document.getElementById('frmCredPropiedad').value.trim();
+  if (!empresaId || !nro || !banco || !montoUF || !cuotas) { mostrarToast('Completa Empresa, Nro. Crédito, Banco, Monto UF y Cuotas', 'error'); return false; }
   if (editCredId) {
     for (var i = 0; i < creditos.length; i++) {
       if (creditos[i].id === editCredId) {
-        creditos[i].nro = nro; creditos[i].banco = banco; creditos[i].montoUF = montoUF;
+        creditos[i].empresaId = empresaId; creditos[i].nro = nro; creditos[i].banco = banco; creditos[i].montoUF = montoUF;
         creditos[i].cuotas = cuotas; creditos[i].fechaVenc = fechaVenc; creditos[i].fechaPago = fechaPago;
-        creditos[i].montoPagar = montoPagar;
+        creditos[i].montoPagar = montoPagar; creditos[i].propiedad = propiedad;
         break;
       }
     }
     mostrarToast('✅ Crédito actualizado', 'success');
   } else {
-    creditos.push({ id: getNextCredId(), nro: nro, banco: banco, montoUF: montoUF, cuotas: cuotas, fechaVenc: fechaVenc, fechaPago: fechaPago, montoPagar: montoPagar });
+    creditos.push({ id: getNextCredId(), empresaId: empresaId, nro: nro, banco: banco, montoUF: montoUF, cuotas: cuotas, fechaVenc: fechaVenc, fechaPago: fechaPago, montoPagar: montoPagar, propiedad: propiedad });
     mostrarToast('✅ Crédito agregado', 'success');
   }
   guardarTodo();
@@ -1170,24 +1182,29 @@ function renderCreditos() {
   for (var i = 0; i < creditos.length; i++) {
     var c = creditos[i];
     if (filterText) {
-      var match = (c.nro || '').toLowerCase().indexOf(filterText) >= 0 || (c.banco || '').toLowerCase().indexOf(filterText) >= 0;
+      var emp = obtenerEmpresa(c.empresaId);
+      var empName = emp ? emp.nombre : '';
+      var match = (c.nro || '').toLowerCase().indexOf(filterText) >= 0 || (c.banco || '').toLowerCase().indexOf(filterText) >= 0 || (c.propiedad || '').toLowerCase().indexOf(filterText) >= 0 || empName.toLowerCase().indexOf(filterText) >= 0;
       if (match) dataF.push(c);
     } else { dataF.push(c); }
   }
   document.getElementById('credCountLabel').textContent = dataF.length + ' créditos';
-  if (dataF.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-gray-400 text-sm">Sin resultados</td></tr>'; return; }
+  if (dataF.length === 0) { tbody.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-400 text-sm">Sin resultados</td></tr>'; return; }
   var html = '';
   for (var i = 0; i < dataF.length; i++) {
     var c = dataF[i];
+    var emp = obtenerEmpresa(c.empresaId);
     html += '<tr class="hover:bg-gray-50">';
     html += '<td class="p-2.5">' + c.id + '</td>';
-    html += '<td class="p-2.5 font-semibold">' + (c.nro || '---') + '</td>';
+    html += '<td class="p-2.5 font-semibold">' + (emp ? emp.nombre + ' (' + emp.rut + ')' : '---') + '</td>';
+    html += '<td class="p-2.5">' + (c.nro || '---') + '</td>';
     html += '<td class="p-2.5">' + (c.banco || '---') + '</td>';
     html += '<td class="p-2.5 text-right">' + c.montoUF.toLocaleString('es-CL', {minimumFractionDigits:2}) + '</td>';
     html += '<td class="p-2.5 text-center">' + (c.cuotas || '---') + '</td>';
     html += '<td class="p-2.5">' + (c.fechaVenc || '---') + '</td>';
     html += '<td class="p-2.5">' + (c.fechaPago || '---') + '</td>';
     html += '<td class="p-2.5 text-right">' + (c.montoPagar ? '$' + Math.round(c.montoPagar).toLocaleString('es-CL') : '---') + '</td>';
+    html += '<td class="p-2.5">' + (c.propiedad || '---') + '</td>';
     html += '<td class="p-2.5 text-center whitespace-nowrap"><button class="bg-[#2E75B6] hover:bg-[#1F4E7A] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition mr-1" onclick="editarCredito(' + c.id + ')">✏️</button><button class="bg-[#E74C3C] hover:bg-[#C0392B] text-white text-xs px-2.5 py-1 rounded-lg cursor-pointer transition" onclick="eliminarCredito(' + c.id + ')">🗑️</button></td></tr>';
   }
   tbody.innerHTML = html;
@@ -1348,7 +1365,7 @@ function renderMediosPago() {
   var empty = document.getElementById('mpEmpty');
   if (creditos.length === 0) {
     creditos = [
-      { id: 1, nro: 'H-001', banco: 'Banco de Chile', montoUF: 3200, cuotas: 240, fechaVenc: '2026-09-05', fechaPago: '', montoPagar: 485000 },
+      { id: 1, empresaId: 1, nro: 'H-001', banco: 'Banco de Chile', montoUF: 3200, cuotas: 240, fechaVenc: '2026-09-05', fechaPago: '', montoPagar: 485000, propiedad: '1234-5' },
     ];
     guardarTodo();
   }
