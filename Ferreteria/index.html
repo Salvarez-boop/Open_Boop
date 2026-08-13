@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Ferretería El Greengo – Sistema de Gestión</title>
+ <meta name="description" content="Sistema de pedidos, ventas y control de caja para Ferretería El Greengo." />
+ <link rel="preconnect" href="https://fonts.googleapis.com" />
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+ <link rel="stylesheet" href="css/global.css" />
+</head>
+<body>
+<div class="wrapper">
+
+ <!-- Header -->
+ <header>
+ <button class="hamburger" onclick="toggleSidebar()" aria-label="Abrir caja">☰</button>
+ <div class="logo-icon">🔩</div>
+ <div>
+ <h1>Ferretería <span>El Greengo</span></h1>
+ <p>Ventas · Catálogo · Pedidos</p>
+ </div>
+ </header>
+
+ <!-- Tabs -->
+ <div class="tabs">
+ <button class="tab-btn active blue" id="tab-ventas" onclick="showTab('ventas')">🛒 Ventas</button>
+ <button class="tab-btn orange" id="tab-catalogo" onclick="showTab('catalogo')">📦 Catálogo</button>
+ <button class="tab-btn" id="tab-pedidos" onclick="showTab('pedidos')">📋 Pedidos</button>
+ </div>
+
+ <!-- ══════════════ TAB PEDIDOS ══════════════ -->
+ <div id="panel-pedidos" class="tab-panel">
+ <div class="card" style="margin-bottom:20px">
+ <p class="section-title">➕ Agregar Producto al Pedido</p>
+ <div class="form-grid-3">
+ <div class="field"><label for="p-nombre">Nombre del Producto</label><input id="p-nombre" type="text" placeholder="Ej: Tornillo cabeza plana 1/4" autocomplete="off"/></div>
+ <div class="field"><label for="p-cantidad">Cantidad</label><input id="p-cantidad" type="number" min="1" step="1" placeholder="50"/></div>
+ <div class="field"><label for="p-formato">Formato</label>
+ <select id="p-formato">
+ <option value="">-- Seleccionar --</option>
+ <option>Unidad</option><option>Bolsa</option><option>Caja</option>
+ <option>Tira</option><option>Rollo</option><option>Metros</option><option>Litros</option><option>Kg</option>
+ </select>
+ </div>
+ <button class="btn btn-green" onclick="pedidoAgregar()">+ Agregar</button>
+ </div>
+ </div>
+ <div class="card">
+ <p class="section-title">📋 Pedidos del Día</p>
+ <div class="stats">
+ <div class="stat-chip"><span class="stat-num green" id="p-stat-prod">0</span><span class="stat-label">productos</span></div>
+ <div class="stat-chip"><span class="stat-num green" id="p-stat-items">0</span><span class="stat-label">unidades totales</span></div>
+ </div>
+ <div class="search-wrap"><span class="search-icon">🔍</span><input id="p-buscar" type="text" placeholder="Buscar por nombre o formato…" oninput="pedidoRender()"/></div>
+ <div class="table-wrap">
+ <table>
+ <thead><tr>
+ <th onclick="pedidoSort('id')">#<span class="arrow">↕</span></th>
+ <th onclick="pedidoSort('nombre')">Nombre Producto<span class="arrow">↕</span></th>
+ <th onclick="pedidoSort('cantidad')">Cantidad<span class="arrow">↕</span></th>
+ <th onclick="pedidoSort('formato')">Formato<span class="arrow">↕</span></th>
+ <th>Acción</th>
+ </tr></thead>
+ <tbody id="p-tbody"></tbody>
+ </table>
+ <div id="p-empty" class="empty" style="display:none"><div class="empty-icon">📦</div><p>No hay productos en el pedido todavía.</p></div>
+ </div>
+ <div class="actions-row">
+ <button class="btn btn-outline" onclick="pedidoLimpiar()">🗑 Limpiar todo</button>
+ <button class="btn btn-print" onclick="window.print()">🖨 Imprimir</button>
+ <button class="btn btn-mail" onclick="enviarPorMail()">✉️ Enviar por Mail</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- ══════════════ TAB VENTAS ══════════════ -->
+ <div id="panel-ventas" class="tab-panel active">
+ <div id="v-caja-warning" class="caja-warning" style="display:none">
+ ⚠️ La caja no está abierta. Ve a la pestaña <strong>&nbsp;💰 Caja&nbsp;</strong> y realiza la apertura antes de vender.
+ </div>
+ <div class="stats" style="margin-bottom:16px">
+ <div class="stat-chip"><span class="stat-num blue" id="v-stat-ventas">0</span><span class="stat-label">ventas hoy</span></div>
+ <div class="stat-chip"><span class="stat-num blue" id="v-stat-ingresos">$0</span><span class="stat-label">ingresos del día</span></div>
+ </div>
+ <div class="pos-layout">
+ <div>
+ <div class="card" style="margin-bottom:16px">
+ <p class="section-title">🛍 Seleccionar Productos</p>
+ <div class="search-wrap" style="margin-bottom:14px"><span class="search-icon">🔍</span><input id="v-buscar" type="text" placeholder="Buscar producto…" oninput="ventasRenderGrid()"/></div>
+ <div id="v-prod-grid" class="prod-grid"></div>
+ <div id="v-grid-empty" class="empty" style="display:none"><div class="empty-icon">📦</div><p>No hay productos en el catálogo.<br/>Agrega productos en la pestaña <strong>Catálogo</strong>.</p></div>
+ </div>
+ <div class="card">
+ <p class="section-title">🧾 Historial de Ventas del Día</p>
+ <div id="v-historial"></div>
+ <div id="v-hist-empty" class="empty" style="display:none"><div class="empty-icon">🧾</div><p>Aún no se han registrado ventas hoy.</p></div>
+ <div class="actions-row"><button class="btn btn-outline" onclick="ventasLimpiarHistorial()">🗑 Limpiar historial</button></div>
+ </div>
+ </div>
+ <div>
+ <div class="cart-box">
+ <div class="cart-header"><span>🛒 Carrito</span><button class="btn-del" onclick="carritoLimpiar()">✕ Vaciar</button></div>
+ <div class="cart-items" id="v-cart-items"><div class="cart-empty">El carrito está vacío.<br/>Haz clic en un producto para agregar.</div></div>
+ <div class="cart-footer">
+ <div class="discount-row"><label>Descuento %</label><input id="v-descuento" type="number" min="0" max="100" step="1" placeholder="0" oninput="carritoRender()"/></div>
+ <div class="total-row"><span class="total-label">TOTAL A COBRAR</span><span class="total-amount" id="v-total">$0</span></div>
+ <button class="btn btn-blue btn-confirm" onclick="confirmarVenta()">✔ Confirmar Venta</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- ══════════════ TAB CATÁLOGO ══════════════ -->
+ <div id="panel-catalogo" class="tab-panel">
+ <div class="card" style="margin-bottom:20px">
+ <p class="section-title">➕ Agregar Producto al Catálogo</p>
+ <div class="form-grid-4">
+ <div class="field"><label for="c-nombre">Nombre del Producto</label><input id="c-nombre" type="text" placeholder="Ej: Tornillo 1/4 cabeza plana" autocomplete="off"/></div>
+ <div class="field"><label for="c-precio">Precio ($)</label><input id="c-precio" type="number" min="0" step="1" placeholder="990"/></div>
+ <div class="field"><label for="c-stock">Stock</label><input id="c-stock" type="number" min="0" step="1" placeholder="100"/></div>
+ <div class="field"><label for="c-formato">Formato</label>
+ <select id="c-formato">
+ <option value="">-- Seleccionar --</option>
+ <option>Unidad</option><option>Bolsa</option><option>Caja</option>
+ <option>Tira</option><option>Rollo</option><option>Metros</option><option>Litros</option><option>Kg</option>
+ </select>
+ </div>
+ <button class="btn btn-orange" onclick="catalogoAgregar()">+ Agregar</button>
+ </div>
+ </div>
+ <div class="card">
+ <p class="section-title">📦 Productos en Catálogo</p>
+ <div class="stats">
+ <div class="stat-chip"><span class="stat-num orange" id="c-stat-prod">0</span><span class="stat-label">productos</span></div>
+ <div class="stat-chip"><span class="stat-num orange" id="c-stat-stock">0</span><span class="stat-label">unidades en stock</span></div>
+ </div>
+ <div class="search-wrap"><span class="search-icon">🔍</span><input id="c-buscar" type="text" placeholder="Buscar producto…" oninput="catalogoRender()"/></div>
+ <div class="table-wrap">
+ <table>
+ <thead><tr>
+ <th onclick="catSort('id')">#<span class="arrow">↕</span></th>
+ <th onclick="catSort('nombre')">Nombre<span class="arrow">↕</span></th>
+ <th onclick="catSort('precio')">Precio<span class="arrow">↕</span></th>
+ <th onclick="catSort('stock')">Stock<span class="arrow">↕</span></th>
+ <th onclick="catSort('formato')">Formato<span class="arrow">↕</span></th>
+ <th>Acción</th>
+ </tr></thead>
+ <tbody id="c-tbody"></tbody>
+ </table>
+ <div id="c-empty" class="empty" style="display:none"><div class="empty-icon">📦</div><p>No hay productos en el catálogo todavía.</p></div>
+ </div>
+ <div class="actions-row"><button class="btn btn-outline" onclick="catalogoLimpiar()">🗑 Limpiar catálogo</button></div>
+ </div>
+ </div>
+
+ <!-- ══════════════ SIDEBAR OVERLAY ══════════════ -->
+ <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+ <!-- ══════════════ SIDEBAR CAJA ══════════════ -->
+ <div id="sidebar-caja" class="sidebar">
+ <div class="sidebar-header">
+ <span class="sidebar-title">💰 Caja</span>
+ <button class="btn-sidebar-close" onclick="toggleSidebar()">✕</button>
+ </div>
+ <div class="sidebar-body">
+
+ <!-- Status banner -->
+ <div id="caja-status-bar" class="caja-status closed">
+ <div id="caja-dot" class="caja-dot off"></div>
+ <div class="caja-status-text">
+ <h3 id="caja-status-title">Caja Cerrada</h3>
+ <p id="caja-status-sub">No hay apertura registrada para hoy.</p>
+ </div>
+ <div class="caja-status-actions" id="caja-status-actions"></div>
+ </div>
+
+ <!-- Panel APERTURA (visible cuando caja cerrada) -->
+ <div id="caja-panel-apertura">
+ <div class="card">
+ <p class="section-title">🔓 Apertura de Caja</p>
+ <div class="sidebar-form">
+ <div class="field">
+ <label for="caja-monto-ini">Monto Inicial en Efectivo ($)</label>
+ <input id="caja-monto-ini" type="number" min="0" step="100" placeholder="Ej: 50000"/>
+ </div>
+ <div class="field">
+ <label for="caja-responsable">Responsable</label>
+ <input id="caja-responsable" type="text" placeholder="Nombre del cajero" autocomplete="off"/>
+ </div>
+ <button class="btn btn-purple" onclick="cajaAbrir()" style="width:100%;">🔓 Abrir Caja</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Panel OPERACIÓN (visible cuando caja abierta) -->
+ <div id="caja-panel-operacion" style="display:none">
+
+ <!-- Summary cards -->
+ <div class="caja-summary">
+ <div class="caja-card">
+ <div class="caja-card-label">💵 Inicial</div>
+ <div class="caja-card-value green" id="cj-inicial">$0</div>
+ <div class="caja-card-sub" id="cj-responsable">–</div>
+ </div>
+ <div class="caja-card">
+ <div class="caja-card-label">📈 Ventas</div>
+ <div class="caja-card-value blue" id="cj-ventas">$0</div>
+ <div class="caja-card-sub" id="cj-nventas">0 transacciones</div>
+ </div>
+ <div class="caja-card">
+ <div class="caja-card-label">📤 Egresos</div>
+ <div class="caja-card-value red" id="cj-egresos">$0</div>
+ <div class="caja-card-sub" id="cj-negresos">0 movimientos</div>
+ </div>
+ <div class="caja-card">
+ <div class="caja-card-label">💰 Saldo</div>
+ <div class="caja-card-value green big" id="cj-saldo">$0</div>
+ <div class="caja-card-sub">Tiempo real</div>
+ </div>
+ </div>
+
+ <!-- Registrar movimiento -->
+ <div class="card" style="margin-bottom:16px">
+ <p class="section-title">➕ Registrar Movimiento</p>
+ <div class="sidebar-form">
+ <div class="field">
+ <label for="caja-desc">Descripción</label>
+ <input id="caja-desc" type="text" placeholder="Ej: Retiro para banco" autocomplete="off"/>
+ </div>
+ <div class="field">
+ <label for="caja-tipo">Tipo</label>
+ <select id="caja-tipo">
+ <option value="retiro">📤 Retiro Administrador</option>
+ <option value="gasto">🧾 Gasto / Egreso</option>
+ <option value="ingreso">📥 Ingreso Extra</option>
+ </select>
+ </div>
+ <div class="field">
+ <label for="caja-monto">Monto ($)</label>
+ <input id="caja-monto" type="number" min="1" step="100" placeholder="10000"/>
+ </div>
+ <button class="btn btn-purple" onclick="cajaRegistrarMovimiento()" style="width:100%;">+ Registrar</button>
+ </div>
+ </div>
+
+ <!-- Movimientos del día -->
+ <div class="card" style="margin-bottom:16px">
+ <p class="section-title">📋 Movimientos del Día</p>
+ <div id="caja-movimientos-list"></div>
+ <div id="caja-mov-empty" class="empty" style="display:none">
+ <div class="empty-icon">📋</div>
+ <p>No hay movimientos registrados aún.</p>
+ </div>
+ </div>
+
+ <!-- Cierre -->
+ <div class="cierre-panel">
+ <h3>🔒 Cierre de Caja</h3>
+ <p style="font-size:.8rem">Genera un resumen descargable y cierra la caja hasta la próxima apertura.</p>
+ <button class="btn btn-red" onclick="cajaCerrar()" style="width:100%;">🔒 Cerrar Caja</button>
+ </div>
+
+ </div><!-- /panel-operacion -->
+ </div>
+ </div>
+
+</div><!-- /wrapper -->
+
+<!-- Mail Modal -->
+<div id="mail-modal">
+ <div class="modal-box">
+ <div class="modal-icon">📎</div>
+ <h2>Gmail abierto en nueva pestaña</h2>
+ <p>El pedido fue descargado como <strong>Pedido_ElGreengo.txt</strong>. Para adjuntarlo:</p>
+ <div class="highlight">
+ <span>① Ve a la pestaña de Gmail que se abrió</span>
+ <span>② Haz clic en el ícono 📎 (adjuntar archivo)</span>
+ <span>③ Selecciona <strong>Pedido_ElGreengo.txt</strong> desde Descargas</span>
+ <span>④ Envía el correo ✉️</span>
+ </div>
+ <button class="modal-close" onclick="cerrarModal()">Entendido ✓</button>
+ </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="script/app.js"></script>
+</body>
+</html>
