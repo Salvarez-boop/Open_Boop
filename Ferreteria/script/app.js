@@ -110,9 +110,12 @@ function pedidoRender(){
 let catalogo = load('catalogo_ferreteria') || [];
 let cNextId = catalogo.length ? Math.max(...catalogo.map(c=>c.id))+1 : 1;
 let cSortCol = 'id', cSortAsc = true;
+let cPagina = 1;
+const C_POR_PAGINA = 10;
 
 function catalogoAgregar(){
  const nombre=document.getElementById('c-nombre').value.trim();
+ const codigo=document.getElementById('c-codigo').value.trim();
  const precioS=document.getElementById('c-precio').value;
  const precio=parseFloat(precioS);
  const stockS=document.getElementById('c-stock').value;
@@ -122,10 +125,11 @@ function catalogoAgregar(){
  if(!precioS||isNaN(precio)||precio<0){shake('c-precio');return;}
  if(!stockS||isNaN(stock)||stock<0){shake('c-stock');return;}
  if(!formato){shake('c-formato');return;}
- catalogo.push({id:cNextId++,nombre,precio,stock,formato});
+ catalogo.push({id:cNextId++,nombre,codigo,precio,stock,formato});
  save('catalogo_ferreteria',catalogo); catalogoRender();
  showToast(`"${nombre}" agregado al catálogo ✓`);
  document.getElementById('c-nombre').value='';
+ document.getElementById('c-codigo').value='';
  document.getElementById('c-precio').value='';
  document.getElementById('c-stock').value='';
  document.getElementById('c-formato').value='';
@@ -133,11 +137,25 @@ function catalogoAgregar(){
 }
 function catalogoEliminar(id){ catalogo=catalogo.filter(c=>c.id!==id); save('catalogo_ferreteria',catalogo); catalogoRender(); showToast('Producto eliminado del catálogo'); }
 function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar todos los productos del catálogo?'))return; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender(); showToast('Catálogo limpiado'); }
-function catSort(col){ cSortAsc=cSortCol===col?!cSortAsc:true; cSortCol=col; catalogoRender(); }
+function catSort(col){ cSortAsc=cSortCol===col?!cSortAsc:true; cSortCol=col; cPagina=1; catalogoRender(); }
+function catIrPagina(dir){
+ const q=document.getElementById('c-buscar').value.toLowerCase();
+ const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q)).sort((a,b)=>{let va=a[cSortCol],vb=b[cSortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return cSortAsc?(va>vb?1:-1):(va<vb?1:-1);});
+ const totalPaginas=Math.max(1,Math.ceil(data.length/C_POR_PAGINA));
+ if(dir==='prev'&&cPagina>1)cPagina--;
+ if(dir==='next'&&cPagina<totalPaginas)cPagina++;
+ if(typeof dir==='number')cPagina=Math.max(1,Math.min(dir,totalPaginas));
+ catalogoRender();
+}
 function catalogoRender(){
  const q=document.getElementById('c-buscar').value.toLowerCase();
- const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q))
+ const fullData=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
  .sort((a,b)=>{let va=a[cSortCol],vb=b[cSortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return cSortAsc?(va>vb?1:-1):(va<vb?1:-1);});
+ const totalPaginas=Math.max(1,Math.ceil(fullData.length/C_POR_PAGINA));
+ if(cPagina>totalPaginas)cPagina=totalPaginas;
+ const start=(cPagina-1)*C_POR_PAGINA;
+ const data=fullData.slice(start,start+C_POR_PAGINA);
+ // arrow sort
  document.querySelectorAll('#panel-catalogo thead th').forEach(th=>{
  th.classList.remove('sorted');
  const m=(th.getAttribute('onclick')||'').match(/catSort\('(.+?)'\)/);
@@ -146,17 +164,26 @@ function catalogoRender(){
  });
  const tbody=document.getElementById('c-tbody');
  const empty=document.getElementById('c-empty');
- if(!data.length){tbody.innerHTML='';empty.style.display='block';}
+ if(!fullData.length){tbody.innerHTML='';empty.style.display='block';document.getElementById('c-pagination').style.display='none';}
  else{
  empty.style.display='none';
  tbody.innerHTML=data.map((c,i)=>`<tr>
- <td style="color:var(--muted);font-size:.76rem">${i+1}</td>
+ <td style="color:var(--muted);font-size:.76rem">${start+i+1}</td>
+ <td style="font-size:.78rem;color:var(--muted);font-family:monospace">${esc(c.codigo)||'—'}</td>
  <td><strong>${esc(c.nombre)}</strong></td>
  <td style="font-weight:700;color:var(--accent)">${fmt$(c.precio)}</td>
  <td><strong>${c.stock.toLocaleString('es-CL')}</strong>${c.stock===0?' <span style="color:var(--red);font-size:.7rem;font-weight:600;margin-left:4px">SIN STOCK</span>':''}</td>
  <td><span class="badge ${badgeCls(c.formato)}">${esc(c.formato)}</span></td>
- <td><button class="btn-del" onclick="catalogoEliminar(${c.id})">✕</button></td>
+ <td><div style="display:flex;gap:6px"><button class="btn-del" onclick="catalogoEditar(${c.id})" title="Editar">✏️</button><button class="btn-del" onclick="catalogoEliminar(${c.id})">✕</button></div></td>
  </tr>`).join('');
+ // pagination
+ const pagEl=document.getElementById('c-pagination');
+ pagEl.style.display='flex';
+ document.getElementById('c-page-prev').disabled=cPagina<=1;
+ document.getElementById('c-page-next').disabled=cPagina>=totalPaginas;
+ const desde=Math.min(fullData.length,start+1);
+ const hasta=Math.min(fullData.length,start+C_POR_PAGINA);
+ document.getElementById('c-page-info').textContent=`${desde}–${hasta} de ${fullData.length}`;
  }
  document.getElementById('c-stat-prod').textContent=catalogo.length;
  document.getElementById('c-stat-stock').textContent=catalogo.reduce((s,c)=>s+c.stock,0).toLocaleString('es-CL');
@@ -167,19 +194,69 @@ function catalogoRender(){
 ══════════════════════════════════════════════ */
 let carrito = [];
 let ventas = load('ventas_ferreteria') || [];
+let vPagina = 1;
+const V_POR_PAGINA = 6;
+
+// Ranking de más vendidos (por cantidad total vendida, basado en historial)
+function ventasRanking(){
+ const rank={};
+ ventas.forEach(v=>v.items.forEach(i=>{rank[i.nombre]=(rank[i.nombre]||0)+i.qty;}));
+ return rank;
+}
 
 function ventasCheckCaja(){
  const caja=load('caja_ferreteria');
  const warn=document.getElementById('v-caja-warning');
  warn.style.display=(!caja||!caja.abierta)?'flex':'none';
 }
+function ventasIrPagina(dir){
+ const q=document.getElementById('v-buscar').value.toLowerCase();
+ const rank=ventasRanking();
+ const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
+ .sort((a,b)=>(rank[b.nombre]||0)-(rank[a.nombre]||0));
+ const totalPaginas=Math.max(1,Math.ceil(data.length/V_POR_PAGINA));
+ if(dir==='prev'&&vPagina>1)vPagina--;
+ if(dir==='next'&&vPagina<totalPaginas)vPagina++;
+ ventasRenderGrid();
+}
+
+// Scanner de código de barras: si el texto coincide EXACTO con un código del catálogo → agregar al carrito
+function ventasScanCodigo(inputId='v-buscar'){
+ const input=document.getElementById(inputId);
+ const q=input.value.trim();
+ if(!q)return;
+ const prod=catalogo.find(c=>c.codigo && c.codigo.trim().toLowerCase()===q.toLowerCase());
+ if(!prod)return; // no es código exacto → la búsqueda filtra normal
+ if(prod.stock<=0){showToast(`"${prod.nombre}" sin stock`,true);input.value='';input.focus();return;}
+ carritoAgregar(prod.id);
+ input.value='';
+ input.focus(); // mantener foco para el siguiente escaneo
+ ventasRenderGrid();
+ showToast(`✓ ${prod.nombre} agregado al carrito`);
+}
 function ventasRenderGrid(){
  const q=document.getElementById('v-buscar').value.toLowerCase();
- const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q));
+ const rank=ventasRanking();
+ // ordenar: más vendidos primero, empate por nombre
+ const fullData=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
+ .sort((a,b)=>{
+  const r=(rank[b.nombre]||0)-(rank[a.nombre]||0);
+  return r!==0?r:a.nombre.localeCompare(b.nombre);
+ });
  const grid=document.getElementById('v-prod-grid');
  const empty=document.getElementById('v-grid-empty');
- if(!catalogo.length){grid.innerHTML='';empty.style.display='block';return;}
+ const pagEl=document.getElementById('v-pagination');
+ if(!fullData.length){
+  grid.innerHTML='';
+  empty.style.display='block';
+  if(pagEl)pagEl.style.display='none';
+  return;
+ }
  empty.style.display='none';
+ const totalPaginas=Math.max(1,Math.ceil(fullData.length/V_POR_PAGINA));
+ if(vPagina>totalPaginas)vPagina=totalPaginas;
+ const start=(vPagina-1)*V_POR_PAGINA;
+ const data=fullData.slice(start,start+V_POR_PAGINA);
  grid.innerHTML=data.map(c=>`
  <div class="prod-card ${c.stock<=0?'disabled':''}" onclick="${c.stock>0?`carritoAgregar(${c.id})`:''}">
  <div class="prod-card-name">${esc(c.nombre)}</div>
@@ -187,6 +264,15 @@ function ventasRenderGrid(){
  <div class="prod-card-stock">Stock: ${c.stock} ${esc(c.formato)}</div>
  <div class="prod-card-badge"><span class="badge ${badgeCls(c.formato)}">${esc(c.formato)}</span></div>
  </div>`).join('');
+ // paginación
+ if(pagEl){
+  pagEl.style.display='flex';
+  document.getElementById('v-page-prev').disabled=vPagina<=1;
+  document.getElementById('v-page-next').disabled=vPagina>=totalPaginas;
+  const desde=Math.min(fullData.length,start+1);
+  const hasta=Math.min(fullData.length,start+V_POR_PAGINA);
+  document.getElementById('v-page-info').textContent=`${desde}–${hasta} de ${fullData.length}`;
+ }
 }
 function carritoAgregar(catId){
  const prod=catalogo.find(c=>c.id===catId);
@@ -428,6 +514,54 @@ function cajaRender(){
 }
 
 /* ══════════════════════════════════════════════
+ EDITAR PRODUCTO (MODAL)
+══════════════════════════════════════════════ */
+let editProductId = null;
+
+function catalogoEditar(id){
+ const prod=catalogo.find(c=>c.id===id);
+ if(!prod)return;
+ editProductId=id;
+ document.getElementById('e-nombre').value=prod.nombre;
+ document.getElementById('e-codigo').value=prod.codigo||'';
+ document.getElementById('e-precio').value=prod.precio;
+ document.getElementById('e-stock').value=prod.stock;
+ document.getElementById('e-formato').value=prod.formato;
+ document.getElementById('edit-modal').classList.add('open');
+}
+
+function catalogoCerrarEdicion(){
+ document.getElementById('edit-modal').classList.remove('open');
+ editProductId=null;
+}
+
+function catalogoGuardarEdicion(){
+ if(editProductId===null)return;
+ const prod=catalogo.find(c=>c.id===editProductId);
+ if(!prod)return;
+ const nombre=document.getElementById('e-nombre').value.trim();
+ const codigo=document.getElementById('e-codigo').value.trim();
+ const precioS=document.getElementById('e-precio').value;
+ const precio=parseFloat(precioS);
+ const stockS=document.getElementById('e-stock').value;
+ const stock=parseInt(stockS);
+ const formato=document.getElementById('e-formato').value;
+ if(!nombre){shake('e-nombre');return;}
+ if(!precioS||isNaN(precio)||precio<0){shake('e-precio');return;}
+ if(!stockS||isNaN(stock)||stock<0){shake('e-stock');return;}
+ if(!formato){shake('e-formato');return;}
+ prod.nombre=nombre;
+ prod.codigo=codigo;
+ prod.precio=precio;
+ prod.stock=stock;
+ prod.formato=formato;
+ save('catalogo_ferreteria',catalogo);
+ catalogoRender();
+ catalogoCerrarEdicion();
+ showToast(`"${nombre}" actualizado ✓`);
+}
+
+/* ══════════════════════════════════════════════
  MAIL
 ══════════════════════════════════════════════ */
 function enviarPorMail(){
@@ -442,21 +576,81 @@ function enviarPorMail(){
  window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=ferreteria.elgreengo%40gmail.com&su=${asunto}&body=${cuerpo}`,'_blank');
  document.getElementById('mail-modal').classList.add('open');
 }
-function cerrarModal(){document.getElementById('mail-modal').classList.remove('open');}
+function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}
 
 /* ── Init ── */
 (function(){
- document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModal();});
+ document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalMail();});
+ document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)catalogoCerrarEdicion();});
+
+ // Scanner: Enter en el buscador de ventas → auto-agregar por código exacto
+ document.getElementById('v-buscar').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); ventasScanCodigo('v-buscar'); }
+ });
+ // Scanner: Enter en el campo dedicado de scanner → auto-agregar
+ document.getElementById('v-scanner').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); ventasScanCodigo('v-scanner'); }
+ });
 
  document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+   if(document.getElementById('mail-modal').classList.contains('open')) cerrarModalMail();
+   if(document.getElementById('edit-modal').classList.contains('open')) catalogoCerrarEdicion();
+   return;
+  }
   if(e.key!=='Enter')return;
   const active=document.querySelector('.tab-panel.active').id;
   if(active==='panel-pedidos' &&e.target.id!=='p-buscar') pedidoAgregar();
   if(active==='panel-catalogo' &&e.target.id!=='c-buscar') catalogoAgregar();
  });
 
+ // Seed 100 productos de muestra (si catálogo vacío o solo tiene la muestra anterior ≤20)
+ if(!catalogo.length || catalogo.length<=20){
+  catalogo=[];
+  const muestras=[];
+  let seedIdx=1;
+  const add=(nombre,precio,stock,formato)=>muestras.push({nombre,codigo:`FER-${String(seedIdx++).padStart(3,'0')}`,precio,stock,formato});
+  // 1. Tornillos (12)
+  ['1/4" x 2"','1/4" x 3"','1/4" x 4"','5/16" x 2"','5/16" x 3"','3/8" x 2"','3/8" x 3"','3/8" x 4"','1/2" x 3"','1/2" x 4"','1/2" x 6"','5/8" x 6"'].forEach((t,i)=>add(`Tornillo cabeza plana ${t}`,120+i*15,300+i*25,'Unidad'));
+  // 2. Clavos (8)
+  ['1"','1 1/2"','2"','2 1/2"','3"','3 1/2"','4"','5"'].forEach((t,i)=>add(`Clavo forjado ${t}`,70+i*12,900-i*60,'Kg'));
+  // 3. Tuercas (8)
+  ['1/4"','5/16"','3/8"','7/16"','1/2"','9/16"','5/8"','3/4"'].forEach((t,i)=>add(`Tuerca hexagonal ${t}`,60+i*20,500-i*30,'Bolsa'));
+  // 4. Arandelas (8)
+  ['1/4"','5/16"','3/8"','7/16"','1/2"','9/16"','5/8"','3/4"'].forEach((t,i)=>add(`Arandela plana ${t}`,40+i*12,1000-i*60,'Bolsa'));
+  // 5. Pernos (8)
+  ['3/8" x 2"','3/8" x 3"','3/8" x 4"','1/2" x 3"','1/2" x 4"','1/2" x 5"','5/8" x 4"','5/8" x 6"'].forEach((t,i)=>add(`Perno galvanizado ${t}`,180+i*40,250+i*20,'Unidad'));
+  // 6. Brocas (10)
+  ['3mm','4mm','5mm','6mm','8mm','10mm','1/4"','3/8"','1/2"','5/8"'].forEach((t,i)=>add(`Broca para metal ${t}`,490+i*90,150-i*8,'Unidad'));
+  // 7. Discos (6)
+  ['4 1/2" x 1/16"','4 1/2" x 3/64"','7" x 1/16"','7" x 1/8"','9" x 1/8"','12" x 1/8"'].forEach((t,i)=>add(`Disco de corte ${t}`,990+i*250,80+i*10,'Unidad'));
+  // 8. Lijas (8)
+  ['#80','#100','#120','#150','#180','#220','#320','#400'].forEach((t,i)=>add(`Lija al agua ${t} lote 10u`,790+i*20,180+i*15,'Bolsa'));
+  // 9. Cintas (6)
+  ['3M 18mm x 10m','3M 18mm x 20m','3M 24mm x 10m','3M 24mm x 20m','Aislante 18mm x 10m','Aislante 24mm x 10m'].forEach((t,i)=>add(`Cinta ${t}`,990+i*150,90+i*12,'Rollo'));
+  // 10. Tarugos (6)
+  ['4mm lote 50u','5mm lote 50u','6mm lote 50u','8mm lote 50u','10mm lote 25u','12mm lote 25u'].forEach((t,i)=>add(`Tarugo plástico ${t}`,490+i*60,250+i*20,'Bolsa'));
+  // 11. Pinturas (10)
+  ['blanco 1L','blanco 4L','negro 1L','negro 4L','rojo 1L','rojo 4L','azul 1L','verde 1L','amarillo 1L','gris 1L'].forEach((t,i)=>add(`Pintura esmalte ${t}`,4990+i*250,35+i*5,'Litros'));
+  // 12. Varios (10)
+  add('Diluyente sintético 1L',2990,60,'Litros');
+  add('Aguarrás mineral 1L',2490,45,'Litros');
+  add('Silicona transparente 280ml',1890,70,'Unidad');
+  add('Guante seguridad cuero lote 2u',3990,45,'Caja');
+  add('Guante nitrilo lote 10u',5490,30,'Caja');
+  add('Antiparras seguridad',2990,25,'Unidad');
+  add('Mascarilla N95 lote 5u',4490,40,'Caja');
+  add('Candado 40mm',3490,50,'Unidad');
+  add('Candado 60mm',5490,35,'Unidad');
+  add('Chaleco reflectante',6990,20,'Unidad');
+  muestras.forEach(m=>catalogo.push({id:cNextId++,...m}));
+  save('catalogo_ferreteria',catalogo);
+ }
+
  pedidoRender();
  catalogoRender();
+ ventasRenderGrid();
+ ventasCheckCaja();
  ventasRenderHistorial();
  ventasStats();
  cajaRender();

@@ -87,9 +87,20 @@
  <div>
  <div class="card" style="margin-bottom:16px">
  <p class="section-title">🛍 Seleccionar Productos</p>
- <div class="search-wrap" style="margin-bottom:14px"><span class="search-icon">🔍</span><input id="v-buscar" type="text" placeholder="Buscar producto…" oninput="ventasRenderGrid()"/></div>
+ <div class="search-row">
+ <div class="scan-row">
+ <span class="scan-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="2" height="14" rx=".5"/><rect x="6" y="5" width="1" height="14" rx=".5"/><rect x="9" y="5" width="2" height="14" rx=".5"/><rect x="13" y="5" width="3" height="14" rx=".5"/><rect x="18" y="5" width="1" height="14" rx=".5"/><rect x="21" y="5" width="1" height="14" rx=".5"/></svg></span>
+ <input id="v-scanner" type="text" placeholder="Escanear código…" autocomplete="off" autofocus/>
+ </div>
+ <div class="search-wrap" style="margin-bottom:0;flex:1"><span class="search-icon">🔍</span><input id="v-buscar" type="text" placeholder="Buscar producto…" oninput="ventasRenderGrid()"/></div>
+ </div>
  <div id="v-prod-grid" class="prod-grid"></div>
  <div id="v-grid-empty" class="empty" style="display:none"><div class="empty-icon">📦</div><p>No hay productos en el catálogo.<br/>Agrega productos en la pestaña <strong>Catálogo</strong>.</p></div>
+ <div id="v-pagination" class="pagination" style="display:none">
+ <button class="page-btn" id="v-page-prev" onclick="ventasIrPagina('prev')">‹ Anterior</button>
+ <div class="page-info" id="v-page-info"></div>
+ <button class="page-btn" id="v-page-next" onclick="ventasIrPagina('next')">Siguiente ›</button>
+ </div>
  </div>
  <div class="card">
  <p class="section-title">🧾 Historial de Ventas del Día</p>
@@ -116,8 +127,9 @@
  <div id="panel-catalogo" class="tab-panel">
  <div class="card" style="margin-bottom:20px">
  <p class="section-title">➕ Agregar Producto al Catálogo</p>
- <div class="form-grid-4">
+ <div class="form-grid-5">
  <div class="field"><label for="c-nombre">Nombre del Producto</label><input id="c-nombre" type="text" placeholder="Ej: Tornillo 1/4 cabeza plana" autocomplete="off"/></div>
+ <div class="field"><label for="c-codigo">Código de Barras</label><input id="c-codigo" type="text" placeholder="Ej: 7801234567890 (opcional)" autocomplete="off"/></div>
  <div class="field"><label for="c-precio">Precio ($)</label><input id="c-precio" type="number" min="0" step="1" placeholder="990"/></div>
  <div class="field"><label for="c-stock">Stock</label><input id="c-stock" type="number" min="0" step="1" placeholder="100"/></div>
  <div class="field"><label for="c-formato">Formato</label>
@@ -141,6 +153,7 @@
  <table>
  <thead><tr>
  <th onclick="catSort('id')">#<span class="arrow">↕</span></th>
+ <th onclick="catSort('codigo')">Código<span class="arrow">↕</span></th>
  <th onclick="catSort('nombre')">Nombre<span class="arrow">↕</span></th>
  <th onclick="catSort('precio')">Precio<span class="arrow">↕</span></th>
  <th onclick="catSort('stock')">Stock<span class="arrow">↕</span></th>
@@ -150,6 +163,11 @@
  <tbody id="c-tbody"></tbody>
  </table>
  <div id="c-empty" class="empty" style="display:none"><div class="empty-icon">📦</div><p>No hay productos en el catálogo todavía.</p></div>
+ </div>
+ <div id="c-pagination" class="pagination" style="display:none">
+ <button class="page-btn" id="c-page-prev" onclick="catIrPagina('prev')">‹ Anterior</button>
+ <div class="page-info" id="c-page-info"></div>
+ <button class="page-btn" id="c-page-next" onclick="catIrPagina('next')">Siguiente ›</button>
  </div>
  <div class="actions-row"><button class="btn btn-outline" onclick="catalogoLimpiar()">🗑 Limpiar catálogo</button></div>
  </div>
@@ -280,7 +298,35 @@
  <span>③ Selecciona <strong>Pedido_ElGreengo.txt</strong> desde Descargas</span>
  <span>④ Envía el correo ✉️</span>
  </div>
- <button class="modal-close" onclick="cerrarModal()">Entendido ✓</button>
+ <button class="modal-close" onclick="cerrarModalMail()">Entendido ✓</button>
+ </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="edit-modal">
+ <div class="modal-box" style="max-width:460px;">
+ <div class="modal-icon">✏️</div>
+ <h2>Editar Producto</h2>
+ <p style="margin-bottom:18px">Modifica los campos del producto seleccionado.</p>
+ <div class="edit-form">
+ <div class="field"><label for="e-nombre">Nombre del Producto</label><input id="e-nombre" type="text" autocomplete="off"/></div>
+ <div class="field"><label for="e-codigo">Código de Barras</label><input id="e-codigo" type="text" placeholder="Opcional" autocomplete="off"/></div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+ <div class="field"><label for="e-precio">Precio ($)</label><input id="e-precio" type="number" min="0" step="1"/></div>
+ <div class="field"><label for="e-stock">Stock</label><input id="e-stock" type="number" min="0" step="1"/></div>
+ </div>
+ <div class="field"><label for="e-formato">Formato</label>
+ <select id="e-formato">
+ <option value="">-- Seleccionar --</option>
+ <option>Unidad</option><option>Bolsa</option><option>Caja</option>
+ <option>Tira</option><option>Rollo</option><option>Metros</option><option>Litros</option><option>Kg</option>
+ </select>
+ </div>
+ <div style="display:flex;gap:10px;margin-top:4px">
+ <button class="btn btn-outline" onclick="catalogoCerrarEdicion()" style="flex:1">Cancelar</button>
+ <button class="btn btn-orange" onclick="catalogoGuardarEdicion()" style="flex:1">💾 Guardar Cambios</button>
+ </div>
+ </div>
  </div>
 </div>
 
