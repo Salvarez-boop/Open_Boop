@@ -385,6 +385,44 @@
  </div>
 </div>
 
+<!-- Login Modal -->
+<div id="login-modal" class="login-overlay">
+ <div class="login-box">
+  <div class="login-icon">🔩</div>
+  <h2>Ferretería El Greengo</h2>
+  <p class="login-sub" id="login-sub">Ingresa tu PIN para acceder</p>
+  <div id="login-step-choose" class="login-step">
+   <div class="field" style="margin-bottom:12px">
+    <label for="login-usuario">Usuario</label>
+    <select id="login-usuario"></select>
+   </div>
+   <div style="margin-bottom:14px">
+    <input id="login-pin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="login-pin-input" placeholder="• • • • • •" autocomplete="off"/>
+   </div>
+   <div id="login-error" class="login-error" style="display:none"></div>
+   <button class="btn btn-green" onclick="loginIngresar()" style="width:100%">🔓 Ingresar</button>
+   <button class="btn btn-outline" onclick="loginSetup()" style="width:100%;margin-top:8px;display:none" id="login-btn-setup">⚙️ Configurar Admin</button>
+  </div>
+  <div id="login-step-setup" class="login-step" style="display:none">
+   <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px;line-height:1.5">Primera configuración. Crea el usuario administrador con un PIN numérico de <strong>4 a 6 dígitos</strong>.</p>
+   <div class="field" style="margin-bottom:10px">
+    <label for="setup-usuario">Nombre de usuario</label>
+    <input id="setup-usuario" type="text" placeholder="Ej: admin" autocomplete="off"/>
+   </div>
+   <div class="field" style="margin-bottom:10px">
+    <label for="setup-pin">PIN (4-6 dígitos)</label>
+    <input id="setup-pin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="login-pin-input" placeholder="• • • • • •" autocomplete="off"/>
+   </div>
+   <div class="field" style="margin-bottom:14px">
+    <label for="setup-pin2">Confirmar PIN</label>
+    <input id="setup-pin2" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="login-pin-input" placeholder="• • • • • •" autocomplete="off"/>
+   </div>
+   <div id="setup-error" class="login-error" style="display:none"></div>
+   <button class="btn btn-green" onclick="loginCrearAdmin()" style="width:100%">✅ Crear Administrador</button>
+  </div>
+ </div>
+</div>
+
 <div id="toast"></div>
 
 <script src="script/app.js"></script>

@@ -316,6 +316,18 @@ tbody td { padding:11px 14px; vertical-align:middle; }
 .pago-vuelto.ok { background:#f0fdf4; color:#15803d; }
 .pago-vuelto.warn { background:#fff7ed; color:#c2410c; }
 
+/* ─── Login Overlay ─── */
+.login-overlay { position:fixed; inset:0; background:var(--bg); z-index:2000; display:flex; align-items:center; justify-content:center; }
+.login-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:40px 32px; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.14); text-align:center; }
+.login-icon { font-size:2.8rem; margin-bottom:14px; }
+.login-box h2 { font-size:1.3rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.login-sub { font-size:.85rem; color:var(--muted); margin-bottom:20px; }
+.login-pin-input { width:100%; background:var(--surface2); border:2px solid var(--border); border-radius:10px; color:var(--text); font-family:monospace; font-size:1.6rem; font-weight:800; padding:12px 14px; outline:none; text-align:center; letter-spacing:8px; transition:border-color .2s,box-shadow .2s; }
+.login-pin-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+.login-pin-input::placeholder { letter-spacing:4px; font-size:1.2rem; color:var(--muted); }
+.login-error { font-size:.82rem; font-weight:700; color:var(--red); padding:8px 12px; background:rgba(220,38,38,.08); border-radius:8px; margin-bottom:12px; }
+.login-step { text-align:left; }
+
 /* ─── Toast ─── */
 #toast { position:fixed; bottom:26px; right:26px; background:var(--green); color:#fff; font-weight:700; font-size:.85rem; padding:11px 20px; border-radius:10px; box-shadow:var(--shadow); opacity:0; transform:translateY(14px); transition:opacity .3s,transform .3s; pointer-events:none; z-index:1001; }
 #toast.show { opacity:1; transform:translateY(0); }

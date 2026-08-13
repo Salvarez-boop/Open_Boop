@@ -764,8 +764,124 @@ function enviarPorMail(){
 }
 function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}
 
+/* ══════════════════════════════════════════════
+ SISTEMA DE LOGIN (PIN + ROLES)
+══════════════════════════════════════════════ */
+const USERS_KEY = 'ferreteria_usuarios';
+const SESSION_KEY = 'ferreteria_sesion';
+
+// Hash simple (no criptográfico, suficientemente opaco para evitar ojeadas)
+function hashPIN(pin){ let h=0; for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0;} return 'h'+Math.abs(h).toString(36); }
+
+function loginGetUsers(){ return load(USERS_KEY)||{}; }
+function loginSaveUsers(u){ save(USERS_KEY,u); }
+
+function loginGetSession(){ return load(SESSION_KEY); }
+function loginSaveSession(s){ save(SESSION_KEY,s); }
+function loginCerrarSesion(){ localStorage.removeItem(SESSION_KEY); location.reload(); }
+
+function loginObtenerUsuarioActual(){ return loginGetSession(); }
+
+function loginEsAdmin(){ const s=loginGetSession(); return s&&s.rol==='admin'; }
+function loginEsCajero(){ const s=loginGetSession(); return s&&(s.rol==='cajero'||s.rol==='admin'); }
+
+// Setup inicial — detectar si hay usuarios
+function loginCheck(){
+ const users=loginGetUsers();
+ const session=loginGetSession();
+ const overlay=document.getElementById('login-modal');
+
+ // Si ya hay sesión activa → ocultar login y continuar
+ if(session && users[session.usuario]){
+  overlay.style.display='none';
+  return true;
+ }
+
+ // No hay sesión → mostrar login
+ overlay.style.display='flex';
+ const stepChoose=document.getElementById('login-step-choose');
+ const stepSetup=document.getElementById('login-step-setup');
+ const btnSetup=document.getElementById('login-btn-setup');
+
+ // Poblar lista de usuarios
+ const sel=document.getElementById('login-usuario');
+ sel.innerHTML=Object.keys(users).map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
+
+ if(!Object.keys(users).length){
+  // No hay usuarios → ir a setup directamente
+  stepChoose.style.display='none';
+  stepSetup.style.display='block';
+  document.getElementById('setup-usuario').focus();
+ } else {
+  stepChoose.style.display='block';
+  stepSetup.style.display='none';
+  btnSetup.style.display='block';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-pin').focus();
+ }
+ return false;
+}
+
+function loginSetup(){
+ document.getElementById('login-step-choose').style.display='none';
+ document.getElementById('login-step-setup').style.display='block';
+ document.getElementById('setup-usuario').focus();
+ document.getElementById('setup-error').style.display='none';
+}
+
+function loginCrearAdmin(){
+ const usuario=document.getElementById('setup-usuario').value.trim();
+ const pin=document.getElementById('setup-pin').value;
+ const pin2=document.getElementById('setup-pin2').value;
+ const errEl=document.getElementById('setup-error');
+
+ if(!usuario){errEl.textContent='Ingresa un nombre de usuario';errEl.style.display='block';shake('setup-usuario');return;}
+ if(!pin||pin.length<4||pin.length>6||!/^\d+$/.test(pin)){errEl.textContent='El PIN debe tener 4 a 6 dígitos numéricos';errEl.style.display='block';shake('setup-pin');return;}
+ if(pin!==pin2){errEl.textContent='Los PIN no coinciden';errEl.style.display='block';shake('setup-pin2');return;}
+ errEl.style.display='none';
+
+ const users=loginGetUsers();
+ users[usuario]={usuario,pinHash:hashPIN(pin),rol:'admin',creado:new Date().toISOString()};
+ loginSaveUsers(users);
+ loginSaveSession({usuario,rol:'admin'});
+ showToast(`✅ Admin "${usuario}" creado`);
+ location.reload();
+}
+
+function loginIngresar(){
+ const usuario=document.getElementById('login-usuario').value;
+ const pin=document.getElementById('login-pin').value;
+ const errEl=document.getElementById('login-error');
+
+ if(!pin){errEl.textContent='Ingresa tu PIN';errEl.style.display='block';return;}
+
+ const users=loginGetUsers();
+ const user=users[usuario];
+ if(!user||user.pinHash!==hashPIN(pin)){
+  errEl.textContent='PIN incorrecto';errEl.style.display='block';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-pin').focus();
+  return;
+ }
+ errEl.style.display='none';
+ loginSaveSession({usuario,rol:user.rol});
+ showToast(`👋 Bienvenido, ${usuario}`);
+ location.reload();
+}
+
+function loginAgregarCajero(usuario,pin){
+ const users=loginGetUsers();
+ if(users[usuario])return false;
+ users[usuario]={usuario,pinHash:hashPIN(pin),rol:'cajero',creado:new Date().toISOString()};
+ loginSaveUsers(users);
+ return true;
+}
+
 /* ── Init ── */
 (function(){
+ // Verificar login primero — si no hay sesión, no se ejecuta nada más
+ if(!loginCheck()) return;
+
  document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalMail();});
  document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)catalogoCerrarEdicion();});
 
@@ -791,8 +907,8 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
   if(active==='panel-catalogo' &&e.target.id!=='c-buscar') catalogoAgregar();
  });
 
- // Seed 100 productos de muestra (si catálogo vacío o solo tiene la muestra anterior ≤20)
- if(!catalogo.length || catalogo.length<=20){
+ // Seed 100 productos de muestra (solo una vez, flag persistente)
+ if(!load('ferreteria_seeded')){
   catalogo=[];
   const muestras=[];
   let seedIdx=1;
@@ -832,6 +948,7 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
   add('Chaleco reflectante',6990,20,'Unidad');
   muestras.forEach(m=>catalogo.push({id:cNextId++,...m}));
   save('catalogo_ferreteria',catalogo);
+  save('ferreteria_seeded',true);
  }
 
  pedidoRender();
