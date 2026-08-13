@@ -196,6 +196,8 @@ let carrito = [];
 let ventas = load('ventas_ferreteria') || [];
 let vPagina = 1;
 const V_POR_PAGINA = 6;
+let histPagina = 1;
+const HIST_POR_PAGINA = 3;
 
 // Ranking de más vendidos (por cantidad total vendida, basado en historial)
 function ventasRanking(){
@@ -318,16 +320,50 @@ function carritoRender(){
  document.getElementById('v-total').textContent=fmt$(Math.round(total));
 }
 function ventasRenderHistorial(){
+ const q=document.getElementById('v-hist-buscar').value.trim().toLowerCase();
+ let fullData=ventas;
+ if(q){
+  const num=parseInt(q);
+  if(!isNaN(num)) fullData=ventas.filter(v=>v.boleta===num);
+  else fullData=ventas.filter(v=>v.items.some(i=>i.nombre.toLowerCase().includes(q)));
+ }
+ fullData=[...fullData].reverse();
  const el=document.getElementById('v-historial');
  const empty=document.getElementById('v-hist-empty');
- if(!ventas.length){el.innerHTML='';empty.style.display='block';return;}
+ const pagEl=document.getElementById('v-hist-pagination');
+ if(!fullData.length){el.innerHTML='';empty.style.display='block';if(pagEl)pagEl.style.display='none';return;}
  empty.style.display='none';
- el.innerHTML=[...ventas].reverse().map(v=>`
+ const totalPaginas=Math.max(1,Math.ceil(fullData.length/HIST_POR_PAGINA));
+ if(histPagina>totalPaginas)histPagina=totalPaginas;
+ const start=(histPagina-1)*HIST_POR_PAGINA;
+ const data=fullData.slice(start,start+HIST_POR_PAGINA);
+ el.innerHTML=data.map(v=>`
  <div class="sale-entry">
- <div class="sale-time">${v.hora}</div>
+ <div class="sale-head">
+  <div class="sale-boleta-wrap">
+  <span class="sale-boleta-label">Nro. Boleta Interna</span>
+  <span class="sale-boleta">${v.boleta?`#${String(v.boleta).padStart(4,'0')}`:'—'}</span>
+  </div>
+  <span class="sale-time">${v.hora}</span>
+ </div>
  <div class="sale-items">${v.items.map(i=>`<span>${i.qty}× ${esc(i.nombre)}</span>`).join(' &nbsp;·&nbsp; ')}${v.descuento>0?`<br/><span style="color:var(--muted);font-size:.74rem">Descuento ${v.descuento}%</span>`:''}</div>
- <div class="sale-total">${fmt$(v.total)}</div>
+ <div class="sale-footer"><span class="sale-pago">${({'efectivo':'💵 Efectivo','debito':'💳 Débito','credito':'💳 Crédito','transferencia':'🏦 Transferencia','libreta':'📒 Libreta'})[v.medioPago]||'—'}</span><div class="sale-total">${fmt$(v.total)}</div></div>
  </div>`).join('');
+ if(pagEl){
+  pagEl.style.display='flex';
+  document.getElementById('v-hist-prev').disabled=histPagina<=1;
+  document.getElementById('v-hist-next').disabled=histPagina>=totalPaginas;
+  const desde=Math.min(fullData.length,start+1);
+  const hasta=Math.min(fullData.length,start+HIST_POR_PAGINA);
+  document.getElementById('v-hist-info').textContent=`${desde}–${hasta} de ${fullData.length}`;
+ }
+}
+
+function histIrPagina(dir){
+ const totalPaginas=Math.max(1,Math.ceil(ventas.length/HIST_POR_PAGINA));
+ if(dir==='prev'&&histPagina>1)histPagina--;
+ if(dir==='next'&&histPagina<totalPaginas)histPagina++;
+ ventasRenderHistorial();
 }
 function ventasStats(){
  const total=ventas.reduce((s,v)=>s+v.total,0);
@@ -348,12 +384,98 @@ function confirmarVenta(){
  const clamp=Math.min(100,Math.max(0,desc));
  const subtotal=carrito.reduce((s,i)=>s+i.precio*i.qty,0);
  const total=Math.round(subtotal*(1-clamp/100));
+ // abrir modal de medio de pago
+ abrirModalPago(total,subtotal,clamp);
+}
+
+/* ══════════════════════════════════════════════
+ MEDIO DE PAGO (MODAL)
+══════════════════════════════════════════════ */
+let pagoPendiente = null;
+let pagoSeleccionado = null;
+
+function abrirModalPago(total,subtotal,clamp){
+ pagoPendiente={total,subtotal,clamp};
+ pagoSeleccionado=null;
+ document.getElementById('pago-total').textContent=fmt$(total);
+ document.querySelectorAll('.pago-option').forEach(o=>o.classList.remove('active'));
+ document.getElementById('pago-extra-efectivo').style.display='none';
+ document.getElementById('pago-extra-tarjeta').style.display='none';
+ document.getElementById('pago-extra-libreta').style.display='none';
+ document.getElementById('pago-recibido').value='';
+ document.getElementById('pago-vuelto').textContent='';
+ document.getElementById('pago-vuelto').className='pago-vuelto';
+ document.getElementById('pago-operacion').value='';
+ document.getElementById('pago-cliente').value='';
+ document.getElementById('pago-modal').classList.add('open');
+}
+
+function seleccionarPago(tipo){
+ pagoSeleccionado=tipo;
+ document.querySelectorAll('.pago-option').forEach(o=>o.classList.remove('active'));
+ const btn=document.getElementById('pago-'+tipo);
+ if(btn)btn.classList.add('active');
+ document.getElementById('pago-extra-efectivo').style.display=(tipo==='efectivo')?'flex':'none';
+ document.getElementById('pago-extra-tarjeta').style.display=(tipo==='debito'||tipo==='credito')?'flex':'none';
+ document.getElementById('pago-extra-libreta').style.display=(tipo==='libreta')?'flex':'none';
+ if(tipo==='efectivo'){ const r=document.getElementById('pago-recibido'); r.value=pagoPendiente?pagoPendiente.total:''; r.focus(); calcularVuelto(); }
+ if(tipo==='debito'||tipo==='credito'){ document.getElementById('pago-operacion').focus(); }
+ if(tipo==='libreta'){ document.getElementById('pago-cliente').focus(); }
+}
+
+function calcularVuelto(){
+ if(!pagoPendiente)return;
+ const recibido=parseFloat(document.getElementById('pago-recibido').value)||0;
+ const total=pagoPendiente.total;
+ const vueltoEl=document.getElementById('pago-vuelto');
+ if(recibido>=total){
+  vueltoEl.textContent=`Vuelto: ${fmt$(recibido-total)}`;
+  vueltoEl.className='pago-vuelto ok';
+ } else {
+  vueltoEl.textContent=`Faltan: ${fmt$(total-recibido)}`;
+  vueltoEl.className='pago-vuelto warn';
+ }
+}
+
+function cerrarModalPago(){
+ document.getElementById('pago-modal').classList.remove('open');
+ pagoPendiente=null;
+ pagoSeleccionado=null;
+}
+
+function confirmarVentaPago(){
+ if(!pagoPendiente){cerrarModalPago();return;}
+ if(!pagoSeleccionado){showToast('Selecciona un medio de pago',true);return;}
+ const {total,subtotal,clamp}=pagoPendiente;
+ let extra=null;
+ if(pagoSeleccionado==='efectivo'){
+  const recibido=parseFloat(document.getElementById('pago-recibido').value)||0;
+  if(recibido<total){showToast('El monto recibido no alcanza',true);return;}
+  extra={recibido,vuelto:recibido-total};
+ }
+ if(pagoSeleccionado==='debito'||pagoSeleccionado==='credito'){
+  const operacion=document.getElementById('pago-operacion').value.trim();
+  if(!operacion){shake('pago-operacion');return;}
+  extra={operacion};
+ }
+ if(pagoSeleccionado==='libreta'){
+  const cliente=document.getElementById('pago-cliente').value.trim();
+  if(!cliente){shake('pago-cliente');return;}
+  extra={cliente};
+ }
+ ejecutarVenta(total,subtotal,clamp,pagoSeleccionado,extra);
+ cerrarModalPago();
+}
+
+function ejecutarVenta(total,subtotal,clamp,medioPago,extra){
  const hora=now();
+ const ultimaBoleta=ventas.reduce((m,v)=>Math.max(m,v.boleta||0),0);
+ const boleta=ultimaBoleta+1;
  // descontar stock
  carrito.forEach(item=>{const p=catalogo.find(c=>c.id===item.id);if(p)p.stock=Math.max(0,p.stock-item.qty);});
  save('catalogo_ferreteria',catalogo);
  // guardar venta
- const venta={hora,items:carrito.map(i=>({nombre:i.nombre,qty:i.qty,precio:i.precio,formato:i.formato})),subtotal,descuento:clamp,total};
+ const venta={boleta,hora,items:carrito.map(i=>({nombre:i.nombre,qty:i.qty,precio:i.precio,formato:i.formato})),subtotal,descuento:clamp,total,medioPago,extra};
  ventas.push(venta); save('ventas_ferreteria',ventas);
  // registrar en caja
  cajaRegistrarVenta(hora, `Venta – ${carrito.length} producto(s)`, total);
@@ -582,6 +704,7 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
 (function(){
  document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalMail();});
  document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)catalogoCerrarEdicion();});
+ document.getElementById('pago-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalPago();});
 
  // Scanner: Enter en el buscador de ventas → auto-agregar por código exacto
  document.getElementById('v-buscar').addEventListener('keydown',e=>{
@@ -596,6 +719,7 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
   if(e.key==='Escape'){
    if(document.getElementById('mail-modal').classList.contains('open')) cerrarModalMail();
    if(document.getElementById('edit-modal').classList.contains('open')) catalogoCerrarEdicion();
+   if(document.getElementById('pago-modal').classList.contains('open')) cerrarModalPago();
    return;
   }
   if(e.key!=='Enter')return;

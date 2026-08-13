@@ -104,8 +104,14 @@
  </div>
  <div class="card">
  <p class="section-title">🧾 Historial de Ventas del Día</p>
+ <div class="search-wrap" style="margin-bottom:13px"><span class="search-icon">🔍</span><input id="v-hist-buscar" type="text" placeholder="Buscar por boleta interna…" oninput="ventasRenderHistorial()"/></div>
  <div id="v-historial"></div>
  <div id="v-hist-empty" class="empty" style="display:none"><div class="empty-icon">🧾</div><p>Aún no se han registrado ventas hoy.</p></div>
+ <div id="v-hist-pagination" class="pagination" style="display:none">
+ <button class="page-btn" id="v-hist-prev" onclick="histIrPagina('prev')">‹ Anterior</button>
+ <div class="page-info" id="v-hist-info"></div>
+ <button class="page-btn" id="v-hist-next" onclick="histIrPagina('next')">Siguiente ›</button>
+ </div>
  <div class="actions-row"><button class="btn btn-outline" onclick="ventasLimpiarHistorial()">🗑 Limpiar historial</button></div>
  </div>
  </div>
@@ -326,6 +332,37 @@
  <button class="btn btn-outline" onclick="catalogoCerrarEdicion()" style="flex:1">Cancelar</button>
  <button class="btn btn-orange" onclick="catalogoGuardarEdicion()" style="flex:1">💾 Guardar Cambios</button>
  </div>
+ </div>
+ </div>
+</div>
+
+<!-- Pago Modal -->
+<div id="pago-modal">
+ <div class="modal-box" style="max-width:440px">
+ <div class="modal-icon">💳</div>
+ <h2>Medio de Pago</h2>
+ <p style="margin-bottom:14px">Selecciona cómo pagará el cliente.</p>
+ <div class="pago-total-row"><span class="total-label">TOTAL A COBRAR</span><span class="total-amount" id="pago-total">$0</span></div>
+ <div class="pago-grid">
+  <button class="pago-option" onclick="seleccionarPago('efectivo')" id="pago-efectivo">💵<span>Efectivo</span></button>
+  <button class="pago-option" onclick="seleccionarPago('debito')" id="pago-debito">💳<span>Tarjeta Débito</span></button>
+  <button class="pago-option" onclick="seleccionarPago('credito')" id="pago-credito">💳<span>Tarjeta Crédito</span></button>
+  <button class="pago-option" onclick="seleccionarPago('transferencia')" id="pago-transferencia">🏦<span>Transferencia</span></button>
+  <button class="pago-option" onclick="seleccionarPago('libreta')" id="pago-libreta">📒<span>Libreta Deuda</span></button>
+ </div>
+ <div id="pago-extra-efectivo" class="pago-extra" style="display:none">
+  <div class="field"><label for="pago-recibido">Monto Recibido ($)</label><input id="pago-recibido" type="number" min="0" step="100" placeholder="0" oninput="calcularVuelto()"/></div>
+  <div class="pago-vuelto" id="pago-vuelto"></div>
+ </div>
+ <div id="pago-extra-tarjeta" class="pago-extra" style="display:none">
+  <div class="field"><label for="pago-operacion">N° de Operación</label><input id="pago-operacion" type="text" placeholder="Ej: 123456789" autocomplete="off"/></div>
+ </div>
+ <div id="pago-extra-libreta" class="pago-extra" style="display:none">
+  <div class="field"><label for="pago-cliente">Nombre del Cliente (Libreta)</label><input id="pago-cliente" type="text" placeholder="Ej: Juan Pérez" autocomplete="off"/></div>
+ </div>
+ <div style="display:flex;gap:10px;margin-top:18px">
+  <button class="btn btn-outline" onclick="cerrarModalPago()" style="flex:1">Cancelar</button>
+  <button class="btn btn-blue" onclick="confirmarVentaPago()" style="flex:1">✔ Confirmar Venta</button>
  </div>
  </div>
 </div>

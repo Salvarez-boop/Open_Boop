@@ -206,10 +206,16 @@ tbody td { padding:11px 14px; vertical-align:middle; }
 .btn-confirm { width:100%; padding:12px; font-size:.93rem; border-radius:10px; }
 
 /* ─── Sale history ─── */
-.sale-entry { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:13px 15px; margin-bottom:9px; display:flex; align-items:flex-start; gap:13px; }
-.sale-time { font-size:.74rem; font-weight:700; color:var(--muted); white-space:nowrap; padding-top:2px; }
-.sale-items { flex:1; font-size:.81rem; color:var(--text); line-height:1.6; }
-.sale-total { font-weight:800; font-size:.93rem; color:var(--accent); white-space:nowrap; }
+.sale-entry { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 15px; margin-bottom:9px; }
+.sale-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+.sale-boleta-wrap { display:flex; flex-direction:column; gap:1px; }
+.sale-boleta-label { font-size:.6rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
+.sale-boleta { font-size:.82rem; font-weight:800; color:var(--text); letter-spacing:1px; }
+.sale-time { font-size:.72rem; font-weight:600; color:var(--muted); }
+.sale-items { font-size:.81rem; color:var(--text); line-height:1.6; }
+.sale-footer { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+.sale-pago { font-size:.72rem; font-weight:700; color:var(--muted); }
+.sale-total { font-weight:800; font-size:.93rem; color:var(--accent); text-align:right; margin-top:0; }
 
 /* ══════════════════════════════════════════════
    CAJA MODULE
@@ -281,6 +287,21 @@ tbody td { padding:11px 14px; vertical-align:middle; }
  font-size:.86rem; color:#c2410c; font-weight:600;
  margin-bottom:16px;
  }
+
+/* ─── Pago Modal ─── */
+#pago-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.32); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
+#pago-modal.open { display:flex; }
+.pago-total-row { display:flex; justify-content:space-between; align-items:baseline; background:var(--surface2); border:1.5px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:14px; }
+.pago-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:9px; }
+.pago-option { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 8px; background:var(--surface2); border:2px solid var(--border); border-radius:12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:.78rem; font-weight:700; color:var(--text); transition:border-color .15s,background .15s,transform .1s; }
+.pago-option:hover { border-color:var(--accent); background:rgba(22,163,74,.06); }
+.pago-option.active { border-color:var(--accent); background:rgba(22,163,74,.1); box-shadow:0 0 0 3px var(--accent-glow); }
+.pago-option span { font-size:.72rem; font-weight:700; }
+.pago-option .opt-icon { font-size:1.5rem; }
+.pago-extra { margin-top:14px; padding:12px 14px; background:var(--surface2); border:1.5px solid var(--border); border-radius:10px; display:flex; flex-direction:column; gap:10px; }
+.pago-vuelto { font-size:.88rem; font-weight:800; text-align:center; padding:6px; border-radius:8px; }
+.pago-vuelto.ok { background:#f0fdf4; color:#15803d; }
+.pago-vuelto.warn { background:#fff7ed; color:#c2410c; }
 
 /* ─── Toast ─── */
 #toast { position:fixed; bottom:26px; right:26px; background:var(--green); color:#fff; font-weight:700; font-size:.85rem; padding:11px 20px; border-radius:10px; box-shadow:var(--shadow); opacity:0; transform:translateY(14px); transition:opacity .3s,transform .3s; pointer-events:none; z-index:999; }
