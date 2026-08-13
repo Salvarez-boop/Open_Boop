@@ -192,6 +192,7 @@
  <button class="side-nav-btn active" id="side-nav-caja" onclick="sidebarSeccion('caja')">💰 Caja</button>
  <button class="side-nav-btn" id="side-nav-libreta" onclick="sidebarSeccion('libreta')">📒 Libreta Deuda</button>
  <button class="side-nav-btn" id="side-nav-audit" onclick="sidebarSeccion('audit')">📋 Auditoría</button>
+ <button class="side-nav-btn" id="side-nav-datos" onclick="sidebarSeccion('datos')">💾 Datos</button>
  </div>
  <div class="sidebar-body">
 
@@ -313,6 +314,21 @@
    <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Acciones sensibles registradas con usuario, fecha y detalle.</p>
    <div id="audit-lista"></div>
    <div id="audit-empty" class="empty" style="display:none"><div class="empty-icon">📋</div><p>No hay registros de auditoría todavía.</p></div>
+  </div>
+ </div>
+
+ <!-- ════ SECCIÓN DATOS ════ -->
+ <div id="sidebar-seccion-datos" class="side-seccion" style="display:none">
+  <div class="card">
+   <p class="section-title">💾 Exportar / Importar Datos</p>
+   <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Respalda o restaura todos los datos del sistema (catálogo, ventas, caja, usuarios, auditoría).</p>
+   <div class="sidebar-form">
+    <button class="btn btn-blue" onclick="exportarDatos()" style="width:100%">📤 Exportar Todo (JSON)</button>
+    <div style="border-top:1px solid var(--border);margin:6px 0"></div>
+    <label style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Importar datos</label>
+    <input id="import-archivo" type="file" accept=".json" style="font-size:.82rem" onchange="importarDatos(event)"/>
+    <div id="import-result" class="login-error" style="display:none"></div>
+   </div>
   </div>
  </div>
 

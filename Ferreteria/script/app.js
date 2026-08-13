@@ -57,10 +57,14 @@ function sidebarSeccion(seccion){
  document.getElementById('side-nav-libreta').classList.toggle('active',seccion==='libreta');
  const auditBtn=document.getElementById('side-nav-audit');
  if(auditBtn)auditBtn.classList.toggle('active',seccion==='audit');
+ const datosBtn=document.getElementById('side-nav-datos');
+ if(datosBtn)datosBtn.classList.toggle('active',seccion==='datos');
  document.getElementById('sidebar-seccion-caja').style.display=(seccion==='caja')?'block':'none';
  document.getElementById('sidebar-seccion-libreta').style.display=(seccion==='libreta')?'block':'none';
  const auditSec=document.getElementById('sidebar-seccion-audit');
  if(auditSec)auditSec.style.display=(seccion==='audit')?'block':'none';
+ const datosSec=document.getElementById('sidebar-seccion-datos');
+ if(datosSec)datosSec.style.display=(seccion==='datos')?'block':'none';
  if(seccion==='caja') cajaRender();
  if(seccion==='libreta') libretaRender();
  if(seccion==='audit') auditRender();
@@ -787,6 +791,58 @@ function enviarPorMail(){
  document.getElementById('mail-modal').classList.add('open');
 }
 function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+ EXPORTAR / IMPORTAR DATOS
+══════════════════════════════════════════════ */
+function exportarDatos(){
+ const datos={
+  fecha:new Date().toISOString(),
+  catalogo:load('catalogo_ferreteria'),
+  ventas:load('ventas_ferreteria'),
+  pedidos:load('pedidos_ferreteria'),
+  caja:load('caja_ferreteria'),
+  cierres:load('cierres_ferreteria'),
+  usuarios:loginGetUsers(),
+  auditoria:auditGetLog(),
+  seeded:load('ferreteria_seeded')
+ };
+ const json=JSON.stringify(datos,null,2);
+ const blob=new Blob([json],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url; a.download=`Ferreteria_Backup_${new Date().toISOString().slice(0,10)}.json`;
+ document.body.appendChild(a); a.click();
+ document.body.removeChild(a); URL.revokeObjectURL(url);
+ auditRegistrar('EXPORTAR_DATOS','Backup descargado');
+ showToast('📤 Backup exportado');
+}
+
+function importarDatos(event){
+ const file=event.target.files[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=function(e){
+  try{
+   const datos=JSON.parse(e.target.result);
+   if(!datos.catalogo&&!datos.ventas){showToast('⚠ Archivo inválido',true);return;}
+   if(!confirm('¿Importar datos? Esto reemplazará TODO el catálogo, ventas, caja, usuarios y auditoría actuales.'))return;
+   if(datos.catalogo!==undefined)save('catalogo_ferreteria',datos.catalogo);
+   if(datos.ventas!==undefined)save('ventas_ferreteria',datos.ventas);
+   if(datos.pedidos!==undefined)save('pedidos_ferreteria',datos.pedidos);
+   if(datos.caja!==undefined)save('caja_ferreteria',datos.caja);
+   if(datos.cierres!==undefined)save('cierres_ferreteria',datos.cierres);
+   if(datos.usuarios!==undefined)loginSaveUsers(datos.usuarios);
+   if(datos.auditoria!==undefined)auditSaveLog(datos.auditoria);
+   if(datos.seeded!==undefined)save('ferreteria_seeded',datos.seeded);
+   auditRegistrar('IMPORTAR_DATOS','Backup restaurado');
+   showToast('📥 Datos importados. Recargando…');
+   setTimeout(()=>location.reload(),1200);
+  }catch(err){showToast('⚠ Error al leer el archivo',true);}
+ };
+ reader.readAsText(file);
+ event.target.value='';
+}
 
 /* ══════════════════════════════════════════════
  LOG DE AUDITORÍA
