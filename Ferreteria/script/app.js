@@ -55,10 +55,15 @@ function toggleSidebar(){
 function sidebarSeccion(seccion){
  document.getElementById('side-nav-caja').classList.toggle('active',seccion==='caja');
  document.getElementById('side-nav-libreta').classList.toggle('active',seccion==='libreta');
+ const auditBtn=document.getElementById('side-nav-audit');
+ if(auditBtn)auditBtn.classList.toggle('active',seccion==='audit');
  document.getElementById('sidebar-seccion-caja').style.display=(seccion==='caja')?'block':'none';
  document.getElementById('sidebar-seccion-libreta').style.display=(seccion==='libreta')?'block':'none';
+ const auditSec=document.getElementById('sidebar-seccion-audit');
+ if(auditSec)auditSec.style.display=(seccion==='audit')?'block':'none';
  if(seccion==='caja') cajaRender();
  if(seccion==='libreta') libretaRender();
+ if(seccion==='audit') auditRender();
 }
 
 /* ══════════════════════════════════════════════
@@ -137,6 +142,7 @@ function catalogoAgregar(){
  if(!formato){shake('c-formato');return;}
  catalogo.push({id:cNextId++,nombre,codigo,precio,stock,formato});
  save('catalogo_ferreteria',catalogo); catalogoRender();
+ auditRegistrar('CATALOGO_AGREGAR',`"${nombre}" $${precio} stock=${stock}`);
  showToast(`"${nombre}" agregado al catálogo ✓`);
  document.getElementById('c-nombre').value='';
  document.getElementById('c-codigo').value='';
@@ -145,8 +151,17 @@ function catalogoAgregar(){
  document.getElementById('c-formato').value='';
  document.getElementById('c-nombre').focus();
 }
-function catalogoEliminar(id){ catalogo=catalogo.filter(c=>c.id!==id); save('catalogo_ferreteria',catalogo); catalogoRender(); showToast('Producto eliminado del catálogo'); }
-function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar todos los productos del catálogo?'))return; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender(); showToast('Catálogo limpiado'); }
+function catalogoEliminar(id){ 
+ const prod=catalogo.find(c=>c.id===id);
+ const nombre=prod?prod.nombre:'?';
+ catalogo=catalogo.filter(c=>c.id!==id); 
+ save('catalogo_ferreteria',catalogo); catalogoRender();
+ auditRegistrar('CATALOGO_ELIMINAR',`"${nombre}"`);
+ showToast('Producto eliminado del catálogo'); 
+}
+function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar todos los productos del catálogo?'))return; const n=catalogo.length; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender();
+ auditRegistrar('CATALOGO_LIMPIEZA',`${n} productos eliminados`);
+ showToast('Catálogo limpiado'); }
 function catSort(col){ cSortAsc=cSortCol===col?!cSortAsc:true; cSortCol=col; cPagina=1; catalogoRender(); }
 function catIrPagina(dir){
  const q=document.getElementById('c-buscar').value.toLowerCase();
@@ -382,9 +397,13 @@ function ventasStats(){
 }
 function ventasLimpiarHistorial(){
  if(!ventas.length)return;
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede limpiar historial',true);return;}
  if(!confirm('¿Limpiar el historial de ventas del día?'))return;
+ const n=ventas.length;
  ventas=[];save('ventas_ferreteria',[]);
- ventasRenderHistorial();ventasStats();showToast('Historial limpiado');
+ ventasRenderHistorial();ventasStats();
+ auditRegistrar('HISTORIAL_LIMPIEZA',`${n} ventas eliminadas`);
+ showToast('Historial limpiado');
 }
 function confirmarVenta(){
  if(!carrito.length){showToast('El carrito está vacío',true);return;}
@@ -518,6 +537,7 @@ function ejecutarVenta(total,subtotal,clamp,medioPago,extra){
  ventas.push(venta); save('ventas_ferreteria',ventas);
  // registrar en caja
  cajaRegistrarVenta(hora, `Venta – ${carrito.length} producto(s)`, total);
+ auditRegistrar('VENTA',`boleta=#${String(boleta).padStart(4,'0')} total=${fmt$(total)} pago=${medioPago}`);
  showToast(`Venta confirmada · ${fmt$(total)} ✓`);
  carrito=[];
  document.getElementById('v-descuento').value='';
@@ -538,6 +558,7 @@ function cajaAbrir(){
  if(!responsable){shake('caja-responsable');return;}
  const state={abierta:true,fecha:today(),horaApertura:now(),montoInicial:monto,responsable,movimientos:[]};
  cajaSave(state); cajaRender();
+ auditRegistrar('CAJA_APERTURA',`monto=${fmt$(monto)} resp=${responsable}`);
  showToast(`Caja abierta con ${fmt$(monto)} ✓`);
 }
 
@@ -568,12 +589,14 @@ function cajaRegistrarMovimiento(){
 function cajaCerrar(){
  const state=cajaGetState();
  if(!state.abierta)return;
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede cerrar caja',true);return;}
  if(!confirm('¿Cerrar la caja y generar el resumen del día?'))return;
  // calcular totales
  const totalVentas=state.movimientos.filter(m=>m.tipo==='venta').reduce((s,m)=>s+m.monto,0);
  const totalEgresos=state.movimientos.filter(m=>m.tipo!=='venta').reduce((s,m)=>s+m.monto,0);
  const saldoFinal=state.montoInicial+totalVentas+totalEgresos;
  const horaCierre=now();
+ auditRegistrar('CAJA_CIERRE',`inicial=${fmt$(state.montoInicial)} ventas=${fmt$(totalVentas)} saldo=${fmt$(saldoFinal)}`);
  // generar resumen
  const lineas=state.movimientos.map((m,i)=>{
  const signo=m.monto>=0?'+':'-';
@@ -719,6 +742,7 @@ function catalogoGuardarEdicion(){
  save('catalogo_ferreteria',catalogo);
  catalogoRender();
  catalogoCerrarEdicion();
+ auditRegistrar('CATALOGO_EDITAR',`"${nombre}" $${precio} stock=${stock}`);
  showToast(`"${nombre}" actualizado ✓`);
 }
 
@@ -763,6 +787,51 @@ function enviarPorMail(){
  document.getElementById('mail-modal').classList.add('open');
 }
 function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+ LOG DE AUDITORÍA
+══════════════════════════════════════════════ */
+const AUDIT_KEY = 'ferreteria_audit';
+
+function auditGetLog(){ return load(AUDIT_KEY)||[]; }
+function auditSaveLog(log){ save(AUDIT_KEY,log); }
+
+function auditRegistrar(accion, detalle){
+ const session=loginGetSession();
+ const usuario=session?session.usuario:'?';
+ const log=auditGetLog();
+ log.unshift({
+  ts:new Date().toLocaleString('es-CL'),
+  usuario,
+  accion,
+  detalle:detalle||''
+ });
+ // Máximo 500 entradas para no saturar localStorage
+ if(log.length>500)log.length=500;
+ auditSaveLog(log);
+}
+
+function auditRender(){
+ const el=document.getElementById('audit-lista');
+ const empty=document.getElementById('audit-empty');
+ const log=auditGetLog();
+ if(!log.length){if(el)el.innerHTML='';if(empty)empty.style.display='block';return;}
+ if(empty)empty.style.display='none';
+ if(el)el.innerHTML=log.slice(0,50).map(e=>`
+ <div class="audit-entry">
+  <div class="audit-head"><span class="audit-accion badge ${auditBadgeCls(e.accion)}">${esc(e.accion)}</span><span class="audit-ts">${esc(e.ts)}</span></div>
+  <div class="audit-user">👤 ${esc(e.usuario)}</div>
+  ${e.detalle?`<div class="audit-detalle">${esc(e.detalle)}</div>`:''}
+ </div>`).join('');
+}
+
+function auditBadgeCls(accion){
+ if(accion.includes('VENTA'))return 'b-venta';
+ if(accion.includes('CAJA')||accion.includes('APERTURA')||accion.includes('CIERRE'))return 'b-caja';
+ if(accion.includes('PAGO')||accion.includes('LIBRETA'))return 'b-ingreso';
+ if(accion.includes('EDIT')||accion.includes('ELIMIN')||accion.includes('LIMPIEZA')||accion.includes('BORR'))return 'b-gasto';
+ return 'b-other';
+}
 
 /* ══════════════════════════════════════════════
  SISTEMA DE LOGIN (PIN + ROLES)

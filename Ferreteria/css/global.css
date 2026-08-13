@@ -283,6 +283,14 @@ tbody td { padding:11px 14px; vertical-align:middle; }
 .libreta-total { font-size:.9rem; font-weight:800; color:var(--accent); }
 .libreta-sub { font-size:.72rem; color:var(--muted); }
 
+/* ─── Auditoría (sidebar) ─── */
+.audit-entry { background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:10px 12px; margin-bottom:7px; font-size:.78rem; }
+.audit-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px; }
+.audit-accion { font-size:.65rem; padding:2px 7px; }
+.audit-ts { font-size:.65rem; color:var(--muted); white-space:nowrap; }
+.audit-user { font-size:.7rem; color:var(--muted); margin-bottom:2px; }
+.audit-detalle { font-size:.74rem; color:var(--text); font-weight:500; }
+
 /* Cierre panel */
 .cierre-panel {
  background:linear-gradient(135deg,#f0fdf4,#dcfce7);

@@ -191,6 +191,7 @@
  <div class="sidebar-nav">
  <button class="side-nav-btn active" id="side-nav-caja" onclick="sidebarSeccion('caja')">💰 Caja</button>
  <button class="side-nav-btn" id="side-nav-libreta" onclick="sidebarSeccion('libreta')">📒 Libreta Deuda</button>
+ <button class="side-nav-btn" id="side-nav-audit" onclick="sidebarSeccion('audit')">📋 Auditoría</button>
  </div>
  <div class="sidebar-body">
 
@@ -302,6 +303,16 @@
    <p class="section-title">📒 Clientes con Deuda</p>
    <div id="libreta-lista"></div>
    <div id="libreta-empty" class="empty" style="display:none"><div class="empty-icon">📒</div><p>No hay clientes con deuda registrada. Las ventas con medio "Libreta Deuda" aparecerán aquí.</p></div>
+  </div>
+ </div>
+
+ <!-- ════ SECCIÓN AUDITORÍA ════ -->
+ <div id="sidebar-seccion-audit" class="side-seccion" style="display:none">
+  <div class="card">
+   <p class="section-title">📋 Registro de Auditoría</p>
+   <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Acciones sensibles registradas con usuario, fecha y detalle.</p>
+   <div id="audit-lista"></div>
+   <div id="audit-empty" class="empty" style="display:none"><div class="empty-icon">📋</div><p>No hay registros de auditoría todavía.</p></div>
   </div>
  </div>
 
