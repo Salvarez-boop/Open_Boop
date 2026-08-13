@@ -48,7 +48,17 @@ function toggleSidebar(){
  const opening=!sidebar.classList.contains('open');
  sidebar.classList.toggle('open');
  overlay.classList.toggle('open');
- if(opening) cajaRender();
+ if(opening) { cajaRender(); libretaRender(); }
+}
+
+/* ── Sidebar: cambiar sección (Caja | Libreta) ── */
+function sidebarSeccion(seccion){
+ document.getElementById('side-nav-caja').classList.toggle('active',seccion==='caja');
+ document.getElementById('side-nav-libreta').classList.toggle('active',seccion==='libreta');
+ document.getElementById('sidebar-seccion-caja').style.display=(seccion==='caja')?'block':'none';
+ document.getElementById('sidebar-seccion-libreta').style.display=(seccion==='libreta')?'block':'none';
+ if(seccion==='caja') cajaRender();
+ if(seccion==='libreta') libretaRender();
 }
 
 /* ══════════════════════════════════════════════
@@ -394,6 +404,25 @@ function confirmarVenta(){
 let pagoPendiente = null;
 let pagoSeleccionado = null;
 
+// Validación de RUT chileno (módulo 11)
+function validarRUT(rut){
+ const limpio=rut.replace(/\./g,'').toUpperCase();
+ const match=limpio.match(/^(\d{1,8})-(\d|K)$/);
+ if(!match)return false;
+ const cuerpo=parseInt(match[1],10);
+ const dv=match[2];
+ let suma=0,mult=2;
+ let temp=cuerpo;
+ while(temp>0){
+  suma+=(temp%10)*mult;
+  temp=Math.floor(temp/10);
+  mult=mult<7?mult+1:2;
+ }
+ const dvCalc=11-(suma%11);
+ const dvEsperado=dvCalc===11?'0':dvCalc===10?'K':String(dvCalc);
+ return dv===dvEsperado;
+}
+
 function abrirModalPago(total,subtotal,clamp){
  pagoPendiente={total,subtotal,clamp};
  pagoSeleccionado=null;
@@ -406,7 +435,7 @@ function abrirModalPago(total,subtotal,clamp){
  document.getElementById('pago-vuelto').textContent='';
  document.getElementById('pago-vuelto').className='pago-vuelto';
  document.getElementById('pago-operacion').value='';
- document.getElementById('pago-cliente').value='';
+ document.getElementById('pago-rut').value='';
  document.getElementById('pago-modal').classList.add('open');
 }
 
@@ -420,7 +449,7 @@ function seleccionarPago(tipo){
  document.getElementById('pago-extra-libreta').style.display=(tipo==='libreta')?'flex':'none';
  if(tipo==='efectivo'){ const r=document.getElementById('pago-recibido'); r.value=pagoPendiente?pagoPendiente.total:''; r.focus(); calcularVuelto(); }
  if(tipo==='debito'||tipo==='credito'){ document.getElementById('pago-operacion').focus(); }
- if(tipo==='libreta'){ document.getElementById('pago-cliente').focus(); }
+ if(tipo==='libreta'){ document.getElementById('pago-rut').focus(); }
 }
 
 function calcularVuelto(){
@@ -443,7 +472,17 @@ function cerrarModalPago(){
  pagoSeleccionado=null;
 }
 
-function confirmarVentaPago(){
+// Cancelar: cierra el modal y vacía el carrito
+function cancelarPago(){
+ cerrarModalPago();
+ carrito=[];
+ document.getElementById('v-descuento').value='';
+ carritoRender();
+ ventasRenderGrid();
+ showToast('Venta cancelada · Carrito vaciado');
+}
+
+ function confirmarVentaPago(){
  if(!pagoPendiente){cerrarModalPago();return;}
  if(!pagoSeleccionado){showToast('Selecciona un medio de pago',true);return;}
  const {total,subtotal,clamp}=pagoPendiente;
@@ -459,9 +498,9 @@ function confirmarVentaPago(){
   extra={operacion};
  }
  if(pagoSeleccionado==='libreta'){
-  const cliente=document.getElementById('pago-cliente').value.trim();
-  if(!cliente){shake('pago-cliente');return;}
-  extra={cliente};
+  const rutRaw=document.getElementById('pago-rut').value.trim();
+  if(!rutRaw||!validarRUT(rutRaw)){showToast('RUT inválido. Usa formato 12.345.678-5',true);shake('pago-rut');return;}
+  extra={rut:rutRaw.replace(/\./g,'')};
  }
  ejecutarVenta(total,subtotal,clamp,pagoSeleccionado,extra);
  cerrarModalPago();
@@ -507,7 +546,7 @@ function cajaRegistrarVenta(hora, desc, monto){
  if(!state.abierta)return;
  state.movimientos.push({hora,tipo:'venta',descripcion:desc,monto});
  cajaSave(state);
- if(document.getElementById('panel-caja').classList.contains('active')) cajaRender();
+ if(document.getElementById('sidebar-caja').classList.contains('open')) cajaRender();
 }
 
 function cajaRegistrarMovimiento(){
@@ -684,8 +723,33 @@ function catalogoGuardarEdicion(){
 }
 
 /* ══════════════════════════════════════════════
- MAIL
+ LIBRETA DEUDA
 ══════════════════════════════════════════════ */
+function libretaClientes(){
+ const clientes={};
+ ventas.forEach(v=>{
+  if(v.medioPago!=='libreta')return;
+  const rut=v.extra && v.extra.rut ? v.extra.rut : 'S/RUT';
+  if(!clientes[rut])clientes[rut]={rut,compras:0,total:0,ventas:[]};
+  clientes[rut].compras++;
+  clientes[rut].total+=v.total;
+  clientes[rut].ventas.push(v);
+ });
+ return Object.values(clientes).sort((a,b)=>b.total-a.total);
+}
+
+function libretaRender(){
+ const el=document.getElementById('libreta-lista');
+ const empty=document.getElementById('libreta-empty');
+ const clientes=libretaClientes();
+ if(!clientes.length){el.innerHTML='';empty.style.display='block';return;}
+ empty.style.display='none';
+ el.innerHTML=clientes.map(c=>`
+ <div class="libreta-cliente">
+  <div class="libreta-head"><span class="libreta-rut">${esc(c.rut)}</span><span class="libreta-total">${fmt$(c.total)}</span></div>
+  <div class="libreta-sub">${c.compras} compra${c.compras!==1?'s':''} · Última: ${c.ventas[c.ventas.length-1].hora}</div>
+ </div>`).join('');
+}
 function enviarPorMail(){
  if(!pedidos.length){showToast('No hay productos en el pedido para enviar.',true);return;}
  const fecha=new Date().toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -704,7 +768,6 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
 (function(){
  document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalMail();});
  document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)catalogoCerrarEdicion();});
- document.getElementById('pago-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalPago();});
 
  // Scanner: Enter en el buscador de ventas → auto-agregar por código exacto
  document.getElementById('v-buscar').addEventListener('keydown',e=>{
@@ -719,7 +782,7 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
   if(e.key==='Escape'){
    if(document.getElementById('mail-modal').classList.contains('open')) cerrarModalMail();
    if(document.getElementById('edit-modal').classList.contains('open')) catalogoCerrarEdicion();
-   if(document.getElementById('pago-modal').classList.contains('open')) cerrarModalPago();
+   if(document.getElementById('pago-modal').classList.contains('open')) cancelarPago();
    return;
   }
   if(e.key!=='Enter')return;

@@ -185,10 +185,17 @@
  <!-- ══════════════ SIDEBAR CAJA ══════════════ -->
  <div id="sidebar-caja" class="sidebar">
  <div class="sidebar-header">
- <span class="sidebar-title">💰 Caja</span>
+ <span class="sidebar-title">☰ Menú</span>
  <button class="btn-sidebar-close" onclick="toggleSidebar()">✕</button>
  </div>
+ <div class="sidebar-nav">
+ <button class="side-nav-btn active" id="side-nav-caja" onclick="sidebarSeccion('caja')">💰 Caja</button>
+ <button class="side-nav-btn" id="side-nav-libreta" onclick="sidebarSeccion('libreta')">📒 Libreta Deuda</button>
+ </div>
  <div class="sidebar-body">
+
+ <!-- ════ SECCIÓN CAJA ════ -->
+ <div id="sidebar-seccion-caja">
 
  <!-- Status banner -->
  <div id="caja-status-bar" class="caja-status closed">
@@ -287,7 +294,18 @@
  </div>
 
  </div><!-- /panel-operacion -->
+ </div><!-- /seccion-caja -->
+
+ <!-- ════ SECCIÓN LIBRETA DEUDA ════ -->
+ <div id="sidebar-seccion-libreta" class="side-seccion" style="display:none">
+  <div class="card">
+   <p class="section-title">📒 Clientes con Deuda</p>
+   <div id="libreta-lista"></div>
+   <div id="libreta-empty" class="empty" style="display:none"><div class="empty-icon">📒</div><p>No hay clientes con deuda registrada. Las ventas con medio "Libreta Deuda" aparecerán aquí.</p></div>
+  </div>
  </div>
+
+ </div><!-- /sidebar-body -->
  </div>
 
 </div><!-- /wrapper -->
@@ -358,10 +376,10 @@
   <div class="field"><label for="pago-operacion">N° de Operación</label><input id="pago-operacion" type="text" placeholder="Ej: 123456789" autocomplete="off"/></div>
  </div>
  <div id="pago-extra-libreta" class="pago-extra" style="display:none">
-  <div class="field"><label for="pago-cliente">Nombre del Cliente (Libreta)</label><input id="pago-cliente" type="text" placeholder="Ej: Juan Pérez" autocomplete="off"/></div>
+  <div class="field"><label for="pago-rut">RUT Cliente</label><input id="pago-rut" type="text" placeholder="Ej: 12.345.678-5" autocomplete="off"/></div>
  </div>
  <div style="display:flex;gap:10px;margin-top:18px">
-  <button class="btn btn-outline" onclick="cerrarModalPago()" style="flex:1">Cancelar</button>
+  <button class="btn btn-outline" onclick="cancelarPago()" style="flex:1">Cancelar</button>
   <button class="btn btn-blue" onclick="confirmarVentaPago()" style="flex:1">✔ Confirmar Venta</button>
  </div>
  </div>
