@@ -33,6 +33,7 @@ function downloadTxt(nombre,contenido){
 
 /* ── Tab navigation ── */
 function showTab(name){
+ if(carrito.length && !confirm('Tienes productos en el carrito. ¿Cambiar de pestaña? Se perderán los productos seleccionados.'))return;
  ['pedidos','ventas','catalogo'].forEach(t=>{
  document.getElementById('panel-'+t).classList.toggle('active',t===name);
  document.getElementById('tab-'+t).classList.toggle('active',t===name);
@@ -155,13 +156,14 @@ function catalogoAgregar(){
  document.getElementById('c-formato').value='';
  document.getElementById('c-nombre').focus();
 }
-function catalogoEliminar(id){ 
+function catalogoEliminar(id){
  const prod=catalogo.find(c=>c.id===id);
  const nombre=prod?prod.nombre:'?';
- catalogo=catalogo.filter(c=>c.id!==id); 
+ if(!confirm(`¿Eliminar "${nombre}" del catálogo? Esta acción no se puede deshacer.`))return;
+ catalogo=catalogo.filter(c=>c.id!==id);
  save('catalogo_ferreteria',catalogo); catalogoRender();
  auditRegistrar('CATALOGO_ELIMINAR',`"${nombre}"`);
- showToast('Producto eliminado del catálogo'); 
+ showToast('Producto eliminado del catálogo');
 }
 function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar todos los productos del catálogo?'))return; const n=catalogo.length; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender();
  auditRegistrar('CATALOGO_LIMPIEZA',`${n} productos eliminados`);
@@ -257,7 +259,7 @@ function ventasScanCodigo(inputId='v-buscar'){
  const q=input.value.trim();
  if(!q)return;
  const prod=catalogo.find(c=>c.codigo && c.codigo.trim().toLowerCase()===q.toLowerCase());
- if(!prod)return; // no es código exacto → la búsqueda filtra normal
+ if(!prod){showToast(`⚠ Código "${esc(q)}" no encontrado en el catálogo`,true);input.value='';input.focus();return;}
  if(prod.stock<=0){showToast(`"${prod.nombre}" sin stock`,true);input.value='';input.focus();return;}
  carritoAgregar(prod.id);
  input.value='';
@@ -268,6 +270,8 @@ function ventasScanCodigo(inputId='v-buscar'){
 function ventasRenderGrid(){
  const q=document.getElementById('v-buscar').value.toLowerCase();
  const rank=ventasRanking();
+ // reset página al buscar
+ vPagina=1;
  // ordenar: más vendidos primero, empate por nombre
  const fullData=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
  .sort((a,b)=>{
@@ -322,7 +326,7 @@ function carritoQty(catId,delta){
  carritoRender();
 }
 function carritoRemover(catId){carrito=carrito.filter(i=>i.id!==catId);carritoRender();}
-function carritoLimpiar(){carrito=[];carritoRender();}
+function carritoLimpiar(){if(!carrito.length)return;if(!confirm('¿Vaciar el carrito? Se perderán todos los productos agregados.'))return;carrito=[];carritoRender();}
 function carritoRender(){
  const el=document.getElementById('v-cart-items');
  const desc=parseFloat(document.getElementById('v-descuento').value)||0;
@@ -402,7 +406,7 @@ function ventasStats(){
 function ventasLimpiarHistorial(){
  if(!ventas.length)return;
  if(!loginEsAdmin()){showToast('⚠ Solo administrador puede limpiar historial',true);return;}
- if(!confirm('¿Limpiar el historial de ventas del día?'))return;
+ if(!confirm('¿Limpiar TODO el historial de ventas? No solo las del día de hoy, sino TODAS las ventas registradas. Esta acción no se puede deshacer.'))return;
  const n=ventas.length;
  ventas=[];save('ventas_ferreteria',[]);
  ventasRenderHistorial();ventasStats();
@@ -495,14 +499,9 @@ function cerrarModalPago(){
  pagoSeleccionado=null;
 }
 
-// Cancelar: cierra el modal y vacía el carrito
+// Cancelar: solo cierra el modal, conserva el carrito
 function cancelarPago(){
  cerrarModalPago();
- carrito=[];
- document.getElementById('v-descuento').value='';
- carritoRender();
- ventasRenderGrid();
- showToast('Venta cancelada · Carrito vaciado');
 }
 
  function confirmarVentaPago(){
@@ -778,6 +777,8 @@ function libretaRender(){
   <div class="libreta-sub">${c.compras} compra${c.compras!==1?'s':''} · Última: ${c.ventas[c.ventas.length-1].hora}</div>
  </div>`).join('');
 }
+const ASUNTO_PEDIDO = 'ferreteria.elgreengo@gmail.com'; // TODO: hacer configurable
+
 function enviarPorMail(){
  if(!pedidos.length){showToast('No hay productos en el pedido para enviar.',true);return;}
  const fecha=new Date().toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -787,7 +788,7 @@ function enviarPorMail(){
  downloadTxt('Pedido_ElGreengo.txt',contenido);
  const asunto=encodeURIComponent(`Pedido Ferretería El Greengo – ${fecha}`);
  const cuerpo=encodeURIComponent(`Estimados,\n\nAdjunto el pedido del día ${fecha}.\n\nDetalle:\n${lineas}\n\nTotal de productos : ${pedidos.length}\nTotal de unidades : ${total}\n\nSaludos,\nFerretería El Greengo`);
- window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=ferreteria.elgreengo%40gmail.com&su=${asunto}&body=${cuerpo}`,'_blank');
+ window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(ASUNTO_PEDIDO)}&su=${asunto}&body=${cuerpo}`,'_blank');
  document.getElementById('mail-modal').classList.add('open');
 }
 function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}
@@ -1023,7 +1024,7 @@ function loginAgregarCajero(usuario,pin){
   if(e.key==='Escape'){
    if(document.getElementById('mail-modal').classList.contains('open')) cerrarModalMail();
    if(document.getElementById('edit-modal').classList.contains('open')) catalogoCerrarEdicion();
-   if(document.getElementById('pago-modal').classList.contains('open')) cancelarPago();
+   if(document.getElementById('pago-modal').classList.contains('open')) cerrarModalPago();
    return;
   }
   if(e.key!=='Enter')return;
@@ -1032,8 +1033,8 @@ function loginAgregarCajero(usuario,pin){
   if(active==='panel-catalogo' &&e.target.id!=='c-buscar') catalogoAgregar();
  });
 
- // Seed 100 productos de muestra (solo una vez, flag persistente)
- if(!load('ferreteria_seeded')){
+ // Seed 100 productos de muestra (solo una vez, flag persistente + catálogo vacío)
+ if(!load('ferreteria_seeded') && (!catalogo || catalogo.length===0)){
   catalogo=[];
   const muestras=[];
   let seedIdx=1;
