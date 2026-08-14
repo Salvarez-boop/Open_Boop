@@ -1,0 +1,30 @@
+# 🔩 Ferretería El Greengo — .gitignore específico
+
+# Backups exportados desde el sistema (sidebar → Datos)
+Ferreteria_Backup_*.json
+
+# Cierres de caja descargados (formato TXT)
+Cierre_Caja_*.txt
+
+# Pedido descargado para adjuntar por mail
+Pedido_ElGreengo.txt
+
+# Archivos temporales
+*.tmp
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# NOTA: el .gitignore raíz del workspace ya cubre secrets, node_modules,
+# .env, __pycache__, etc. Este es específico para los archivos generados
+# por el sistema en runtime (backups, cierres, pedidos).
