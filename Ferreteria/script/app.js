@@ -171,13 +171,14 @@ function catalogoAgregar(){
 function catalogoEliminar(id){
  const prod=catalogo.find(c=>c.id===id);
  const nombre=prod?prod.nombre:'?';
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede eliminar productos',true);return;}
  if(!confirm(`¿Eliminar "${nombre}" del catálogo? Esta acción no se puede deshacer.`))return;
  catalogo=catalogo.filter(c=>c.id!==id);
  save('catalogo_ferreteria',catalogo); catalogoRender();
  auditRegistrar('CATALOGO_ELIMINAR',`"${nombre}"`);
  showToast('Producto eliminado del catálogo');
 }
-function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar todos los productos del catálogo?'))return; const n=catalogo.length; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender();
+function catalogoLimpiar(){ if(!catalogo.length)return; if(!loginEsAdmin()){showToast('⚠ Solo administrador puede limpiar catálogo',true);return;} if(!confirm('¿Eliminar todos los productos del catálogo?'))return; const n=catalogo.length; catalogo=[];cNextId=1; save('catalogo_ferreteria',catalogo); catalogoRender();
  auditRegistrar('CATALOGO_LIMPIEZA',`${n} productos eliminados`);
  showToast('Catálogo limpiado'); }
 function catSort(col){ cSortAsc=cSortCol===col?!cSortAsc:true; cSortCol=col; cPagina=1; catalogoRender(); }
@@ -824,6 +825,7 @@ function cerrarModalMail(){document.getElementById('mail-modal').classList.remov
  EXPORTAR / IMPORTAR DATOS
 ══════════════════════════════════════════════ */
 function exportarDatos(){
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede exportar datos',true);return;}
  const datos={
   fecha:new Date().toISOString(),
   catalogo:load('catalogo_ferreteria'),
@@ -847,6 +849,7 @@ function exportarDatos(){
 }
 
 function importarDatos(event){
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede importar datos',true);return;}
  const file=event.target.files[0];
  if(!file)return;
  const reader=new FileReader();
@@ -922,6 +925,10 @@ function auditBadgeCls(accion){
 ══════════════════════════════════════════════ */
 const USERS_KEY = 'ferreteria_usuarios';
 const SESSION_KEY = 'ferreteria_sesion';
+const LOGIN_ATTEMPTS_KEY = 'ferreteria_intentos';
+const SESION_MAX_HORAS = 8;
+const MAX_INTENTOS = 3;
+const LOCKOUT_MS = 30000; // 30 segundos
 
 // Hash simple (no criptográfico, suficientemente opaco para evitar ojeadas)
 function hashPIN(pin){ let h=0; for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0;} return 'h'+Math.abs(h).toString(36); }
@@ -930,8 +937,19 @@ function loginGetUsers(){ return load(USERS_KEY)||{}; }
 function loginSaveUsers(u){ save(USERS_KEY,u); }
 
 function loginGetSession(){ return load(SESSION_KEY); }
-function loginSaveSession(s){ save(SESSION_KEY,s); }
+function loginSaveSession(s){ save(SESSION_KEY,{...s,ts:Date.now()}); }
 function loginCerrarSesion(){ localStorage.removeItem(SESSION_KEY); location.reload(); }
+
+// Estado de intentos fallidos (anti brute force)
+function loginGetIntentos(){ const i=load(LOGIN_ATTEMPTS_KEY); if(!i) return {n:0,lockedHasta:0}; return i; }
+function loginSaveIntentos(i){ save(LOGIN_ATTEMPTS_KEY,i); }
+function loginResetIntentos(){ loginSaveIntentos({n:0,lockedHasta:0}); }
+function loginEstaBloqueado(){
+ const i=loginGetIntentos();
+ if(i.n>=MAX_INTENTOS && Date.now()<i.lockedHasta) return Math.ceil((i.lockedHasta-Date.now())/1000);
+ if(Date.now()>=i.lockedHasta) loginResetIntentos();
+ return 0;
+}
 
 function loginObtenerUsuarioActual(){ return loginGetSession(); }
 
@@ -944,8 +962,14 @@ function loginCheck(){
  const session=loginGetSession();
  const overlay=document.getElementById('login-modal');
 
- // Si ya hay sesión activa → ocultar login y continuar
+ // Si ya hay sesión activa → verificar expiración
  if(session && users[session.usuario]){
+  // S2: sesión expira tras SESION_MAX_HORAS
+  const antiguedadMs=Date.now()-(session.ts||0);
+  if(session.ts && antiguedadMs > SESION_MAX_HORAS*3600*1000){
+   loginCerrarSesion();
+   return false;
+  }
   overlay.style.display='none';
   return true;
  }
@@ -1006,17 +1030,37 @@ function loginIngresar(){
  const pin=document.getElementById('login-pin').value;
  const errEl=document.getElementById('login-error');
 
+ // S1: verificar bloqueo por intentos fallidos
+ const segundosBloqueo=loginEstaBloqueado();
+ if(segundosBloqueo>0){
+  errEl.textContent=`Demasiados intentos. Espera ${segundosBloqueo}s e inténtalo de nuevo.`;
+  errEl.style.display='block';
+  return;
+ }
+
  if(!pin){errEl.textContent='Ingresa tu PIN';errEl.style.display='block';return;}
 
  const users=loginGetUsers();
  const user=users[usuario];
  if(!user||user.pinHash!==hashPIN(pin)){
-  errEl.textContent='PIN incorrecto';errEl.style.display='block';
+  const intentos=loginGetIntentos();
+  intentos.n++;
+  if(intentos.n>=MAX_INTENTOS){
+   intentos.lockedHasta=Date.now()+LOCKOUT_MS;
+   intentos.n=0;
+   loginSaveIntentos(intentos);
+   errEl.textContent=`PIN incorrecto. Demasiados intentos: bloqueado por ${LOCKOUT_MS/1000}s.`;
+  }else{
+   loginSaveIntentos(intentos);
+   errEl.textContent=`PIN incorrecto. Quedan ${MAX_INTENTOS-intentos.n} intento${MAX_INTENTOS-intentos.n!==1?'s':''}. Tras ${MAX_INTENTOS} fallos se bloquea ${LOCKOUT_MS/1000}s.`;
+  }
+  errEl.style.display='block';
   document.getElementById('login-pin').value='';
   document.getElementById('login-pin').focus();
   return;
  }
  errEl.style.display='none';
+ loginResetIntentos();
  loginSaveSession({usuario,rol:user.rol});
  showToast(`👋 Bienvenido, ${usuario}`);
  location.reload();
