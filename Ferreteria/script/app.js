@@ -31,6 +31,19 @@ function downloadTxt(nombre,contenido){
  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
+/* ── Helpers de ordenamiento y filtrado (anti-duplicación) ── */
+function ordenarLista(arr, col, asc){
+ return [...arr].sort((a,b)=>{
+  let va=a[col], vb=b[col];
+  if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+  return asc?(va>vb?1:-1):(va<vb?1:-1);
+ });
+}
+function filtrarCatalogo(q){
+ const query=(q||'').toLowerCase();
+ return catalogo.filter(c=>c.nombre.toLowerCase().includes(query)||c.formato.toLowerCase().includes(query)||(c.codigo||'').toLowerCase().includes(query));
+}
+
 /* ── Tab navigation ── */
 function showTab(name){
  if(carrito.length && !confirm('Tienes productos en el carrito. ¿Cambiar de pestaña? Se perderán los productos seleccionados.'))return;
@@ -49,7 +62,7 @@ function toggleSidebar(){
  const opening=!sidebar.classList.contains('open');
  sidebar.classList.toggle('open');
  overlay.classList.toggle('open');
- if(opening) { cajaRender(); libretaRender(); }
+ if(opening) { cajaRender(); libretaRender(); configRender(); }
 }
 
 /* ── Sidebar: cambiar sección (Caja | Libreta) ── */
@@ -99,8 +112,7 @@ function pedidoLimpiar(){ if(!pedidos.length)return; if(!confirm('¿Eliminar tod
 function pedidoSort(col){ pSortAsc=pSortCol===col?!pSortAsc:true; pSortCol=col; pedidoRender(); }
 function pedidoRender(){
  const q=document.getElementById('p-buscar').value.toLowerCase();
- const data=pedidos.filter(p=>p.nombre.toLowerCase().includes(q)||p.formato.toLowerCase().includes(q))
- .sort((a,b)=>{let va=a[pSortCol],vb=b[pSortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return pSortAsc?(va>vb?1:-1):(va<vb?1:-1);});
+ const data=ordenarLista(pedidos.filter(p=>p.nombre.toLowerCase().includes(q)||p.formato.toLowerCase().includes(q)), pSortCol, pSortAsc);
  document.querySelectorAll('#panel-pedidos thead th').forEach(th=>{
  th.classList.remove('sorted');
  const m=(th.getAttribute('onclick')||'').match(/pedidoSort\('(.+?)'\)/);
@@ -171,7 +183,7 @@ function catalogoLimpiar(){ if(!catalogo.length)return; if(!confirm('¿Eliminar 
 function catSort(col){ cSortAsc=cSortCol===col?!cSortAsc:true; cSortCol=col; cPagina=1; catalogoRender(); }
 function catIrPagina(dir){
  const q=document.getElementById('c-buscar').value.toLowerCase();
- const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q)).sort((a,b)=>{let va=a[cSortCol],vb=b[cSortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return cSortAsc?(va>vb?1:-1):(va<vb?1:-1);});
+ const data=ordenarLista(filtrarCatalogo(q), cSortCol, cSortAsc);
  const totalPaginas=Math.max(1,Math.ceil(data.length/C_POR_PAGINA));
  if(dir==='prev'&&cPagina>1)cPagina--;
  if(dir==='next'&&cPagina<totalPaginas)cPagina++;
@@ -180,8 +192,7 @@ function catIrPagina(dir){
 }
 function catalogoRender(){
  const q=document.getElementById('c-buscar').value.toLowerCase();
- const fullData=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
- .sort((a,b)=>{let va=a[cSortCol],vb=b[cSortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return cSortAsc?(va>vb?1:-1):(va<vb?1:-1);});
+ const fullData=ordenarLista(filtrarCatalogo(q), cSortCol, cSortAsc);
  const totalPaginas=Math.max(1,Math.ceil(fullData.length/C_POR_PAGINA));
  if(cPagina>totalPaginas)cPagina=totalPaginas;
  const start=(cPagina-1)*C_POR_PAGINA;
@@ -245,8 +256,7 @@ function ventasCheckCaja(){
 function ventasIrPagina(dir){
  const q=document.getElementById('v-buscar').value.toLowerCase();
  const rank=ventasRanking();
- const data=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
- .sort((a,b)=>(rank[b.nombre]||0)-(rank[a.nombre]||0));
+ const data=filtrarCatalogo(q).sort((a,b)=>(rank[b.nombre]||0)-(rank[a.nombre]||0));
  const totalPaginas=Math.max(1,Math.ceil(data.length/V_POR_PAGINA));
  if(dir==='prev'&&vPagina>1)vPagina--;
  if(dir==='next'&&vPagina<totalPaginas)vPagina++;
@@ -273,8 +283,7 @@ function ventasRenderGrid(){
  // reset página al buscar
  vPagina=1;
  // ordenar: más vendidos primero, empate por nombre
- const fullData=catalogo.filter(c=>c.nombre.toLowerCase().includes(q)||c.formato.toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q))
- .sort((a,b)=>{
+ const fullData=filtrarCatalogo(q).sort((a,b)=>{
   const r=(rank[b.nombre]||0)-(rank[a.nombre]||0);
   return r!==0?r:a.nombre.localeCompare(b.nombre);
  });
@@ -777,7 +786,25 @@ function libretaRender(){
   <div class="libreta-sub">${c.compras} compra${c.compras!==1?'s':''} · Última: ${c.ventas[c.ventas.length-1].hora}</div>
  </div>`).join('');
 }
-const ASUNTO_PEDIDO = 'ferreteria.elgreengo@gmail.com'; // TODO: hacer configurable
+const CONFIG_KEY = 'ferreteria_config';
+function configGet(){ return load(CONFIG_KEY) || {}; }
+function configSave(c){ save(CONFIG_KEY,c); }
+function configGetMail(){ const c=configGet(); return (c.mailDestino||'').trim() || 'ferreteria.elgreengo@gmail.com'; }
+function configSetMail(mail){ const c=configGet(); c.mailDestino=(mail||'').trim(); configSave(c); }
+
+function configRender(){
+ const mail=configGetMail();
+ const el=document.getElementById('config-mail-input');
+ if(el) el.value=mail;
+}
+function configGuardarMail(){
+ const input=document.getElementById('config-mail-input');
+ const mail=input.value.trim();
+ if(!mail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)){showToast('⚠ Correo inválido',true);shake('config-mail-input');return;}
+ configSetMail(mail);
+ auditRegistrar('CONFIG_MAIL',`Destino de pedidos: ${mail}`);
+ showToast('📧 Correo destino actualizado ✓');
+}
 
 function enviarPorMail(){
  if(!pedidos.length){showToast('No hay productos en el pedido para enviar.',true);return;}
@@ -788,7 +815,7 @@ function enviarPorMail(){
  downloadTxt('Pedido_ElGreengo.txt',contenido);
  const asunto=encodeURIComponent(`Pedido Ferretería El Greengo – ${fecha}`);
  const cuerpo=encodeURIComponent(`Estimados,\n\nAdjunto el pedido del día ${fecha}.\n\nDetalle:\n${lineas}\n\nTotal de productos : ${pedidos.length}\nTotal de unidades : ${total}\n\nSaludos,\nFerretería El Greengo`);
- window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(ASUNTO_PEDIDO)}&su=${asunto}&body=${cuerpo}`,'_blank');
+ window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(configGetMail())}&su=${asunto}&body=${cuerpo}`,'_blank');
  document.getElementById('mail-modal').classList.add('open');
 }
 function cerrarModalMail(){document.getElementById('mail-modal').classList.remove('open');}

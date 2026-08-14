@@ -331,6 +331,19 @@
    </div>
   </div>
 
+  <!-- Configuración: Correo destino pedidos -->
+  <div class="card" style="margin-top:14px">
+   <p class="section-title">📧 Correo Destino (Pedidos)</p>
+   <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Correo donde se envían los pedidos con el botón "✉️ Enviar por Mail".</p>
+   <div class="sidebar-form">
+    <div class="field">
+     <label for="config-mail-input">Correo destinatario</label>
+     <input id="config-mail-input" type="email" placeholder="pedidos@ferreteria.cl" autocomplete="off"/>
+    </div>
+    <button class="btn btn-blue" onclick="configGuardarMail()" style="width:100%">💾 Guardar Correo</button>
+   </div>
+  </div>
+
   <!-- Cerrar Sesión -->
   <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
    <button class="btn btn-outline" onclick="loginCerrarSesion()" style="width:100%;color:var(--red);border-color:var(--red)">🚪 Cerrar Sesión</button>
