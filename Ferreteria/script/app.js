@@ -45,8 +45,12 @@ function filtrarCatalogo(q){
 }
 
 /* ── Tab navigation ── */
+let _tabDestino='';
 function showTab(name){
- if(carrito.length && !confirm('Tienes productos en el carrito. ¿Cambiar de pestaña? Se perderán los productos seleccionados.'))return;
+ if(carrito.length){ _tabDestino=name; document.getElementById('cambio-modal').classList.add('open'); return; }
+ _ejecutarCambioTab(name);
+}
+function _ejecutarCambioTab(name){
  ['pedidos','ventas','catalogo'].forEach(t=>{
  document.getElementById('panel-'+t).classList.toggle('active',t===name);
  document.getElementById('tab-'+t).classList.toggle('active',t===name);
@@ -54,6 +58,8 @@ function showTab(name){
  if(name==='ventas') { ventasRenderGrid(); ventasCheckCaja(); }
  if(name==='catalogo') catalogoRender();
 }
+function confirmarCambioTab(){ const n=_tabDestino; _tabDestino=''; document.getElementById('cambio-modal').classList.remove('open'); _ejecutarCambioTab(n); carrito=[]; carritoRender(); }
+function cerrarCambioTab(){ _tabDestino=''; document.getElementById('cambio-modal').classList.remove('open'); }
 
 /* ── Sidebar (Caja) ── */
 function toggleSidebar(){
