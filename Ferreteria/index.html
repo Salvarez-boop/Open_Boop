@@ -18,6 +18,10 @@
  <h1>Ferretería <span>El Greengo</span></h1>
  <p>Ventas · Catálogo · Pedidos</p>
  </div>
+ <div class="header-end">
+ <div class="user-badge"><span id="header-username"></span></div>
+ <button class="logout-rapido" onclick="cerrarTurno()" title="Cerrar turno"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>Cerrar Vista</button>
+ </div>
  </header>
 
  <!-- Tabs -->
@@ -78,11 +82,11 @@
  ⚠️ La caja no está abierta. Ve a la pestaña <strong>&nbsp;💰 Caja&nbsp;</strong> y realiza la apertura antes de vender.
  </div>
  <div class="stats" style="margin-bottom:16px">
- <div class="stat-chip"><span class="stat-num blue" id="v-stat-ventas">0</span><span class="stat-label">ventas hoy</span></div>
- <div class="stat-chip"><span class="stat-num blue" id="v-stat-ingresos">$0</span><span class="stat-label">ingresos del día</span></div>
+ <div class="stat-chip"><span class="stat-num blue" id="v-stat-ventas">0</span><span class="stat-label">VENTAS DIARIA</span></div>
+ <div class="stat-chip"><span class="stat-num blue" id="v-stat-ingresos">$0</span><span class="stat-label">INGRESOS DIA</span></div>
  </div>
  <div class="pos-layout">
- <div>
+ <div class="pos-prod">
  <div class="card" style="margin-bottom:16px">
  <p class="section-title">🛍 Seleccionar Productos</p>
  <div class="search-row">
@@ -100,8 +104,21 @@
  <button class="page-btn" id="v-page-next" onclick="ventasIrPagina('next')">Siguiente ›</button>
  </div>
  </div>
+ </div>
+ <div class="pos-cart">
+ <div class="cart-box">
+ <div class="cart-header"><span>🛒 Carrito</span><button class="btn-del btn-del-green" onclick="abrirModalVaciar()">✕ Vaciar</button></div>
+ <div class="cart-items" id="v-cart-items"><div class="cart-empty">El carrito está vacío.<br/>Haz clic en un producto para agregar.</div></div>
+ <div class="cart-footer">
+ <div class="discount-row"><label>Descuento %</label><input id="v-descuento" type="number" min="0" max="100" step="1" placeholder="0" oninput="carritoRender()"/></div>
+ <div class="total-row"><span class="total-label">TOTAL A COBRAR</span><span class="total-amount" id="v-total">$0</span></div>
+ <button class="btn btn-blue btn-confirm" onclick="confirmarVenta()">✔ Confirmar Venta</button>
+ </div>
+ </div>
+ </div>
+ <div class="pos-hist">
  <div class="card">
- <p class="section-title">🧾 Historial de Ventas del Día</p>
+ <p class="section-title">🧾 Historial de Ventas (Todas)</p>
  <div class="search-wrap" style="margin-bottom:13px"><span class="search-icon">🔍</span><input id="v-hist-buscar" type="text" placeholder="Buscar por boleta interna…" oninput="ventasRenderHistorial()"/></div>
  <div id="v-historial"></div>
  <div id="v-hist-empty" class="empty" style="display:none"><div class="empty-icon">🧾</div><p>Aún no se han registrado ventas hoy.</p></div>
@@ -111,17 +128,6 @@
  <button class="page-btn" id="v-hist-next" onclick="histIrPagina('next')">Siguiente ›</button>
  </div>
  <div class="actions-row"><button class="btn btn-outline" onclick="ventasLimpiarHistorial()">🗑 Limpiar historial</button></div>
- </div>
- </div>
- <div>
- <div class="cart-box">
- <div class="cart-header"><span>🛒 Carrito</span><button class="btn-del" onclick="carritoLimpiar()">✕ Vaciar</button></div>
- <div class="cart-items" id="v-cart-items"><div class="cart-empty">El carrito está vacío.<br/>Haz clic en un producto para agregar.</div></div>
- <div class="cart-footer">
- <div class="discount-row"><label>Descuento %</label><input id="v-descuento" type="number" min="0" max="100" step="1" placeholder="0" oninput="carritoRender()"/></div>
- <div class="total-row"><span class="total-label">TOTAL A COBRAR</span><span class="total-amount" id="v-total">$0</span></div>
- <button class="btn btn-blue btn-confirm" onclick="confirmarVenta()">✔ Confirmar Venta</button>
- </div>
  </div>
  </div>
  </div>
@@ -191,6 +197,7 @@
  <button class="side-nav-btn" id="side-nav-libreta" onclick="sidebarSeccion('libreta')">📒 Libreta Deuda</button>
  <button class="side-nav-btn" id="side-nav-audit" onclick="sidebarSeccion('audit')">📋 Auditoría</button>
  <button class="side-nav-btn" id="side-nav-datos" onclick="sidebarSeccion('datos')">💾 Datos</button>
+ <button class="side-nav-btn" id="side-nav-usuarios" onclick="sidebarSeccion('usuarios')">👥 Usuarios</button>
  </div>
  <div class="sidebar-body">
 
@@ -293,6 +300,17 @@
  <button class="btn btn-red" onclick="cajaCerrar()" style="width:100%;">🔒 Cerrar Caja</button>
  </div>
 
+ <!-- Cierres anteriores -->
+ <div class="card" style="margin-top:16px">
+ <p class="section-title">📁 Cierres Anteriores</p>
+ <div id="cierre-historial"></div>
+ <div id="cierre-hist-empty" class="empty" style="display:none">
+ <div class="empty-icon">📁</div>
+ <p>No hay cierres registrados aún. Aparecerán aquí tras el primer cierre de caja.</p>
+ </div>
+ <button class="btn btn-outline" onclick="cierreExportar()" style="width:100%;margin-top:8px;font-size:.72rem" id="btn-reabrir-cierre" disabled>📂 Reabrir resumen</button>
+ </div>
+
  </div><!-- /panel-operacion -->
  </div><!-- /seccion-caja -->
 
@@ -302,6 +320,7 @@
    <p class="section-title">📒 Clientes con Deuda</p>
    <div id="libreta-lista"></div>
    <div id="libreta-empty" class="empty" style="display:none"><div class="empty-icon">📒</div><p>No hay clientes con deuda registrada. Las ventas con medio "Libreta Deuda" aparecerán aquí.</p></div>
+   <button class="btn btn-green" onclick="libretaSeleccionarPago()" style="width:100%;margin-top:10px" id="btn-libreta-pagar">✅ Pagar Deuda</button>
   </div>
  </div>
 
@@ -312,6 +331,7 @@
    <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Acciones sensibles registradas con usuario, fecha y detalle.</p>
    <div id="audit-lista"></div>
    <div id="audit-empty" class="empty" style="display:none"><div class="empty-icon">📋</div><p>No hay registros de auditoría todavía.</p></div>
+   <button class="btn btn-blue" onclick="auditExportar()" style="width:100%;margin-top:10px">📤 Exportar Auditoría (TXT)</button>
   </div>
  </div>
 
@@ -320,6 +340,7 @@
   <div class="card">
    <p class="section-title">💾 Exportar / Importar Datos</p>
    <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Respalda o restaura todos los datos del sistema (catálogo, ventas, caja, usuarios, auditoría).</p>
+   <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:.7rem;color:#92400e;margin-bottom:12px;line-height:1.4">🔒 Los datos se almacenan en el navegador. Para no perderlos ante fallos del equipo, exporta backups periódicos.</div>
    <div class="sidebar-form">
     <button class="btn btn-blue" onclick="exportarDatos()" style="width:100%">📤 Exportar Todo (JSON)</button>
     <div style="border-top:1px solid var(--border);margin:6px 0"></div>
@@ -349,6 +370,35 @@
 
  </div><!-- /sidebar-body -->
  </div>
+
+<!-- ════ SECCIÓN USUARIOS ════ -->
+<div id="sidebar-seccion-usuarios" class="side-seccion" style="display:none">
+  <div class="card">
+   <p class="section-title">👥 Gestión de Usuarios</p>
+   <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Crea cuentas de cajero para que otros operadores accedan al sistema con su propio PIN.</p>
+   <div class="sidebar-form">
+    <div class="field">
+     <label for="usuario-nuevo">Usuario</label>
+     <input id="usuario-nuevo" type="text" placeholder="Ej: cajero1" autocomplete="off"/>
+    </div>
+    <div class="field">
+     <label for="usuario-pin">PIN (4-6 dígitos)</label>
+     <input id="usuario-pin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="• • • • • •" autocomplete="off"/>
+    </div>
+    <div class="field">
+     <label for="usuario-pin2">Confirmar PIN</label>
+     <input id="usuario-pin2" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="• • • • • •" autocomplete="off"/>
+    </div>
+    <div id="usuario-error" class="login-error" style="display:none"></div>
+    <button class="btn btn-purple" onclick="agregarCajeroUI()" style="width:100%">✅ Crear Cajero</button>
+   </div>
+  </div>
+  <div class="card">
+   <p class="section-title">📋 Usuarios Registrados</p>
+   <div id="usuarios-lista"></div>
+   <div id="usuarios-empty" class="empty" style="display:none"><div class="empty-icon">👥</div><p>No hay usuarios registrados.</p></div>
+  </div>
+</div>
 
 </div><!-- /wrapper -->
 
@@ -462,6 +512,91 @@
    <div id="setup-error" class="login-error" style="display:none"></div>
    <button class="btn btn-green" onclick="loginCrearAdmin()" style="width:100%">✅ Crear Administrador</button>
   </div>
+ </div>
+</div>
+
+<!-- Cierre Modal -->
+<div id="cierre-modal">
+ <div class="modal-box" style="max-width:450px">
+ <div class="modal-icon">🔒</div>
+ <h2>Cierre de Caja</h2>
+ <p style="margin-bottom:16px">Revisa los totales antes de cerrar. Se descargará un resumen en TXT.</p>
+ <div class="cierre-resumen">
+ <div class="cierre-fila">
+ <span class="cierre-label">Total Ventas</span>
+ <span class="cierre-valor green" id="cierre-total-ventas">$0</span>
+ </div>
+ <div class="cierre-fila">
+ <span class="cierre-label">Total Egresos</span>
+ <span class="cierre-valor red" id="cierre-total-egresos">$0</span>
+ </div>
+ <div class="cierre-divider"></div>
+ <div class="cierre-fila">
+ <span class="cierre-label" style="font-weight:800">Saldo Final</span>
+ <span class="cierre-valor big" id="cierre-saldo">$0</span>
+ </div>
+ </div>
+ <div class="cierre-instrucciones">
+ <strong>📋 Antes de cerrar:</strong>
+ <ul>
+ <li>Verifica que el saldo final coincida con el efectivo en caja</li>
+ <li>La boleta de cierre se descargará automáticamente como TXT</li>
+ <li>Guarda el archivo en la carpeta de cierres diarios</li>
+ <li>La caja se reiniciará para la próxima apertura</li>
+ <li>Los cierres anteriores quedarán visibles en la sección 📁 Cierres Anteriores</li>
+ </ul>
+ </div>
+ <div style="display:flex;gap:10px;margin-top:18px">
+ <button class="btn btn-outline" onclick="cerrarModalCierre()" style="flex:1">Cancelar</button>
+ <button class="btn btn-red" onclick="ejecutarCierre()" style="flex:1">🔒 Confirmar y Cerrar</button>
+ </div>
+ </div>
+</div>
+
+<div id="editar-pin-modal">
+ <div class="modal-box" style="max-width:400px">
+ <div class="modal-icon">🔑</div>
+ <h2>Cambiar PIN</h2>
+ <p style="margin-bottom:12px">Usuario: <strong id="editar-pin-usuario"></strong></p>
+ <div style="display:flex;flex-direction:column;gap:12px;text-align:left">
+  <div class="field">
+   <label for="editar-pin-nuevo">Nuevo PIN (4-6 dígitos)</label>
+   <input id="editar-pin-nuevo" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="• • • • • •" autocomplete="off"/>
+  </div>
+  <div class="field">
+   <label for="editar-pin-confirmar">Confirmar PIN</label>
+   <input id="editar-pin-confirmar" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="• • • • • •" autocomplete="off"/>
+  </div>
+  <div id="editar-pin-error" class="login-error" style="display:none"></div>
+ </div>
+ <div style="display:flex;gap:10px;margin-top:18px">
+  <button class="btn btn-outline" onclick="cerrarModalEditarPin()" style="flex:1">Cancelar</button>
+  <button class="btn btn-green" onclick="confirmarEditarPin()" style="flex:1">💾 Guardar PIN</button>
+ </div>
+ </div>
+</div>
+
+<div id="vaciar-modal">
+ <div class="modal-box" style="max-width:400px">
+ <div class="modal-icon">🗑️</div>
+ <h2>Vaciar Carrito</h2>
+ <p style="margin-bottom:16px">¿Estás seguro de que deseas vaciar el carrito? Se perderán <strong>todos los productos</strong> agregados.</p>
+ <div style="display:flex;gap:10px;margin-top:18px">
+ <button class="btn btn-outline" onclick="cerrarModalVaciar()" style="flex:1">Cancelar</button>
+ <button class="btn btn-red" onclick="confirmarVaciar()" style="flex:1">🗑️ Vaciar Carrito</button>
+ </div>
+ </div>
+</div>
+
+<div id="turno-modal">
+ <div class="modal-box" style="max-width:400px">
+ <div class="modal-icon"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></div>
+ <h2>Cerrar Vista</h2>
+ <p style="margin-bottom:16px">¿Estás seguro de que deseas cerrar tu sesión? La caja <strong>quedará abierta</strong> para el próximo operador.</p>
+ <div style="display:flex;gap:10px;margin-top:18px">
+ <button class="btn btn-outline" onclick="cerrarModalTurno()" style="flex:1">Cancelar</button>
+ <button class="btn btn-red" onclick="confirmarCerrarTurno()" style="flex:1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>Cerrar Vista</button>
+ </div>
  </div>
 </div>
 

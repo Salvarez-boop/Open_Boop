@@ -73,15 +73,20 @@ function sidebarSeccion(seccion){
  if(auditBtn)auditBtn.classList.toggle('active',seccion==='audit');
  const datosBtn=document.getElementById('side-nav-datos');
  if(datosBtn)datosBtn.classList.toggle('active',seccion==='datos');
+ const usuariosBtn=document.getElementById('side-nav-usuarios');
+ if(usuariosBtn)usuariosBtn.classList.toggle('active',seccion==='usuarios');
  document.getElementById('sidebar-seccion-caja').style.display=(seccion==='caja')?'block':'none';
  document.getElementById('sidebar-seccion-libreta').style.display=(seccion==='libreta')?'block':'none';
  const auditSec=document.getElementById('sidebar-seccion-audit');
  if(auditSec)auditSec.style.display=(seccion==='audit')?'block':'none';
  const datosSec=document.getElementById('sidebar-seccion-datos');
  if(datosSec)datosSec.style.display=(seccion==='datos')?'block':'none';
+ const usuariosSec=document.getElementById('sidebar-seccion-usuarios');
+ if(usuariosSec)usuariosSec.style.display=(seccion==='usuarios')?'block':'none';
  if(seccion==='caja') cajaRender();
  if(seccion==='libreta') libretaRender();
  if(seccion==='audit') auditRender();
+ if(seccion==='usuarios') usuariosRender();
 }
 
 /* ══════════════════════════════════════════════
@@ -149,7 +154,7 @@ function catalogoAgregar(){
  const nombre=document.getElementById('c-nombre').value.trim();
  const codigo=document.getElementById('c-codigo').value.trim();
  const precioS=document.getElementById('c-precio').value;
- const precio=parseFloat(precioS);
+ const precio=Math.round(parseFloat(precioS));
  const stockS=document.getElementById('c-stock').value;
  const stock=parseInt(stockS);
  const formato=document.getElementById('c-formato').value;
@@ -336,7 +341,12 @@ function carritoQty(catId,delta){
  carritoRender();
 }
 function carritoRemover(catId){carrito=carrito.filter(i=>i.id!==catId);carritoRender();}
-function carritoLimpiar(){if(!carrito.length)return;if(!confirm('¿Vaciar el carrito? Se perderán todos los productos agregados.'))return;carrito=[];carritoRender();}
+function abrirModalVaciar(){
+ if(!carrito.length){showToast('🛒 El carrito ya está vacío',true);return;}
+ document.getElementById('vaciar-modal').classList.add('open');
+}
+function cerrarModalVaciar(){ document.getElementById('vaciar-modal').classList.remove('open'); }
+function confirmarVaciar(){ carrito=[]; carritoRender(); cerrarModalVaciar(); showToast('🛒 Carrito vaciado'); }
 function carritoRender(){
  const el=document.getElementById('v-cart-items');
  const desc=parseFloat(document.getElementById('v-descuento').value)||0;
@@ -571,6 +581,7 @@ function cajaAbrir(){
  if(!responsable){shake('caja-responsable');return;}
  const state={abierta:true,fecha:today(),horaApertura:now(),montoInicial:monto,responsable,movimientos:[]};
  cajaSave(state); cajaRender();
+ ventasCheckCaja();
  auditRegistrar('CAJA_APERTURA',`monto=${fmt$(monto)} resp=${responsable}`);
  showToast(`Caja abierta con ${fmt$(monto)} ✓`);
 }
@@ -603,7 +614,23 @@ function cajaCerrar(){
  const state=cajaGetState();
  if(!state.abierta)return;
  if(!loginEsAdmin()){showToast('⚠ Solo administrador puede cerrar caja',true);return;}
- if(!confirm('¿Cerrar la caja y generar el resumen del día?'))return;
+ abrirModalCierre(state);
+}
+
+function abrirModalCierre(state){
+ document.getElementById('cierre-modal').classList.add('open');
+ document.getElementById('cierre-total-ventas').textContent=fmt$(state.movimientos.filter(m=>m.tipo==='venta').reduce((s,m)=>s+m.monto,0));
+ document.getElementById('cierre-total-egresos').textContent=fmt$(Math.abs(state.movimientos.filter(m=>m.tipo!=='venta').reduce((s,m)=>s+m.monto,0)));
+ document.getElementById('cierre-saldo').textContent=fmt$(state.montoInicial+state.movimientos.reduce((s,m)=>s+m.monto,0));
+}
+
+function cerrarModalCierre(){
+ document.getElementById('cierre-modal').classList.remove('open');
+}
+
+function ejecutarCierre(){
+ const state=cajaGetState();
+ if(!state.abierta){cerrarModalCierre();return;}
  // calcular totales
  const totalVentas=state.movimientos.filter(m=>m.tipo==='venta').reduce((s,m)=>s+m.monto,0);
  const totalEgresos=state.movimientos.filter(m=>m.tipo!=='venta').reduce((s,m)=>s+m.monto,0);
@@ -639,12 +666,49 @@ Total movimientos: ${state.movimientos.length}
  downloadTxt(`Cierre_Caja_${state.fecha.replace(/\//g,'-')}.txt`, resumen);
  // guardar cierre en historial
  const cierres=load('cierres_ferreteria')||[];
- cierres.push({fecha:state.fecha,horaApertura:state.horaApertura,horaCierre,responsable:state.responsable,montoInicial:state.montoInicial,totalVentas,totalEgresos,saldoFinal,movimientos:state.movimientos});
+ const cierre={fecha:state.fecha,horaApertura:state.horaApertura,horaCierre,responsable:state.responsable,montoInicial:state.montoInicial,totalVentas,totalEgresos,saldoFinal,movimientos:state.movimientos};
+ cierres.push(cierre);
  save('cierres_ferreteria',cierres);
  // resetear caja
  cajaSave({abierta:false,fecha:'',horaApertura:'',montoInicial:0,responsable:'',movimientos:[]});
  cajaRender();
+ ventasCheckCaja();
+ cerrarModalCierre();
+ cierreRenderHistorial();
  showToast('Caja cerrada. Resumen descargado ✓');
+}
+
+function cierreRenderHistorial(){
+ const cierres=load('cierres_ferreteria')||[];
+ const el=document.getElementById('cierre-historial');
+ const empty=document.getElementById('cierre-hist-empty');
+ const btn=document.getElementById('btn-reabrir-cierre');
+ if(!cierres.length){if(el)el.innerHTML='';if(empty)empty.style.display='block';if(btn)btn.disabled=true;return;}
+ if(empty)empty.style.display='none';
+ if(el)el.innerHTML=[...cierres].reverse().slice(0,10).map(c=>
+ `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:.76rem">
+ <div style="display:flex;justify-content:space-between;align-items:center">
+ <span style="font-weight:800;font-size:.82rem">${esc(c.fecha)}</span>
+ <span style="color:var(--muted);font-size:.7rem">${esc(c.horaApertura)} → ${esc(c.horaCierre)}</span>
+ </div>
+ <div style="display:flex;justify-content:space-between;margin-top:4px">
+ <span>Inicial: ${fmt$(c.montoInicial)}</span>
+ <span>Ventas: <span style="color:var(--green);font-weight:700">+${fmt$(c.totalVentas)}</span></span>
+ <span style="font-weight:800;color:var(--accent)">${fmt$(c.saldoFinal)}</span>
+ </div>
+ <div style="font-size:.7rem;color:var(--muted);margin-top:3px">Resp: ${esc(c.responsable)}</div>
+ </div>`).join('');
+ if(btn){btn.disabled=false;btn.onclick=function(){cierreExportar();}}
+}
+
+function cierreExportar(){
+ const cierres=load('cierres_ferreteria')||[];
+ if(!cierres.length){showToast('No hay cierres para exportar',true);return;}
+ const txt=cierres.map((c,i)=>{
+ return `CIERRE #${i+1}\n${'─'.repeat(40)}\nFecha: ${c.fecha}\nResponsable: ${c.responsable}\nApertura: ${c.horaApertura} → Cierre: ${c.horaCierre}\nInicial: ${fmt$(c.montoInicial)}\nVentas: +${fmt$(c.totalVentas)}\nEgresos: ${fmt$(Math.abs(c.totalEgresos))}\nSALDO: ${fmt$(c.saldoFinal)}`;
+ }).join('\n\n');
+ downloadTxt('Historial_Cierres.txt',txt);
+ showToast('📁 Historial de cierres descargado');
 }
 
 function cajaRender(){
@@ -739,7 +803,7 @@ function catalogoGuardarEdicion(){
  const nombre=document.getElementById('e-nombre').value.trim();
  const codigo=document.getElementById('e-codigo').value.trim();
  const precioS=document.getElementById('e-precio').value;
- const precio=parseFloat(precioS);
+ const precio=Math.round(parseFloat(precioS));
  const stockS=document.getElementById('e-stock').value;
  const stock=parseInt(stockS);
  const formato=document.getElementById('e-formato').value;
@@ -778,14 +842,35 @@ function libretaClientes(){
 function libretaRender(){
  const el=document.getElementById('libreta-lista');
  const empty=document.getElementById('libreta-empty');
+ const btn=document.getElementById('btn-libreta-pagar');
  const clientes=libretaClientes();
- if(!clientes.length){el.innerHTML='';empty.style.display='block';return;}
+ if(!clientes.length){el.innerHTML='';empty.style.display='block';if(btn)btn.style.display='none';return;}
  empty.style.display='none';
+ if(btn)btn.style.display='block';
  el.innerHTML=clientes.map(c=>`
  <div class="libreta-cliente">
   <div class="libreta-head"><span class="libreta-rut">${esc(c.rut)}</span><span class="libreta-total">${fmt$(c.total)}</span></div>
   <div class="libreta-sub">${c.compras} compra${c.compras!==1?'s':''} · Última: ${c.ventas[c.ventas.length-1].hora}</div>
  </div>`).join('');
+ if(btn)btn.onclick=function(){libretaSeleccionarPago();};
+}
+
+function libretaSeleccionarPago(){
+ const clientes=libretaClientes();
+ if(!clientes.length){showToast('No hay deudas pendientes',true);return;}
+ const rutStr=clientes.map((c,i)=>`${i+1}. ${c.rut} — ${fmt$(c.total)} (${c.compras} compra${c.compras!==1?'s':''})`).join('\n');
+ const idx=prompt(`Selecciona el cliente a pagar (ingresa el número):\n\n${rutStr}`);
+ if(idx===null)return;
+ const n=parseInt(idx);
+ if(isNaN(n)||n<1||n>clientes.length){showToast('Número inválido',true);return;}
+ const cliente=clientes[n-1];
+ if(!confirm(`¿Registrar pago de ${fmt$(cliente.total)} del cliente ${cliente.rut}?`))return;
+ // Marcar todas las ventas libreta de este cliente como pagadas
+ ventas.forEach(v=>{if(v.medioPago==='libreta'&&v.extra&&v.extra.rut===cliente.rut)v.pagada=true;});
+ save('ventas_ferreteria',ventas);
+ libretaRender();
+ auditRegistrar('LIBRETA_PAGO',`Cliente ${cliente.rut} — ${fmt$(cliente.total)}`);
+ showToast(`✅ Pago registrado: ${cliente.rut} — ${fmt$(cliente.total)}`);
 }
 const CONFIG_KEY = 'ferreteria_config';
 function configGet(){ return load(CONFIG_KEY) || {}; }
@@ -920,6 +1005,15 @@ function auditBadgeCls(accion){
  return 'b-other';
 }
 
+function auditExportar(){
+ const log=auditGetLog();
+ if(!log.length){showToast('No hay registros de auditoría para exportar',true);return;}
+ const txt=log.map((e,i)=>`${i+1}. [${e.ts}] ${e.usuario} | ${e.accion}${e.detalle?' | '+e.detalle:''}`).join('\n');
+ const header=`FERRETERÍA EL GREENGO – LOG DE AUDITORÍA\n${'═'.repeat(60)}\nExportado: ${new Date().toLocaleString('es-CL')}\nTotal registros: ${log.length}\n${'═'.repeat(60)}\n\n`;
+ downloadTxt('Auditoria_ElGreengo.txt',header+txt);
+ showToast('📤 Log de auditoría exportado');
+}
+
 /* ══════════════════════════════════════════════
  SISTEMA DE LOGIN (PIN + ROLES)
 ══════════════════════════════════════════════ */
@@ -930,8 +1024,22 @@ const SESION_MAX_HORAS = 8;
 const MAX_INTENTOS = 3;
 const LOCKOUT_MS = 30000; // 30 segundos
 
-// Hash simple (no criptográfico, suficientemente opaco para evitar ojeadas)
-function hashPIN(pin){ let h=0; for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0;} return 'h'+Math.abs(h).toString(36); }
+// Hash: usa SHA-256 si crypto.subtle está disponible (HTTPS/localhost), fallback a hash simple en HTTP
+async function hashPIN(pin) {
+ try {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+   const encoder = new TextEncoder();
+   const data = encoder.encode(pin);
+   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+   const hashArray = Array.from(new Uint8Array(hashBuffer));
+   return 'h' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+ } catch(e) { /* fallback */ }
+ // Fallback: hash simple compatible con HTTP
+ let h = 0;
+ for(let i = 0; i < pin.length; i++) { h = ((h << 5) - h) + pin.charCodeAt(i); h |= 0; }
+ return 'h' + Math.abs(h).toString(36);
+}
 
 function loginGetUsers(){ return load(USERS_KEY)||{}; }
 function loginSaveUsers(u){ save(USERS_KEY,u); }
@@ -939,6 +1047,19 @@ function loginSaveUsers(u){ save(USERS_KEY,u); }
 function loginGetSession(){ return load(SESSION_KEY); }
 function loginSaveSession(s){ save(SESSION_KEY,{...s,ts:Date.now()}); }
 function loginCerrarSesion(){ localStorage.removeItem(SESSION_KEY); location.reload(); }
+
+function cerrarTurno(){
+ document.getElementById('turno-modal').classList.add('open');
+}
+
+function confirmarCerrarTurno(){
+ document.getElementById('turno-modal').classList.remove('open');
+ loginCerrarSesion();
+}
+
+function cerrarModalTurno(){
+ document.getElementById('turno-modal').classList.remove('open');
+}
 
 // Estado de intentos fallidos (anti brute force)
 function loginGetIntentos(){ const i=load(LOGIN_ATTEMPTS_KEY); if(!i) return {n:0,lockedHasta:0}; return i; }
@@ -962,7 +1083,7 @@ function loginCheck(){
  const session=loginGetSession();
  const overlay=document.getElementById('login-modal');
 
- // Si ya hay sesión activa → verificar expiración
+  // Si ya hay sesión activa → verificar expiración
  if(session && users[session.usuario]){
   // S2: sesión expira tras SESION_MAX_HORAS
   const antiguedadMs=Date.now()-(session.ts||0);
@@ -971,6 +1092,8 @@ function loginCheck(){
    return false;
   }
   overlay.style.display='none';
+  const badge=document.getElementById('header-username');
+  if(badge) badge.textContent='👤 '+session.usuario;
   return true;
  }
 
@@ -992,7 +1115,7 @@ function loginCheck(){
  } else {
   stepChoose.style.display='block';
   stepSetup.style.display='none';
-  btnSetup.style.display='block';
+  btnSetup.style.display='none';
   document.getElementById('login-pin').value='';
   document.getElementById('login-pin').focus();
  }
@@ -1006,7 +1129,7 @@ function loginSetup(){
  document.getElementById('setup-error').style.display='none';
 }
 
-function loginCrearAdmin(){
+async function loginCrearAdmin(){
  const usuario=document.getElementById('setup-usuario').value.trim();
  const pin=document.getElementById('setup-pin').value;
  const pin2=document.getElementById('setup-pin2').value;
@@ -1018,14 +1141,14 @@ function loginCrearAdmin(){
  errEl.style.display='none';
 
  const users=loginGetUsers();
- users[usuario]={usuario,pinHash:hashPIN(pin),rol:'admin',creado:new Date().toISOString()};
+ users[usuario]={usuario,pinHash:await hashPIN(pin),rol:'admin',creado:new Date().toISOString()};
  loginSaveUsers(users);
  loginSaveSession({usuario,rol:'admin'});
  showToast(`✅ Admin "${usuario}" creado`);
  location.reload();
 }
 
-function loginIngresar(){
+async function loginIngresar(){
  const usuario=document.getElementById('login-usuario').value;
  const pin=document.getElementById('login-pin').value;
  const errEl=document.getElementById('login-error');
@@ -1042,7 +1165,7 @@ function loginIngresar(){
 
  const users=loginGetUsers();
  const user=users[usuario];
- if(!user||user.pinHash!==hashPIN(pin)){
+ if(!user||user.pinHash!==await hashPIN(pin)){
   const intentos=loginGetIntentos();
   intentos.n++;
   if(intentos.n>=MAX_INTENTOS){
@@ -1066,13 +1189,68 @@ function loginIngresar(){
  location.reload();
 }
 
-function loginAgregarCajero(usuario,pin){
+async function loginAgregarCajero(usuario,pin){
  const users=loginGetUsers();
  if(users[usuario])return false;
- users[usuario]={usuario,pinHash:hashPIN(pin),rol:'cajero',creado:new Date().toISOString()};
+ users[usuario]={usuario,pinHash:await hashPIN(pin),rol:'cajero',creado:new Date().toISOString()};
  loginSaveUsers(users);
  return true;
 }
+
+function usuariosRender(){
+ const users=loginGetUsers();
+ const el=document.getElementById('usuarios-lista');
+ const empty=document.getElementById('usuarios-empty');
+ const btn=document.getElementById('side-nav-usuarios');
+ if(btn)btn.style.display=loginEsAdmin()?'block':'none';
+ if(!Object.keys(users).length){if(el)el.innerHTML='';if(empty)empty.style.display='block';return;}
+ if(empty)empty.style.display='none';
+ if(el)el.innerHTML=Object.entries(users).sort((a,b)=>a[1].rol.localeCompare(b[1].rol)).map(([u,d])=>
+ `<div class="audit-entry" style="margin-bottom:6px">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+   <span style="font-weight:800;font-size:.82rem">${esc(u)}</span>
+   <span style="display:flex;align-items:center;gap:6px">
+    <span class="badge ${d.rol==='admin'?'b-venta':'b-other'}">${d.rol==='admin'?'👑 Admin':'👤 Cajero'}</span>
+    ${loginEsAdmin()?`<button class="btn-del" onclick="abrirModalEditarPin('${esc(u)}')" title="Cambiar PIN">🔑</button>`:''}
+   </span>
+  </div>
+  <div style="font-size:.7rem;color:var(--muted);margin-top:4px">Creado: ${d.creado?new Date(d.creado).toLocaleDateString('es-CL'):'—'}</div>
+ </div>`).join('');
+}
+
+function agregarCajeroUI(){
+ if(!loginEsAdmin()){showToast('⚠ Solo administrador puede crear usuarios',true);return;}
+ const usuario=document.getElementById('usuario-nuevo').value.trim();
+ const pin=document.getElementById('usuario-pin').value;
+ const pin2=document.getElementById('usuario-pin2').value;
+ const errEl=document.getElementById('usuario-error');
+ if(!usuario){errEl.textContent='Ingresa un nombre de usuario';errEl.style.display='block';shake('usuario-nuevo');return;}
+ if(!pin||pin.length<4||pin.length>6||!/^\d+$/.test(pin)){errEl.textContent='El PIN debe tener 4 a 6 dígitos numéricos';errEl.style.display='block';shake('usuario-pin');return;}
+ if(pin!==pin2){errEl.textContent='Los PIN no coinciden';errEl.style.display='block';shake('usuario-pin2');return;}
+ const users=loginGetUsers();
+ if(users[usuario]){errEl.textContent='El usuario ya existe';errEl.style.display='block';shake('usuario-nuevo');return;}
+ errEl.style.display='none';
+ loginAgregarCajero(usuario,pin).then(()=>{
+  usuariosRender();
+  showToast(`✅ Cajero "${usuario}" creado`);
+  document.getElementById('usuario-nuevo').value='';
+  document.getElementById('usuario-pin').value='';
+  document.getElementById('usuario-pin2').value='';
+  document.getElementById('usuario-nuevo').focus();
+ });
+}
+let _editPinUsuario='';
+function abrirModalEditarPin(usuario){
+ _editPinUsuario=usuario;
+ document.getElementById('editar-pin-usuario').textContent=usuario;
+ document.getElementById('editar-pin-nuevo').value='';
+ document.getElementById('editar-pin-confirmar').value='';
+ document.getElementById('editar-pin-error').style.display='none';
+ document.getElementById('editar-pin-modal').classList.add('open');
+ document.getElementById('editar-pin-nuevo').focus();
+}
+function cerrarModalEditarPin(){ document.getElementById('editar-pin-modal').classList.remove('open'); _editPinUsuario=''; }
+async function confirmarEditarPin(){ const pin=document.getElementById('editar-pin-nuevo').value; const pin2=document.getElementById('editar-pin-confirmar').value; const errEl=document.getElementById('editar-pin-error'); if(!pin||pin.length<4||pin.length>6||!/^\d+$/.test(pin)){errEl.textContent='El PIN debe tener 4 a 6 dígitos numéricos';errEl.style.display='block';return;} if(pin!==pin2){errEl.textContent='Los PIN no coinciden';errEl.style.display='block';return;} errEl.style.display='none'; const users=loginGetUsers(); if(!users[_editPinUsuario]){showToast('⚠ Usuario no encontrado',true);cerrarModalEditarPin();return;} users[_editPinUsuario].pinHash=await hashPIN(pin); users[_editPinUsuario].creado=users[_editPinUsuario].creado||new Date().toISOString(); loginSaveUsers(users); cerrarModalEditarPin(); showToast('✅ PIN actualizado para '+_editPinUsuario); }
 
 /* ── Init ── */
 (function(){
@@ -1081,21 +1259,25 @@ function loginAgregarCajero(usuario,pin){
 
  document.getElementById('mail-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalMail();});
  document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)catalogoCerrarEdicion();});
+ document.getElementById('pago-modal').addEventListener('click',function(e){if(e.target===this)cancelarPago();});
+ document.getElementById('cierre-modal').addEventListener('click',function(e){if(e.target===this)cerrarModalCierre();});
 
  // Scanner: Enter en el buscador de ventas → auto-agregar por código exacto
- document.getElementById('v-buscar').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){ e.preventDefault(); ventasScanCodigo('v-buscar'); }
- });
- // Scanner: Enter en el campo dedicado de scanner → auto-agregar
+ // Scanner: Enter en campo dedicado → auto-agregar por código exacto
  document.getElementById('v-scanner').addEventListener('keydown',e=>{
   if(e.key==='Enter'){ e.preventDefault(); ventasScanCodigo('v-scanner'); }
+ });
+ // Buscador: Enter filtra resultados sin interferir con scanner
+ document.getElementById('v-buscar').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); ventasRenderGrid(); }
  });
 
  document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
    if(document.getElementById('mail-modal').classList.contains('open')) cerrarModalMail();
    if(document.getElementById('edit-modal').classList.contains('open')) catalogoCerrarEdicion();
-   if(document.getElementById('pago-modal').classList.contains('open')) cerrarModalPago();
+   if(document.getElementById('pago-modal').classList.contains('open')) cancelarPago();
+   if(document.getElementById('cierre-modal').classList.contains('open')) cerrarModalCierre();
    return;
   }
   if(e.key!=='Enter')return;
@@ -1105,7 +1287,8 @@ function loginAgregarCajero(usuario,pin){
  });
 
  // Seed 100 productos de muestra (solo una vez, flag persistente + catálogo vacío)
- if(!load('ferreteria_seeded') && (!catalogo || catalogo.length===0)){
+ const catalogoExistente=load('catalogo_ferreteria');
+ if(!load('ferreteria_seeded') && (!catalogoExistente || !catalogoExistente.length)){
   catalogo=[];
   const muestras=[];
   let seedIdx=1;
